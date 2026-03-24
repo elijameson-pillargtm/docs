@@ -1,0 +1,113 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "PILLAR Data Reference",
+  "logo": {
+    "dark": "/logo/pillar-dark.svg",
+    "light": "/logo/pillar-light.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#2D5BDA",
+    "light": "#4B7BF5",
+    "dark": "#1E3A8A",
+    "anchors": {
+      "from": "#2D5BDA",
+      "to": "#1E3A8A"
+    }
+  },
+  "topbarLinks": [
+    { "name": "App", "url": "https://app.pillargtm.com" }
+  ],
+  "topbarCtaButton": {
+    "name": "Get Started",
+    "url": "https://app.pillargtm.com"
+  },
+  "tabs": [
+    { "name": "Data Model", "url": "data" },
+    { "name": "Scoring Rules", "url": "scoring" },
+    { "name": "Signals", "url": "signals" },
+    { "name": "API Reference", "url": "api" }
+  ],
+  "anchors": [
+    { "name": "Blueprint Assessment", "icon": "clipboard-check", "url": "https://pillargtm.com/blueprint" },
+    { "name": "Support", "icon": "envelope", "url": "mailto:support@pillargtm.com" }
+  ],
+  "navigation": [
+    {
+      "group": "Overview",
+      "pages": ["introduction", "architecture", "data-sources"]
+    },
+    {
+      "group": "Data Model",
+      "pages": [
+        "data/accounts",
+        "data/contacts",
+        "data/opportunities",
+        "data/leads",
+        "data/renewals",
+        "data/activities",
+        "data/signals",
+        "data/plays",
+        "data/territory",
+        "data/revenue-economics"
+      ]
+    },
+    {
+      "group": "District Intelligence",
+      "pages": [
+        "data/starbridge-overview",
+        "data/starbridge-buyer-attributes",
+        "data/starbridge-contacts",
+        "data/starbridge-spend-data",
+        "data/starbridge-conferences",
+        "data/starbridge-rfps",
+        "data/starbridge-documents"
+      ]
+    },
+    {
+      "group": "Scoring Engine",
+      "pages": [
+        "scoring/overview",
+        "scoring/account-health",
+        "scoring/icp-fit",
+        "scoring/lead-score",
+        "scoring/renewal-risk",
+        "scoring/pipeline-hygiene",
+        "scoring/forecast-confidence",
+        "scoring/expansion-readiness",
+        "scoring/territory-equity",
+        "scoring/economics-rules"
+      ]
+    },
+    {
+      "group": "Signal Taxonomy",
+      "pages": [
+        "signals/overview",
+        "signals/pipeline-signals",
+        "signals/renewal-signals",
+        "signals/expansion-signals",
+        "signals/account-signals",
+        "signals/economics-signals",
+        "signals/coverage-signals",
+        "signals/trend-warnings"
+      ]
+    },
+    {
+      "group": "API Reference",
+      "pages": [
+        "api/authentication",
+        "api/dashboard",
+        "api/accounts",
+        "api/connectors",
+        "api/scoring",
+        "api/signals",
+        "api/forecast",
+        "api/territory",
+        "api/blueprint"
+      ]
+    }
+  ],
+  "footerSocials": {
+    "website": "https://pillargtm.com"
+  }
+}

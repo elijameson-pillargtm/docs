@@ -1,0 +1,49 @@
+---
+title: 'Renewal Signals'
+description: 'Churn risk indicators from engagement, stakeholders, support, and market context'
+icon: 'rotate'
+---
+
+# Renewal Signals
+
+Renewal signals fire when churn risk indicators exceed thresholds. They are the most operationally critical signal family.
+
+## Signal Types
+
+| Signal Type | Severity Logic | Description |
+|-------------|---------------|-------------|
+| `renewal_risk_critical` | CRITICAL | Renewal risk score >= 85 |
+| `renewal_risk_warning` | WARNING | Renewal risk score >= 50 |
+| `engagement_decay` | CRITICAL >= 80, WARNING >= 50 | Usage and activity declining |
+| `stakeholder_turnover` | CRITICAL if 3+ changes, WARNING if 1+ | Key contacts departing |
+| `exec_sponsor_gap` | WARNING | No active executive sponsor on at-risk renewal |
+| `contracting_stall` | WARNING | No contract activity within configured days of renewal |
+| `nps_decline` | WARNING | NPS dropped below threshold |
+| `support_burden` | WARNING/CRITICAL | Excessive support escalation rate |
+| `budget_shift_detected` | CRITICAL > 10% decline, WARNING > 5% | Starbridge budget reduction detected |
+
+## Threshold Configuration
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `renewal_critical_score` | 85 | Risk score for CRITICAL signals |
+| `renewal_warning_score` | 50 | Risk score for WARNING signals |
+| `renewal_info_score` | 30 | Risk score for INFO signals |
+| `exec_sponsor_gap_enabled` | true | Whether to generate exec sponsor signals |
+| `contracting_stall_lag_days` | 90 | Days of no contract activity before signal |
+| `nps_decline_threshold` | 5 | NPS score that triggers decline signal |
+| `support_burden_critical` | 70 | Escalation % for CRITICAL |
+| `support_burden_warning` | 40 | Escalation % for WARNING |
+
+## Recommended Actions
+
+| Signal | Typical Action |
+|--------|---------------|
+| Renewal risk critical | Exec escalation, save play activation, 1:1 with customer exec |
+| Engagement decay | Proactive outreach, usage review, health check meeting |
+| Stakeholder turnover | Identify replacements, schedule introductions, update org chart |
+| Exec sponsor gap | Identify and cultivate new exec sponsor |
+| Contracting stall | Initiate renewal conversation, review terms, align on timeline |
+| NPS decline | Root cause analysis, corrective action plan, customer success intervention |
+| Support burden | Escalation review, dedicated support resources, product remediation |
+| Budget shift | Assess impact, explore alternative funding (grants, coop), repackage offer |

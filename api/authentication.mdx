@@ -1,0 +1,40 @@
+---
+title: 'Authentication'
+description: 'Supabase Auth, session management, and role-based access control'
+icon: 'lock'
+---
+
+# Authentication
+
+PILLAR uses Supabase Auth for authentication with Row-Level Security (RLS) enforcing multi-tenant data isolation.
+
+## Auth Flow
+
+1. User authenticates via Supabase Auth (email/password or SSO)
+2. Supabase issues a JWT token linked to `auth.users`
+3. The `users` table links `auth_user_id` to the PILLAR user record
+4. RLS policies filter all queries by `org_id`
+
+## User Roles
+
+| Role | Access Level |
+|------|-------------|
+| `Leader` | Full org access, all dashboards and settings |
+| `Manager` | Team-level access, pipeline and forecast views |
+| `Rep_CSM` | Own accounts, opportunities, and renewals |
+| `Admin` | Full access plus configuration and user management |
+| `Executive_RO` | Read-only access to all dashboards |
+
+## API Authentication
+
+All API routes require a valid Supabase session. The session is validated via:
+
+```
+GET /api/auth/me
+```
+
+Returns the current user profile including `org_id`, `role`, and `user_id`.
+
+## Row-Level Security
+
+All database tables enforce RLS policies scoped to `org_id`. Users can only access data belonging to their organization. Rep_CSM users are further scoped to their owned accounts.

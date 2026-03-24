@@ -1,0 +1,83 @@
+---
+title: 'Architecture'
+description: 'System architecture overview for the PILLAR GTM Operating System'
+icon: 'sitemap'
+---
+
+# System Architecture
+
+PILLAR follows a layered architecture that ingests data from multiple sources, computes scores and signals, and surfaces insights through role-based dashboards.
+
+## Layers
+
+### 1. Data Ingestion Layer
+
+CRM connectors (Salesforce, HubSpot, Dynamics 365) sync bidirectionally every 5 minutes using OAuth 2.0. Email and calendar data flows from Google Workspace and Microsoft 365. Starbridge district intelligence arrives via webhook and on-demand API calls.
+
+All connectors are managed through the `crm_connections` and `integrations` tables, with customizable field mappings in `crm_field_mappings`.
+
+### 2. Data Model Layer
+
+PostgreSQL (Supabase) with Drizzle ORM. Core entities:
+
+| Entity | Table | Relationships |
+|--------|-------|---------------|
+| Organizations | `organizations` | Top-level tenant |
+| Users | `users` | Belong to an org, own accounts/deals |
+| Accounts | `accounts` | 100+ fields, owns contacts/opps/renewals |
+| Contacts | `contacts` | Belong to accounts, buying roles |
+| Opportunities | `opportunities` | Pipeline with hygiene/confidence scores |
+| Renewals | `renewals` | 8-variable risk scoring |
+| Signals | `signals` | 7-state lifecycle, 8 families |
+| Plays | `plays` | Triggered from signals, task-based |
+| Activities | `activities` | Email, meeting, call, note |
+| Leads | `leads` | Lifecycle from new to opportunity |
+
+### 3. Scoring Engine
+
+93+ rules across 8 categories evaluate every account on a 5-minute cycle:
+
+- **Engagement** (12 rules) -- Usage trends, activity volume, product adoption
+- **Fit** (12 rules) -- ICP alignment, segment, budget, procurement
+- **Intent** (12 rules) -- Buying signals, RFPs, grants, competitive windows
+- **Velocity** (11 rules) -- Deal speed, stage progression, meeting cadence
+- **Pipeline Health** (16 rules) -- Hygiene, forecast integrity, handoff compliance
+- **Relationship** (11 rules) -- Champion, exec sponsor, multi-threading
+- **Risk** (12 rules) -- Churn patterns, budget decline, competitive threat
+- **Opportunity Quality** (11 rules) -- Deal size, win probability, buyer readiness
+
+Each rule produces a 0-100 sub-score with a weight (0-10). Category scores are weighted averages, and the composite score is a weighted sum of category scores.
+
+### 4. Signal Generation Engine
+
+The signal engine evaluates scoring outputs against configurable thresholds to generate actionable signals. Signals have a 7-state lifecycle (PENDING, ACTIVE, ACKNOWLEDGED, IN_PROGRESS, RESOLVED, EXPIRED, SUPPRESSED) and are routed to 8 families: RENEWAL, PIPELINE, EXPANSION, ACCOUNT, COVERAGE, WORKFLOW, STARBRIDGE, and ECONOMICS.
+
+### 5. Presentation Layer
+
+Next.js 14 (App Router) with role-based dashboards:
+
+- **Command Center** -- Executive overview with KPIs
+- **Pipeline Board** -- Kanban with hygiene overlays
+- **Forecast Dashboard** -- 5-band probability-weighted forecast
+- **Health Map** -- Heatmap of account health scores
+- **Signal Viewer** -- Signal feed with acknowledgment workflow
+- **Territory Dashboard** -- SAM equity and P&L analytics
+- **Blueprint Assessment** -- 142-item GTM maturity diagnostic
+
+### 6. Security
+
+Row-Level Security (RLS) on all tables. Multi-tenant via `org_id`. Role-based access: Leader, Manager, Rep_CSM, Admin, Executive_RO. OAuth tokens encrypted at rest.
+
+## Technology Stack
+
+| Component | Technology |
+|-----------|------------|
+| Database | PostgreSQL (Supabase) |
+| ORM | Drizzle ORM |
+| Backend | Next.js 14 API Routes |
+| Frontend | Next.js 14, React, Tailwind CSS |
+| Auth | Supabase Auth |
+| Hosting | Vercel |
+| District Intelligence | Starbridge.ai API |
+| CRM Integration | Salesforce, HubSpot, Dynamics 365 |
+| Notifications | Slack, Email (digest) |

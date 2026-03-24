@@ -1,0 +1,55 @@
+---
+title: 'Trend Warnings'
+description: 'Workflow signals for SLA compliance and deal tracking'
+icon: 'chart-line-down'
+---
+
+# Trend Warnings and Workflow Signals
+
+Workflow signals monitor process compliance, SLA adherence, and deal trajectory.
+
+## Signal Types
+
+| Signal Type | Family | Severity | Description |
+|-------------|--------|----------|-------------|
+| `sla_breach_warning` | WORKFLOW | WARNING | Play or task approaching SLA breach (default: 7 days overdue) |
+| `deal_off_track` | WORKFLOW | WARNING | Composite: insufficient contacts, stale activity, low score |
+| `deal_on_track` | WORKFLOW | INFO | Positive signal: deal meeting all health criteria |
+
+## Deal Track Composite
+
+A deal is evaluated as on-track or off-track using three dimensions:
+
+| Dimension | On-Track Threshold | Off-Track Threshold |
+|-----------|-------------------|---------------------|
+| Contact coverage | >= 3 contacts | < 3 contacts |
+| Activity recency | Activity within 14 days | No activity > 14 days |
+| Composite score | Score >= 60 | Score < 60 |
+
+## Threshold Configuration
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `sla_days_overdue` | 7 | Days overdue before SLA breach warning |
+| `deal_track_healthy_contacts` | 3 | Minimum contacts for on-track |
+| `deal_track_activity_days` | 14 | Maximum days since activity for on-track |
+| `deal_track_min_score` | 60 | Minimum composite score for on-track |
+
+## Score Trend Signals
+
+The velocity rules track score momentum:
+
+| Rule | Period | Trigger |
+|------|--------|---------|
+| VEL-006 | 7-day score change | Triggered when delta >= 10 points |
+| VEL-010 | 30-day score change | Triggered when delta >= 10 points |
+
+Rising scores (positive delta) indicate improving health. Declining scores generate risk signals.
+
+## Expiration
+
+Signals auto-expire when:
+1. The `expires_at` timestamp is past
+2. The signal state is not already terminal (RESOLVED, EXPIRED, SUPPRESSED)
+
+The `checkExpiration` function in the lifecycle engine evaluates this on each refresh cycle.

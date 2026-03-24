@@ -1,0 +1,49 @@
+---
+title: 'Signals API'
+description: 'Signal management, lifecycle transitions, and Starbridge webhooks'
+icon: 'bolt'
+---
+
+# Signals API
+
+## List Signals
+
+```
+GET /api/signals
+```
+
+Returns signals filtered by family, severity, state, account, and date range.
+
+## Starbridge Webhook
+
+```
+POST /api/signals/starbridge-webhook
+```
+
+Receives real-time Starbridge events (job changes, RFP publications, budget shifts) and generates corresponding signals.
+
+## Signal Lifecycle Transitions
+
+Signals follow the 7-state lifecycle. Valid transitions:
+
+| From | To |
+|------|----|
+| PENDING | ACTIVE, SUPPRESSED |
+| ACTIVE | ACKNOWLEDGED, RESOLVED, EXPIRED, SUPPRESSED |
+| ACKNOWLEDGED | IN_PROGRESS, RESOLVED, EXPIRED, SUPPRESSED |
+| IN_PROGRESS | RESOLVED, EXPIRED |
+
+## Signal Object
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Signal identifier |
+| `signal_type` | string | Type code |
+| `family` | SignalFamily | One of 8 families |
+| `severity` | SignalSeverity | CRITICAL, WARNING, INFO |
+| `state` | SignalState | Current lifecycle state |
+| `title` | string | Human-readable title |
+| `explanation_text` | string | Plain-language explanation |
+| `recommended_action` | string | AI-generated recommendation |
+| `evidence_refs` | object | Supporting data |
+| `confidence` | number | 0-100 confidence |

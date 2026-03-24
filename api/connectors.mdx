@@ -1,0 +1,93 @@
+---
+title: 'Connectors API'
+description: 'CRM integration, field mapping, and sync management'
+icon: 'plug'
+---
+
+# Connectors API
+
+## Provider Routes
+
+All connector operations are scoped by provider:
+
+### Authentication
+```
+GET /api/connectors/[provider]/auth
+```
+Initiates OAuth 2.0 flow for the specified provider.
+
+```
+GET /api/connectors/[provider]/callback
+```
+Handles OAuth callback and token storage.
+
+### Status
+```
+GET /api/connectors/[provider]/status
+```
+Returns connection status, last sync time, and error state.
+
+### Schema Discovery
+```
+GET /api/connectors/[provider]/discover
+```
+Discovers available CRM objects and fields for mapping.
+
+```
+GET /api/connectors/[provider]/schema
+```
+Returns the CRM schema for the connected instance.
+
+### Field Mappings
+```
+GET /api/connectors/[provider]/mappings
+PUT /api/connectors/[provider]/mappings
+```
+View and update field mappings between PILLAR and CRM fields.
+
+### Sync
+```
+POST /api/connectors/[provider]/sync
+```
+Triggers a manual sync for the specified provider.
+
+### Validate
+```
+POST /api/connectors/[provider]/validate
+```
+Validates the connection and credentials.
+
+### Disconnect
+```
+POST /api/connectors/[provider]/disconnect
+```
+Disconnects the provider and clears stored credentials.
+
+## Global Status
+```
+GET /api/connectors/status
+```
+Returns status for all connected providers.
+
+## Global Mappings
+```
+GET /api/connectors/mappings
+```
+Returns all field mappings across providers.
+
+## Starbridge Sync
+```
+POST /api/connectors/starbridge/sync
+```
+Triggers Starbridge district intelligence sync for all matched accounts.
+
+## Supported Providers
+
+| Provider | Code | Objects |
+|----------|------|---------|
+| Salesforce | `salesforce` | Account, Contact, Opportunity, Lead, Task |
+| HubSpot | `hubspot` | Company, Contact, Deal, Ticket |
+| Dynamics 365 | `dynamics` | Account, Contact, Opportunity, Lead |
+| Google Workspace | `google` | Gmail, Calendar |
+| Microsoft 365 | `microsoft` | Outlook, Calendar |
+| Starbridge | `starbridge` | Buyer attributes, contacts, contracts, RFPs |

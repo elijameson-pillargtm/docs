@@ -1,0 +1,50 @@
+---
+title: 'Scoring API'
+description: 'Scoring engine configuration, calibration, and profile management'
+icon: 'calculator'
+---
+
+# Scoring API
+
+## Scoring Profile
+
+```
+GET /api/settings/scoring-profile
+PUT /api/settings/scoring-profile
+```
+
+Manages the per-org scoring profile (`org_scoring_profiles`) including:
+- ICP company fit tiers and segment weights
+- ICP persona rules and title tiers
+- Behavioral, demographic, and engagement scoring weights
+- MQL qualification triggers
+- ICP firmographic criteria
+- Pipeline and forecast settings
+
+## Calibration
+
+```
+GET /api/calibration
+POST /api/calibration
+```
+
+The calibration endpoint allows admins to:
+- View current scoring weights and thresholds
+- Adjust category weights (engagement, fit, intent, velocity, pipeline_health, relationship, risk, opportunity_quality)
+- Override individual rule weights
+- Test score impact with sample accounts
+
+## Score Decomposition
+
+Scores returned by the engine include full decomposition:
+
+| Field | Description |
+|-------|-------------|
+| `compositeScore` | Overall 0-100 score |
+| `categoryScores` | Array of per-category scores with weights |
+| `ruleResults` | Array of individual rule results |
+| `metadata.totalRulesEvaluated` | Rules run |
+| `metadata.totalRulesTriggered` | Rules that fired |
+| `metadata.durationMs` | Computation time |
+| `modelVersion` | Engine version |
+| `computedAt` | ISO timestamp |

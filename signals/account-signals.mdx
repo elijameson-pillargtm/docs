@@ -1,0 +1,48 @@
+---
+title: 'Account Signals'
+description: 'Account-level signals from contacts, competitors, meetings, and district intelligence'
+icon: 'building'
+---
+
+# Account Signals
+
+Account signals capture important changes at the account level: stakeholder movements, competitive activity, engagement gaps, and district intelligence events.
+
+## Signal Types
+
+| Signal Type | Severity | Description |
+|-------------|----------|-------------|
+| `stakeholder_departure_starbridge` | CRITICAL/WARNING | Key contact departed (CRITICAL if champion) |
+| `board_discussion_relevant` | WARNING | Starbridge: relevant product mentions in board minutes |
+| `hiring_intent` | INFO | Starbridge: hiring in relevant departments |
+| `meeting_gap` | WARNING | No meeting in configured days (default: 30) |
+| `contact_disengagement` | WARNING | Multiple contacts showing declining engagement |
+| `competitor_engaged` | WARNING | Competitor actively engaged on the account |
+| `competitor_contract_expiring` | WARNING/CRITICAL | Tracked competitor contract approaching renewal |
+
+## Severity Logic
+
+### Stakeholder Departure
+- **CRITICAL**: Departed person is a champion (`is_champion = true`)
+- **WARNING**: Any other departure
+
+### Board Discussion
+- Always **WARNING** -- board discussions are informational but actionable
+
+### Hiring Intent
+- Always **INFO** -- hiring indicates investment but is not urgent
+
+### Meeting Gap
+- Configurable threshold: `meeting_gap_days` (default: 30 days)
+
+## Recommended Actions
+
+| Signal | Typical Action |
+|--------|---------------|
+| Stakeholder departure | Update org chart, identify replacement, schedule introduction |
+| Board discussion relevant | Review board minutes, align messaging to discussion topics |
+| Hiring intent | Research new hires, prepare outreach, update buying committee |
+| Meeting gap | Schedule check-in, send value-add content, review account plan |
+| Contact disengagement | Multi-thread outreach, engage different stakeholders |
+| Competitor engaged | Develop competitive strategy, reinforce value proposition |
+| Competitor contract expiring | Prepare displacement proposal, engage procurement |

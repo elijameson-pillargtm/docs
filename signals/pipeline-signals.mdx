@@ -1,0 +1,43 @@
+---
+title: 'Pipeline Signals'
+description: 'Deal health, forecast integrity, and handoff compliance signals'
+icon: 'chart-bar'
+---
+
+# Pipeline Signals
+
+Pipeline signals alert to deal health issues, forecast inconsistencies, and handoff compliance failures.
+
+## Signal Types
+
+| Signal Type | Severity Logic | Description |
+|-------------|---------------|-------------|
+| `pipeline_hygiene_warning` | WARNING | Hygiene score exceeds warning threshold (default: 50) |
+| `pipeline_hygiene_critical` | CRITICAL | Hygiene score exceeds critical threshold (default: 70) |
+| `forecast_risk` | Varies | Forecast confidence below threshold |
+| `forecast_commit_no_buyer` | WARNING | Commit-category deal has no economic buyer and < min contacts |
+| `forecast_no_activity` | WARNING | Commit-category deal has no activity in > configured days |
+| `close_date_pushed` | WARNING/CRITICAL | Close date pushed 2+ times (WARNING) or 3+ times (CRITICAL) |
+| `stage_stagnation` | WARNING | Deal stuck in same stage for 30+ days |
+| `rep_coverage_gap` | WARNING/CRITICAL | Rep pipeline below coverage ratio thresholds |
+| `handoff_incomplete` | WARNING/CRITICAL | Late-stage deal missing stakeholder map, next steps, or EB |
+| `onboarding_risk_high` | WARNING/CRITICAL | High implementation complexity at close |
+| `competitive_displacement_window` | WARNING/CRITICAL | Competitor contract expiring (CRITICAL if <60d) |
+| `rfp_active` | CRITICAL | Active RFP detected via Starbridge |
+
+## Threshold Configuration
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `pipeline_warning_score` | 50 | Hygiene score threshold for warning |
+| `pipeline_critical_score` | 70 | Hygiene score threshold for critical |
+| `push_count_warning` | 2 | Push count for warning |
+| `push_count_critical` | 3 | Push count for critical |
+| `stage_stagnation_days` | 30 | Days before stagnation signal |
+| `rep_coverage_ratio_warning` | 3.0 | Pipeline/quota below this = warning |
+| `rep_coverage_ratio_critical` | 2.0 | Pipeline/quota below this = critical |
+| `forecast_commit_min_contacts` | 2 | Min contacts for Commit deals |
+| `forecast_activity_gap_days` | 14 | Max days since activity for Commit deals |
+| `deal_track_healthy_contacts` | 3 | Min contacts for on-track |
+| `deal_track_activity_days` | 14 | Max days since activity for on-track |
+| `deal_track_min_score` | 60 | Composite score for on-track |

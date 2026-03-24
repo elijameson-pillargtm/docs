@@ -1,0 +1,66 @@
+---
+title: 'Renewals'
+description: 'Renewal tracking with 8-variable risk scoring and disposition lifecycle'
+icon: 'rotate'
+---
+
+# Renewals
+
+The `renewals` table tracks upcoming and historical contract renewals. Each renewal carries an 8-variable risk score and follows a 7-state disposition lifecycle.
+
+## Core Fields
+
+| Field | Type | Source | Description |
+|-------|------|--------|-------------|
+| `id` | UUID | System | Unique identifier |
+| `account_id` | UUID | System | Parent account (FK to `accounts`) |
+| `opportunity_id` | UUID | System | Linked opportunity (FK to `opportunities`), nullable |
+| `arr` | DECIMAL(14,2) | CRM Sync | Annual Recurring Revenue at stake |
+| `renewal_date` | TIMESTAMP | CRM Sync | Contract renewal date |
+| `disposition` | ENUM | System | Current renewal disposition state |
+| `risk_score` | INTEGER | Computed | 0-100 renewal risk (higher = riskier) |
+| `risk_level` | VARCHAR(20) | Computed | `low`, `medium`, `high`, `critical` |
+| `owner_id` | UUID | CRM Sync | Renewal owner (FK to `users`) |
+| `auto_renew` | BOOLEAN | CRM/Manual | Whether the contract auto-renews |
+| `save_play_id` | UUID | System | Active save play if risk is elevated |
+| `outcome_reason` | TEXT | Manual | Reason for final outcome (churn reason, etc.) |
+
+## 8-Variable Scoring Inputs
+
+These fields feed the renewal risk scoring model:
+
+| Field | Type | Weight | Description |
+|-------|------|--------|-------------|
+| `usage_trend` | INTEGER | 25% | Percent change in MAU (negative = declining) |
+| `stakeholder_health` | INTEGER | 5% | 0-100 stakeholder stability |
+| `support_burden` | INTEGER | 20% | 0-100 support escalation burden |
+| `contracting_momentum` | INTEGER | 15% | 0-100 contracting activity level |
+| `executive_sponsor_engaged` | BOOLEAN | 10% | Whether exec sponsor is active |
+| `nps_score` | INTEGER | 10% | Net Promoter Score (0-10) |
+| `payment_health` | VARCHAR(20) | 5% | `on_time`, `late_payment` |
+| `market_context` | VARCHAR(30) | 10% | `growth`, `stable`, `budget_flat`, `budget_cuts`, `budget_crisis`, `fiscal_review` |
+
+## Disposition Lifecycle
+
+```
+NOT_YET_DUE → APPROACHING → URGENT → SAVE_IN_PROGRESS → RESOLVED/RENEWED/CHURNED
+```
+
+| Disposition | Description |
+|-------------|-------------|
+| `NOT_YET_DUE` | Renewal is >90 days out |
+| `APPROACHING` | 30-90 days until renewal |
+| `URGENT` | <30 days until renewal |
+| `SAVE_IN_PROGRESS` | Active save play running |
+| `RESOLVED` | Risk mitigated, renewal expected |
+| `RENEWED` | Contract renewed (terminal) |
+| `CHURNED` | Customer lost (terminal) |
+
+## Indexes
+
+| Index | Columns | Purpose |
+|-------|---------|---------|
+| `renewals_account_idx` | `account_id` | Filter by account |
+| `renewals_date_idx` | `renewal_date` | Sort by renewal date |
+| `renewals_disposition_idx` | `disposition` | Filter by state |
+| `renewals_risk_idx` | `risk_score` | Sort by risk level |

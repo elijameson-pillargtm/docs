@@ -1,0 +1,49 @@
+---
+title: 'Documents'
+description: 'Board meeting minutes, strategic plans, and public documents'
+icon: 'file-lines'
+---
+
+# Starbridge Document Intelligence
+
+Starbridge indexes publicly-available documents from buyer organizations, including board meeting minutes, strategic plans, budget documents, and policy papers.
+
+## Document Fields (`starbridge_documents`)
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Unique identifier |
+| `org_id` | UUID | Organization tenant |
+| `account_id` | UUID | Originating account (FK to `accounts`) |
+| `doc_type` | VARCHAR(50) | Document type: `board_minutes`, `strategic_plan`, `budget`, `policy`, `agenda` |
+| `title` | VARCHAR(500) | Document title |
+| `summary` | TEXT | AI-generated document summary |
+| `posted_date` | DATE | When publicly posted |
+| `effective_from_date` | DATE | Effective date of the document |
+| `file_url` | VARCHAR(500) | URL to the original document |
+| `file_name` | VARCHAR(300) | Original file name |
+| `starbridge_id` | VARCHAR(50) | Starbridge record ID |
+
+## Document Types
+
+| Type | Description | Signal Potential |
+|------|-------------|-----------------|
+| `board_minutes` | Board of education meeting minutes | `board_discussion_relevant` signals when product-category mentions detected |
+| `strategic_plan` | Multi-year strategic plans | Updates `strategic_themes` on account, feeds FIT-007 and INT-009 |
+| `budget` | Annual budget documents | Updates budget fields, feeds budget scoring variables |
+| `policy` | Policy documents and guidelines | Informs procurement complexity analysis |
+| `agenda` | Meeting agendas | Early indicator of upcoming discussions |
+
+## Signal Generation
+
+- **`board_discussion_relevant`** (ACCOUNT, WARNING): Fired when AI analysis detects mentions of relevant product categories or strategic priorities in board minutes
+- **`strategic_alignment`** (EXPANSION, WARNING): When strategic plan themes align with product capabilities
+
+## Scoring Impact
+
+Document intelligence feeds into:
+
+- **FIT-007**: Strategic theme alignment -- Whether district priorities match product capabilities
+- **INT-009**: Strategic theme match -- Same alignment check from the intent perspective
+- **INT-011**: Board discussion relevance -- Direct signal from board minutes analysis
+- **Account Priority**: strategic_alignment variable (10% weight)

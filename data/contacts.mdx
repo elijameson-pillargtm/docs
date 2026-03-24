@@ -1,0 +1,68 @@
+---
+title: 'Contacts'
+description: 'CRM contacts with engagement tracking and stakeholder mapping'
+icon: 'users'
+---
+
+# Contacts
+
+The `contacts` table stores individuals associated with accounts. Contacts are classified by buying role and tracked for engagement, champion status, and executive sponsorship.
+
+## Fields
+
+| Field | Type | Source | Description |
+|-------|------|--------|-------------|
+| `id` | UUID | System | Unique identifier |
+| `account_id` | UUID | System | Parent account (FK to `accounts`, cascade delete) |
+| `name` | VARCHAR(200) | CRM Sync | Contact full name |
+| `title` | VARCHAR(200) | CRM Sync | Job title |
+| `email` | VARCHAR(255) | CRM Sync | Email address |
+| `phone` | VARCHAR(50) | CRM Sync | Phone number |
+| `department` | VARCHAR(200) | CRM Sync | Department |
+| `buying_role` | ENUM | Manual/Computed | `Champion`, `Economic Buyer`, `Technical Buyer`, `Influencer`, `Blocker`, `End User`, `Unknown` |
+| `status` | ENUM | System | `ACTIVE`, `INACTIVE`, `LEFT_ORG` |
+| `engagement_score` | INTEGER | Computed | 0-100 engagement level |
+| `last_activity_date` | TIMESTAMP | Computed | Most recent activity timestamp |
+| `is_champion` | BOOLEAN | Manual | Identified as internal champion |
+| `is_exec_sponsor` | BOOLEAN | Manual | Identified as executive sponsor |
+| `crm_external_id` | VARCHAR(100) | CRM | External CRM record ID |
+| `starbridge_contact_id` | VARCHAR(50) | Starbridge | Starbridge contact identifier |
+| `created_at` | TIMESTAMP | System | Record creation time |
+| `updated_at` | TIMESTAMP | System | Last modification time |
+
+## Buying Roles
+
+| Role | Description | Scoring Impact |
+|------|-------------|----------------|
+| Champion | Internal advocate who actively promotes the solution | Highest relationship score boost |
+| Economic Buyer | Has budget authority and final purchase decision | Required for forecast Commit deals |
+| Technical Buyer | Evaluates technical fit and integration | Important for deal progression |
+| Influencer | Shapes opinions but lacks direct authority | Moderate relationship contribution |
+| Blocker | Opposes the purchase or creates obstacles | Negative signal when active |
+| End User | Will use the product daily | Low direct scoring impact |
+| Unknown | Role not yet classified | Default, prompts classification task |
+
+## Contact Status Lifecycle
+
+```
+ACTIVE → INACTIVE → LEFT_ORG
+```
+
+- **ACTIVE**: Engaged and responsive
+- **INACTIVE**: No recent activity, may have gone dark
+- **LEFT_ORG**: Confirmed departure from the organization (triggers stakeholder departure signal)
+
+## Key Relationships
+
+- Belongs to one `account`
+- Referenced by `activities` (contact_id)
+- Referenced by `starbridge_job_changes` (contact_id)
+- Evaluated by 11 Relationship scoring rules and 12 Engagement rules
+
+## Indexes
+
+| Index | Columns | Purpose |
+|-------|---------|---------|
+| `contacts_account_idx` | `account_id` | Filter contacts by account |
+| `contacts_role_idx` | `buying_role` | Filter by buying role |
+| `contacts_status_idx` | `status` | Filter active/inactive contacts |

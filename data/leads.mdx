@@ -1,0 +1,96 @@
+---
+title: 'Leads'
+description: 'Lead lifecycle tracking with scoring, behavioral signals, and MQL qualification'
+icon: 'user-plus'
+---
+
+# Leads
+
+The `leads` table tracks individuals from initial capture through MQL qualification, SQL conversion, and opportunity creation. Lead scoring combines behavioral, demographic, and engagement components.
+
+## Fields
+
+| Field | Type | Source | Description |
+|-------|------|--------|-------------|
+| `id` | UUID | System | Unique identifier |
+| `org_id` | UUID | System | Organization tenant |
+| `name` | VARCHAR(200) | Inbound/CRM | Lead full name |
+| `email` | VARCHAR(255) | Inbound/CRM | Email address |
+| `company_name` | VARCHAR(300) | Inbound/CRM | Company/district name |
+| `title` | VARCHAR(200) | Inbound/CRM | Job title |
+| `state` | VARCHAR(10) | Inbound/CRM | US state code |
+| `enrollment` | INTEGER | Starbridge/Manual | District enrollment (for ICP scoring) |
+| `segment` | VARCHAR(50) | Computed | Enterprise, Mid-Market, SMB |
+| `source_id` | UUID | System | Lead source (FK to `lead_sources`) |
+| `source_detail` | TEXT | System | Additional source context |
+| `status` | ENUM | System | Lead lifecycle state |
+| `lead_score` | INTEGER | Computed | Composite lead score (0-100) |
+| `assigned_to` | UUID | System/Manual | Assigned sales rep (FK to `users`) |
+
+## Lifecycle Dates
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `mql_date` | TIMESTAMP | When the lead became MQL |
+| `sql_date` | TIMESTAMP | When the lead became SQL |
+| `opportunity_date` | TIMESTAMP | When an opportunity was created |
+| `opportunity_id` | UUID | Linked opportunity (FK to `opportunities`) |
+
+## Behavioral Tracking
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `website_visits` | INTEGER | Count of website visits |
+| `content_downloads` | INTEGER | Count of content downloads |
+| `email_opens` | INTEGER | Count of email opens |
+| `email_clicks` | INTEGER | Count of email clicks |
+| `demo_requested` | BOOLEAN | Whether a demo was requested |
+
+## Lead Status Lifecycle
+
+```
+new → engaged → mql → sql → opportunity → (disqualified | recycled)
+```
+
+| Status | Description |
+|--------|-------------|
+| `new` | Just captured, no engagement yet |
+| `engaged` | Has shown some activity (opens, visits) |
+| `mql` | Marketing Qualified -- meets MQL trigger criteria |
+| `sql` | Sales Qualified -- accepted by sales rep |
+| `opportunity` | Converted to an opportunity |
+| `disqualified` | Not a fit, removed from pipeline |
+| `recycled` | Returned to marketing for nurturing |
+
+## Lead Score Composition
+
+Configurable per org via `org_scoring_profiles`:
+
+| Component | Default Weight | Inputs |
+|-----------|---------------|--------|
+| Behavioral | 50 points max | Website visits (2pts each, cap 20), content downloads (5pts, cap 25), email clicks (3pts, cap 15), demo requested (15pts) |
+| Demographic | 30 points max | Enrollment tier (5-20pts), title tier (5-15pts) |
+| Engagement | 20 points max | Email opens (2pts, cap 20), website visits (1pt, cap 10) |
+
+## MQL Qualification Triggers
+
+A lead qualifies as MQL when any of these configurable thresholds are met:
+
+| Trigger | Default Threshold |
+|---------|------------------|
+| Demo requested | true |
+| Content downloads | >= 3 |
+| Website visits | >= 10 |
+| Email clicks | >= 3 |
+| Email opens | >= 5 |
+| Lead score | >= 60 |
+
+## Indexes
+
+| Index | Columns | Purpose |
+|-------|---------|---------|
+| `leads_status_idx` | `status` | Filter by lifecycle state |
+| `leads_source_idx` | `source_id` | Filter by source |
+| `leads_assigned_idx` | `assigned_to` | Filter by assignee |
+| `leads_score_idx` | `lead_score` | Sort by score |
+| `leads_mql_date_idx` | `mql_date` | Filter by MQL date |

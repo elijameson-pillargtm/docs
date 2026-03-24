@@ -1,0 +1,35 @@
+---
+title: 'Economics Signals'
+description: 'Financial health signals: budget overruns, unit economics, S&M efficiency'
+icon: 'coins'
+---
+
+# Economics Signals
+
+Economics signals alert to financial health issues at the organizational level. These signals fire when ECON rules detect threshold violations.
+
+## Signal Types
+
+| Signal Type | Severity Logic | Description |
+|-------------|---------------|-------------|
+| `budget_overrun` | CRITICAL > 25%, WARNING > 10% | Actual spend exceeds planned budget |
+| `territory_below_breakeven` | CRITICAL > 0.50, WARNING > 0.30 | Territory cost-to-yield ratio too high |
+| `headcount_plan_risk` | CRITICAL if P&L < -$100K, WARNING if < $0 | Headcount scenario yields negative P&L |
+| `unit_economics_degradation` | CRITICAL if LTV:CAC < 2, WARNING if < 3 | Unit economics degrading |
+| `retention_vs_acquisition` | CRITICAL if ratio > 6, WARNING if > 4 | Over-investing in acquisition vs retention |
+| `sm_efficiency_warning` | CRITICAL if S&M > 70%, WARNING if > 55% | Sales & Marketing spend too high |
+
+## Recomputation
+
+Economics signals are recomputed every 24 hours as part of the `economics_refresh` schedule.
+
+## Recommended Actions
+
+| Signal | Typical Action |
+|--------|---------------|
+| Budget overrun | Review spend categories, identify overages, adjust allocation |
+| Territory below breakeven | Rebalance territories, evaluate rep productivity, adjust coverage model |
+| Headcount plan risk | Revise hiring timeline, adjust quota assumptions, model alternatives |
+| Unit economics degradation | Review pricing, reduce CAC, improve retention programs |
+| Retention vs acquisition | Rebalance investment, increase CS resources, reduce new logo spend |
+| S&M efficiency warning | Audit marketing spend ROI, consolidate channels, improve conversion rates |

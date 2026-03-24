@@ -1,0 +1,122 @@
+---
+title: 'Buyer Attributes'
+description: 'All 120+ Starbridge buyer attributes stored on account records'
+icon: 'list-check'
+---
+
+# Starbridge Buyer Attributes
+
+Starbridge enriches PILLAR accounts with 120+ buyer attributes covering identity, geography, budgets, procurement, innovation readiness, demographics, and education-specific metrics. All fields are stored directly on the `accounts` table.
+
+## Identity and Classification
+
+| Attribute | Field | Type | Description |
+|-----------|-------|------|-------------|
+| Buyer ID | `starbridge_buyer_id` | VARCHAR(50) | Unique Starbridge identifier |
+| Common Name | `common_name` | VARCHAR(300) | Short/common organization name |
+| Parent Name | `parent_name` | VARCHAR(300) | Parent organization |
+| Parent Buyer ID | `parent_buyer_id` | VARCHAR(50) | Parent's Starbridge ID |
+| Buyer Type | `buyer_type` | VARCHAR(100) | Buyer type classification |
+| District Type | `district_type` | ENUM | K-12 District, Charter, Higher Ed, Municipality, State Agency |
+| Classifications | `classifications` | JSONB | Organization classifications array |
+
+## Geography
+
+| Attribute | Field | Type | Description |
+|-----------|-------|------|-------------|
+| State | `state` | VARCHAR(10) | US state code |
+| City | `city` | VARCHAR(100) | City |
+| County | `county` | VARCHAR(100) | County |
+| ZIP | `zip` | VARCHAR(20) | ZIP code |
+| Full Address | `full_address` | VARCHAR(500) | Complete street address |
+| Latitude | `latitude` | DECIMAL(10,7) | Geographic latitude |
+| Longitude | `longitude` | DECIMAL(10,7) | Geographic longitude |
+| Locale | `district_locale` | VARCHAR(50) | Urban, suburban, rural classification |
+| Population | `population` | INTEGER | Population served |
+| Homepage | `homepage_url` | VARCHAR(500) | Organization website |
+| Phone | `phone` | VARCHAR(30) | Main phone |
+
+## Budget and Financial
+
+| Attribute | Field | Type | Description |
+|-----------|-------|------|-------------|
+| Total Budget | `total_budget` | DECIMAL(14,2) | Operating budget |
+| Annual Budget | `annual_budget` | DECIMAL(14,2) | Annual operating budget |
+| Tech Budget | `tech_budget` | DECIMAL(14,2) | Technology allocation |
+| SBITA Spend | `budget_sbita` | DECIMAL(14,2) | Subscription-based IT arrangement spend |
+| Budget URL | `budget_url` | VARCHAR(500) | Link to public budget document |
+| Budget Year | `budget_latest_year` | INTEGER | Most recent budget year |
+| Budget Confidence | `budget_confidence` | INTEGER | Data confidence (0-100) |
+| Budget Trend YoY | `budget_trend_yoy` | DECIMAL(5,2) | Year-over-year change % |
+| Spend Propensity | `propensity_to_spend` | VARCHAR(50) | Spending category |
+| Spend Summary | `propensity_to_spend_summary` | TEXT | AI-generated analysis |
+| Budget Change URLs | `budget_change_source_urls` | JSONB | Source documentation |
+| Historical Spend | `historical_spend` | JSONB | Multi-year spend data |
+
+## Procurement
+
+| Attribute | Field | Type | Description |
+|-----------|-------|------|-------------|
+| Procurement Complexity | `procurement_complexity` | INTEGER | Difficulty score (0-100) |
+| Procurement Summary | `procurement_summary` | TEXT | AI navigation guide |
+| Coop Agreements | `coop_agreements` | JSONB | Active cooperative purchasing agreements |
+
+## Innovation and Adoption
+
+| Attribute | Field | Type | Description |
+|-----------|-------|------|-------------|
+| AI Adoption Score | `ai_adoption_score` | INTEGER | AI readiness (0-100) |
+| AI Adoption Summary | `ai_adoption_summary` | TEXT | AI adoption analysis |
+| Startup Friendliness | `startup_friendliness` | INTEGER | Vendor openness (0-100) |
+| Startup Summary | `startup_friendliness_summary` | TEXT | Analysis |
+| Tech Spend Propensity | `tech_spend_propensity` | INTEGER | Tech spending likelihood (0-100) |
+| Strategic Themes | `strategic_themes` | JSONB | Strategic priority themes |
+
+## K-12 Demographics
+
+| Attribute | Field | Type | Description |
+|-----------|-------|------|-------------|
+| Student Count | `student_count` | INTEGER | Total enrollment |
+| School Count | `school_count` | INTEGER | Total schools |
+| Num Schools | `num_schools` | INTEGER | School count (detailed) |
+| Elementary Schools | `elementary_schools` | INTEGER | Elementary count |
+| Middle Schools | `middle_schools` | INTEGER | Middle school count |
+| High Schools | `high_schools` | INTEGER | High school count |
+| Staff Count | `staff_count` | INTEGER | Total staff |
+| Total Staff | `total_staff` | INTEGER | Staff (detailed) |
+| FTE Teachers | `fte_teachers` | DECIMAL(8,1) | Full-time equivalent teachers |
+| Grade Range | `grade_range` | VARCHAR(20) | Grades offered |
+| Lowest Grade | `lowest_grade` | VARCHAR(10) | Lowest grade |
+| Highest Grade | `highest_grade` | VARCHAR(10) | Highest grade |
+| Median Income | `median_household_income` | DECIMAL(12,2) | Area median income |
+| Free/Reduced Lunch | `free_reduced_lunch_pct` | DECIMAL(5,2) | FRL eligibility % |
+| English Learners | `english_learner_pct` | DECIMAL(5,2) | EL percentage |
+| Enrollment Change | `yoy_enrollment_change` | DECIMAL(5,2) | YoY enrollment delta |
+| Enrollment Trend | `enrollment_trend` | VARCHAR(50) | Trajectory description |
+| SIS Provider | `sis_provider` | VARCHAR(100) | Student Information System |
+| LMS Providers | `lms_providers` | JSONB | Learning Management Systems |
+| NCES ID | `nces_id` | VARCHAR(20) | NCES identifier |
+| NCES State ID | `nces_state_district_id` | VARCHAR(20) | State-level NCES ID |
+
+## Higher Education
+
+| Attribute | Field | Type | Description |
+|-----------|-------|------|-------------|
+| Institution Type | `higher_ed_type` | VARCHAR(100) | Type classification |
+| FTE Enrollment | `higher_ed_fte_enrollment` | INTEGER | Full-time equivalent enrollment |
+| Graduation Rate | `higher_ed_graduation_rate` | DECIMAL(5,2) | Graduation % |
+| Retention Rate | `higher_ed_retention_rate` | DECIMAL(5,2) | Retention % |
+| Grad Enrollment | `higher_ed_grad_enrollment` | INTEGER | Graduate students |
+| Undergrad Enrollment | `higher_ed_undergrad_enrollment` | INTEGER | Undergraduates |
+| Control | `higher_ed_control` | VARCHAR(50) | Public or private |
+| Endowment | `higher_ed_endowment` | DECIMAL(14,2) | Endowment size |
+| System | `higher_ed_system` | VARCHAR(200) | University system |
+| IPEDS ID | `ipeds_id` | VARCHAR(20) | IPEDS identifier |
+
+## Government/Organization
+
+| Attribute | Field | Type | Description |
+|-----------|-------|------|-------------|
+| Employee FTE | `employee_fte` | INTEGER | Full-time equivalents |
+| Fiscal Year Start | `fiscal_year_start_date` | VARCHAR(10) | FY start date |
+| Census ID | `census_id` | VARCHAR(30) | US Census identifier |

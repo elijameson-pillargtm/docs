@@ -1,0 +1,175 @@
+---
+title: 'Accounts'
+description: 'Account-level data including CRM fields, scoring outputs, and district intelligence'
+icon: 'building'
+---
+
+# Accounts
+
+The `accounts` table is the core entity in PILLAR, representing organizations (school districts, companies, institutions) that are customers or prospects. Contains 100+ fields spanning CRM data, scoring outputs, and Starbridge district intelligence.
+
+## Core Fields
+
+| Field | Type | Source | Description |
+|-------|------|--------|-------------|
+| `id` | UUID | System | Unique identifier (auto-generated) |
+| `org_id` | UUID | System | Organization (tenant) this account belongs to |
+| `name` | VARCHAR(300) | CRM Sync | Account name |
+| `domain` | VARCHAR(255) | CRM Sync | Company website domain |
+| `segment` | ENUM | CRM/Manual | `Enterprise`, `Mid-Market`, `SMB` |
+| `tier` | ENUM | Computed | Account tier: `1`, `2`, `3` (1 = highest potential) |
+| `industry` | VARCHAR(100) | CRM Sync | Industry classification |
+| `state` | VARCHAR(10) | CRM Sync | US state code |
+| `territory` | VARCHAR(200) | Manual/Computed | Territory assignment |
+| `district_type` | ENUM | Starbridge | `K-12 District`, `Charter`, `Higher Ed`, `Municipality`, `State Agency` |
+| `owner_id` | UUID | CRM Sync | Account owner (FK to `users`) |
+| `arr` | DECIMAL(14,2) | CRM Sync | Annual Recurring Revenue |
+| `student_count` | INTEGER | Starbridge | Total student enrollment |
+| `annual_budget` | DECIMAL(14,2) | Starbridge | Operating budget amount |
+| `health_score` | INTEGER | Computed | Composite account health (0-100), null for prospects |
+| `status` | VARCHAR(20) | System | `active`, `churned`, `prospect` |
+| `fiscal_year_end` | VARCHAR(5) | CRM/Manual | Fiscal year end date (MM-DD format) |
+
+## Scoring Outputs (Computed)
+
+Updated by the scoring engine every 5 minutes. All scores are 0-100.
+
+| Field | Type | Range | Description |
+|-------|------|-------|-------------|
+| `health_score` | INTEGER | 0-100 | Composite account health from 8 category scores |
+| `priority_score` | INTEGER | 0-100 | Account prioritization based on ARR, risk, expansion, market context |
+| `risk_score` | INTEGER | 0-100 | Churn risk level from 12 risk rules |
+| `expansion_propensity` | INTEGER | 0-100 | Likelihood of expansion from 8 variables |
+| `whitespace_pct` | INTEGER | 0-100 | Product catalog gap percentage |
+| `health_trend` | JSONB (number[]) | -- | Last 6 health score data points for sparkline rendering |
+
+## Starbridge: Identity and Geography
+
+| Field | Type | Source | Description |
+|-------|------|--------|-------------|
+| `common_name` | VARCHAR(300) | Starbridge | Common/short name |
+| `parent_name` | VARCHAR(300) | Starbridge | Parent organization name |
+| `parent_buyer_id` | VARCHAR(50) | Starbridge | Starbridge parent buyer ID |
+| `buyer_type` | VARCHAR(100) | Starbridge | Buyer type classification |
+| `classifications` | JSONB (string[]) | Starbridge | Organization classifications |
+| `homepage_url` | VARCHAR(500) | Starbridge | Organization website |
+| `phone` | VARCHAR(30) | Starbridge | Main phone number |
+| `city` | VARCHAR(100) | Starbridge | City |
+| `county` | VARCHAR(100) | Starbridge | County |
+| `zip` | VARCHAR(20) | Starbridge | ZIP code |
+| `full_address` | VARCHAR(500) | Starbridge | Complete address |
+| `latitude` | DECIMAL(10,7) | Starbridge | Location latitude |
+| `longitude` | DECIMAL(10,7) | Starbridge | Location longitude |
+| `population` | INTEGER | Starbridge | Population served |
+
+## Starbridge: Budget and Financial
+
+| Field | Type | Source | Description |
+|-------|------|--------|-------------|
+| `total_budget` | DECIMAL(14,2) | Starbridge | Total operating budget |
+| `tech_budget` | DECIMAL(14,2) | Starbridge | Technology budget allocation |
+| `budget_sbita` | DECIMAL(14,2) | Starbridge | Subscription-based IT arrangement spend |
+| `budget_url` | VARCHAR(500) | Starbridge | URL to public budget document |
+| `budget_latest_year` | INTEGER | Starbridge | Most recent budget year |
+| `budget_confidence` | INTEGER | Starbridge | Confidence level in budget data (0-100) |
+| `budget_trend_yoy` | DECIMAL(5,2) | Starbridge | Year-over-year budget change percentage |
+| `propensity_to_spend` | VARCHAR(50) | Starbridge | Spending propensity category |
+| `propensity_to_spend_summary` | TEXT | Starbridge | AI-generated spending analysis |
+| `budget_change_source_urls` | JSONB (string[]) | Starbridge | Source URLs for budget change analysis |
+
+## Starbridge: Procurement Intelligence
+
+| Field | Type | Source | Description |
+|-------|------|--------|-------------|
+| `procurement_complexity` | INTEGER | Starbridge | Procurement difficulty score (0-100, higher = harder) |
+| `procurement_summary` | TEXT | Starbridge | AI-generated procurement navigation guide |
+| `coop_agreements` | JSONB (string[]) | Starbridge | Active cooperative purchasing agreements (BuyBoard, TIPS, NASPO, etc.) |
+
+## Starbridge: Innovation and Adoption
+
+| Field | Type | Source | Description |
+|-------|------|--------|-------------|
+| `ai_adoption_score` | INTEGER | Starbridge | AI adoption readiness (0-100) |
+| `ai_adoption_summary` | TEXT | Starbridge | AI adoption analysis |
+| `startup_friendliness` | INTEGER | Starbridge | Openness to startup vendors (0-100) |
+| `startup_friendliness_summary` | TEXT | Starbridge | Startup friendliness analysis |
+| `tech_spend_propensity` | INTEGER | Starbridge | Technology spending propensity (0-100) |
+| `strategic_themes` | JSONB (string[]) | Starbridge | Strategic priority themes from board documents |
+| `historical_spend` | JSONB | Starbridge | Historical spending data by category/year |
+
+## Starbridge: K-12 School District Demographics
+
+| Field | Type | Source | Description |
+|-------|------|--------|-------------|
+| `school_count` | INTEGER | Starbridge | Total number of schools |
+| `num_schools` | INTEGER | Starbridge | Number of schools (detailed) |
+| `elementary_schools` | INTEGER | Starbridge | Elementary school count |
+| `middle_schools` | INTEGER | Starbridge | Middle school count |
+| `high_schools` | INTEGER | Starbridge | High school count |
+| `staff_count` | INTEGER | Starbridge | Total staff |
+| `total_staff` | INTEGER | Starbridge | Total staff (detailed) |
+| `fte_teachers` | DECIMAL(8,1) | Starbridge | Full-time equivalent teachers |
+| `grade_range` | VARCHAR(20) | Starbridge | Grade range offered |
+| `lowest_grade` | VARCHAR(10) | Starbridge | Lowest grade offered |
+| `highest_grade` | VARCHAR(10) | Starbridge | Highest grade offered |
+| `district_locale` | VARCHAR(50) | Starbridge | Urban/suburban/rural classification |
+| `median_household_income` | DECIMAL(12,2) | Starbridge | Median household income in district |
+| `free_reduced_lunch_pct` | DECIMAL(5,2) | Starbridge | Free/reduced lunch eligibility percentage |
+| `english_learner_pct` | DECIMAL(5,2) | Starbridge | English learner percentage |
+| `yoy_enrollment_change` | DECIMAL(5,2) | Starbridge | Year-over-year enrollment change |
+| `enrollment_trend` | VARCHAR(50) | Starbridge | Enrollment trajectory description |
+| `sis_provider` | VARCHAR(100) | Starbridge | Student Information System vendor |
+| `lms_providers` | JSONB (string[]) | Starbridge | Learning Management System(s) |
+| `nces_id` | VARCHAR(20) | Starbridge | National Center for Education Statistics ID |
+| `nces_state_district_id` | VARCHAR(20) | Starbridge | NCES state district ID |
+
+## Starbridge: Higher Education
+
+| Field | Type | Source | Description |
+|-------|------|--------|-------------|
+| `higher_ed_type` | VARCHAR(100) | Starbridge | Institution type |
+| `higher_ed_fte_enrollment` | INTEGER | Starbridge | Full-time equivalent enrollment |
+| `higher_ed_graduation_rate` | DECIMAL(5,2) | Starbridge | Graduation rate |
+| `higher_ed_retention_rate` | DECIMAL(5,2) | Starbridge | Retention rate |
+| `higher_ed_grad_enrollment` | INTEGER | Starbridge | Graduate enrollment |
+| `higher_ed_undergrad_enrollment` | INTEGER | Starbridge | Undergraduate enrollment |
+| `higher_ed_control` | VARCHAR(50) | Starbridge | Public/private control |
+| `higher_ed_endowment` | DECIMAL(14,2) | Starbridge | Endowment amount |
+| `higher_ed_system` | VARCHAR(200) | Starbridge | University system affiliation |
+| `ipeds_id` | VARCHAR(20) | Starbridge | IPEDS identifier |
+
+## Starbridge: Government/Organization
+
+| Field | Type | Source | Description |
+|-------|------|--------|-------------|
+| `employee_fte` | INTEGER | Starbridge | Full-time equivalent employees |
+| `fiscal_year_start_date` | VARCHAR(10) | Starbridge | Fiscal year start date |
+| `census_id` | VARCHAR(30) | Starbridge | US Census ID |
+
+## CRM Sync
+
+| Field | Type | Source | Description |
+|-------|------|--------|-------------|
+| `crm_external_id` | VARCHAR(100) | CRM | External CRM record ID |
+| `crm_source` | VARCHAR(20) | System | `salesforce`, `hubspot`, `dynamics` |
+| `starbridge_buyer_id` | VARCHAR(50) | Starbridge | Starbridge buyer identifier |
+| `starbridge_last_synced` | TIMESTAMP | System | Last Starbridge sync timestamp |
+
+## Indexes
+
+| Index | Columns | Purpose |
+|-------|---------|---------|
+| `accounts_owner_idx` | `owner_id` | Filter by account owner |
+| `accounts_segment_idx` | `segment` | Filter by segment |
+| `accounts_territory_idx` | `territory` | Filter by territory |
+| `accounts_nces_idx` | `nces_id` | Lookup by NCES ID |
+| `accounts_crm_idx` | `crm_external_id` | CRM sync deduplication |
+| `accounts_risk_idx` | `risk_score` | Risk-based sorting |
+| `accounts_priority_idx` | `priority_score` | Priority-based sorting |
+
+## Timestamps
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `created_at` | TIMESTAMP | Record creation time |
+| `updated_at` | TIMESTAMP | Last modification time |

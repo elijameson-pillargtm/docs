@@ -1,0 +1,70 @@
+---
+title: 'Account Health'
+description: 'Composite health score formula and the Account Priority scoring model'
+icon: 'heart-pulse'
+---
+
+# Account Health Score
+
+The account health score is the composite output of evaluating all 93+ rules across 8 categories. It is stored in `accounts.health_score` (0-100) and updated every 5 minutes.
+
+## Composite Formula
+
+```
+health_score = SUM(category_score[i] * category_weight[i])
+```
+
+Where each `category_score` is:
+
+```
+category_score = SUM(rule_score[j] * rule_weight[j]) / SUM(rule_weight[j])
+```
+
+## Default Category Weights
+
+| Category | Weight | Contribution |
+|----------|--------|-------------|
+| Engagement | 0.15 | 15% |
+| Fit | 0.10 | 10% |
+| Intent | 0.15 | 15% |
+| Velocity | 0.10 | 10% |
+| Pipeline Health | 0.15 | 15% |
+| Relationship | 0.10 | 10% |
+| Risk | 0.15 | 15% |
+| Opportunity Quality | 0.10 | 10% |
+
+## Account Priority Score
+
+A separate computed score (`accounts.priority_score`) that determines which accounts deserve immediate attention. Uses 8 variables:
+
+| Variable | Weight | Input | Scoring Logic |
+|----------|--------|-------|--------------|
+| ARR Value | 20% | `account.arr` | $500K+ = 100, $200K = 85, scaled down |
+| Risk Urgency | 15% | `account.risk_score` | Direct pass-through of risk score |
+| Expansion Potential | 15% | `whitespace_pct` | Higher whitespace = higher priority |
+| Engagement Trend | 10% | Engagement delta (-100 to +100) | Mapped to 0-100 scale |
+| Territory Impact | 10% | `territory_quota_impact` | Quota contribution percentage |
+| Market Context | 10% | `budget_trend_yoy` (Starbridge) | Growing budget = 80, shrinking = 10 |
+| Strategic Alignment | 10% | Strategic theme match (Starbridge) | Match = 100, no match = 0 |
+| Tech Spend Propensity | 10% | `tech_spend_propensity` (Starbridge) | Direct pass-through, 50 if no data |
+
+## Health Trend
+
+The `accounts.health_trend` field stores the last 6 health score data points as a JSON array, enabling sparkline visualization in dashboards.
+
+## Engagement Rules (ENG-001 to ENG-012)
+
+| Rule | Name | Weight | What It Measures |
+|------|------|--------|-----------------|
+| ENG-001 | Usage trend decline | 8 | Quarter-over-quarter usage trend |
+| ENG-002 | Activity recency | 7 | Days since last recorded activity |
+| ENG-003 | Activity volume (30d) | 6 | Count of activities in last 30 days |
+| ENG-004 | Email and meeting engagement | 5 | Ratio of meetings/emails to total activities |
+| ENG-005 | Average contact engagement | 6 | Average engagement_score across active contacts |
+| ENG-006 | Product adoption depth | 7 | Average adoption % across purchased products |
+| ENG-007 | Activity trend acceleration | 5 | 30-day activity count vs prior 60-day rate |
+| ENG-008 | Login frequency | 6 | Account usage_depth metric |
+| ENG-009 | NPS survey engagement | 4 | Whether account responded to NPS surveys |
+| ENG-010 | Stakeholder breadth | 5 | Number of unique active contacts |
+| ENG-011 | Support interaction frequency | 3 | Support ticket volume and escalation rate |
+| ENG-012 | Feature breadth utilization | 5 | Products actively used vs products purchased |

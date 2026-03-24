@@ -1,0 +1,80 @@
+---
+title: 'ICP Fit'
+description: 'Ideal Customer Profile fit scoring: firmographic, demographic, and persona analysis'
+icon: 'bullseye'
+---
+
+# ICP Fit Scoring
+
+The Fit category evaluates how well an account or lead matches the Ideal Customer Profile. Contains 12 rules (FIT-001 to FIT-012) with a default category weight of 10%.
+
+## Fit Rules
+
+| Rule | Name | Weight | What It Measures |
+|------|------|--------|-----------------|
+| FIT-001 | ARR tier fit | 8 | Account ARR relative to ICP thresholds ($500K+ = 100) |
+| FIT-002 | Segment alignment | 6 | Enterprise = 100, Mid-Market = 70, SMB = 35 |
+| FIT-003 | District size fit | 7 | Student count (50K+ = 100, 1K-5K = 25) |
+| FIT-004 | Technology spend propensity | 6 | Starbridge tech_spend_propensity (0-100 pass-through) |
+| FIT-005 | AI adoption readiness | 5 | Starbridge ai_adoption_score (0-100 pass-through) |
+| FIT-006 | Budget capacity | 7 | Tech budget size ($5M+ tech = 100) |
+| FIT-007 | Strategic theme alignment | 6 | Whether district themes match product capabilities |
+| FIT-008 | Procurement complexity fit | 5 | Lower complexity = higher fit (inverted) |
+| FIT-009 | Cooperative purchasing pathway | 4 | Whether coop pathways exist (NASPO, PEPPM, etc.) |
+| FIT-010 | Account tier alignment | 5 | Tier 1 = 100, Tier 2 = 60, Tier 3 = 30 |
+| FIT-011 | Startup friendliness | 4 | Starbridge startup_friendliness (0-100 pass-through) |
+| FIT-012 | Primary contact persona fit | 5 | Best contact buying role and title match |
+
+## Configurable ICP Profiles
+
+Per-org customization via `org_scoring_profiles`:
+
+### Company Fit Tiers
+
+Default enrollment-based tiers (clients can replace with revenue, headcount, etc.):
+
+| Tier | Enrollment Range | Points |
+|------|-----------------|--------|
+| Tier 1 | 50,000+ | 40 |
+| Tier 2 | 20,000-49,999 | 35 |
+| Tier 3 | 10,000-19,999 | 25 |
+| Tier 4 | 5,000-9,999 | 15 |
+| Tier 5 | 0-4,999 | 5 |
+
+### Segment Weights
+
+| Segment | Default Points |
+|---------|---------------|
+| Enterprise | 35 |
+| Mid-Market | 30 |
+| SMB | 15 |
+
+### Persona Fit Rules
+
+Title-to-score mappings (configurable):
+
+| Pattern | Score | Persona |
+|---------|-------|---------|
+| superintendent, chief | 95 | Executive Decision Maker |
+| deputy, assistant superintendent | 85 | Senior Leader |
+| executive director, associate superintendent | 80 | Senior Leader |
+| director | 70 | Department Leader |
+| coordinator, specialist | 50 | Program Manager |
+| teacher, instructor | 25 | End User |
+
+### ICP Title Tiers
+
+| Tier | Default Titles |
+|------|---------------|
+| Tier 1 | Superintendent, CEO, CFO, CTO, CIO, Chancellor, Commissioner |
+| Tier 2 | Director, VP, Executive Director, Deputy/Assistant Superintendent |
+| Tier 3 | Manager, Coordinator, Specialist, Program Manager, Instructional Coach |
+| Tier 4 | Teacher, Instructor, Analyst, Counselor, Librarian |
+
+## Thresholds
+
+| Threshold | Default |
+|-----------|---------|
+| ICP Strong | >= 70 |
+| ICP Moderate | >= 45 |
+| ICP Weak | < 45 |

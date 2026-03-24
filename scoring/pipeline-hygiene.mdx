@@ -1,0 +1,48 @@
+---
+title: 'Pipeline Hygiene'
+description: 'Deal hygiene rules and handoff compliance enforcement'
+icon: 'broom'
+---
+
+# Pipeline Hygiene Score
+
+The pipeline hygiene score (`opportunities.hygiene_score`) measures deal health. Higher score = more problems (dirtier pipeline). Uses 6 weighted variables plus 16 pipeline health rules.
+
+## 6-Variable Hygiene Model
+
+| Variable | Default Weight | Input | Scoring Logic |
+|----------|---------------|-------|--------------|
+| Stage Velocity | 20% | `days_in_stage / stage_median_days` | >= 2x median = 100, >= 1.5x = 70 |
+| Close Date Slips | 20% | `push_count` | 3+ pushes = 100, 2 = 60, 1 = 30 |
+| Next Step | 20% | `has_next_step` | Missing = 100, defined = 0 |
+| Contact Coverage | 15% | `contact_count` | 3+ contacts = 0, 2 = 40, 1 or fewer = 100 |
+| Economic Buyer | 15% | `has_economic_buyer` | Missing = 100, identified = 0 |
+| Meeting Recency | 10% | `meeting_recency_days` | 21+ days = 100, 14+ = 70, 7+ = 30 |
+
+## Pipeline Health Rules (PH-001 to PH-016)
+
+| Rule | Name | Weight | Description |
+|------|------|--------|-------------|
+| PH-001 | Economic buyer identified | 8 | EB coverage across open deals |
+| PH-002 | Deal contact coverage | 7 | Average contacts per deal |
+| PH-003 | Forecast category consistency | 8 | Category/stage/probability alignment |
+| PH-004 | Stale deal detection | 7 | Deals 30+ days in same stage |
+| PH-005 | Deal meeting recency | 6 | Days since last meeting on primary deal |
+| PH-006 | Deal amount data quality | 7 | Deals with $0 or missing amounts |
+| PH-007 | Close date integrity | 6 | Past-due or >12 months out close dates |
+| PH-008 | Stage skip compliance | 5 | Deals that skipped pipeline stages |
+| PH-009 | Deal owner assignment | 6 | Unowned pipeline orphans |
+| PH-010 | Pipeline coverage ratio | 7 | Total pipeline vs ARR (target: 2-3x) |
+| PH-011 | Governance compliance | 6 | Commit without EB, missing next steps, stale meetings |
+| PH-012 | Renewal data integrity | 5 | Duplicate active renewals, missing dates |
+
+## Handoff Compliance (PH-013 to PH-016)
+
+These rules enforce Sales-to-CS handoff readiness on late-stage deals (Negotiation, Closed Won, Proposal):
+
+| Rule | Name | Weight | Description |
+|------|------|--------|-------------|
+| PH-013 | Handoff stakeholder map | 7 | Late-stage deals need >= 3 contacts mapped |
+| PH-014 | Handoff success criteria | 7 | Late-stage deals must have defined next steps |
+| PH-015 | Handoff economic buyer | 6 | Late-stage deals must have identified EB |
+| PH-016 | Handoff composite compliance | 8 | Combined: stakeholder map + success criteria + EB (33/33/34 weighted) |

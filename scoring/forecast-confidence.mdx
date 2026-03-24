@@ -1,0 +1,72 @@
+---
+title: 'Forecast Confidence'
+description: 'Forecast confidence computation with 7 variables including procurement alignment'
+icon: 'chart-mixed'
+---
+
+# Forecast Confidence Score
+
+The forecast confidence score (`opportunities.confidence_score`) measures how reliable a deal forecast is. Higher score = MORE confident (inverted from hygiene). Uses 7 weighted variables.
+
+## 7-Variable Model
+
+| Variable | Default Weight | Input | Scoring Logic |
+|----------|---------------|-------|--------------|
+| Stage Probability | 20% | `stage_probability` | Direct pass-through (0-100) |
+| Deal Hygiene | 20% | `hygiene_score` | Inverted: 100 - hygiene_score |
+| Engagement Velocity | 15% | Meetings per 30 days | 4+ = 100, 2+ = 70, 1 = 40, 0 = 10 |
+| Competitor Risk | 15% | `competitor_risk` (0-100) | Inverted: 100 - competitor_risk |
+| Executive Engagement | 10% | `executive_engagement` | Yes = 100, No = 20 |
+| Historical Win Rate | 10% | `historical_win_rate` | Direct pass-through (0-100) |
+| Procurement Alignment | 10% | Starbridge composite | Complexity (40%), coop pathway (35%), fiscal alignment (25%) |
+
+## Procurement Alignment (Starbridge-Enhanced)
+
+When Starbridge data is available:
+
+| Sub-factor | Weight | Logic |
+|------------|--------|-------|
+| Procurement complexity | 40% | > 70 = 20, > 50 = 50, <= 50 = 80 |
+| Coop pathway exists | 35% | Yes = 80, No = 30 |
+| Fiscal year aligned | 25% | Aligned = 80, Misaligned = 20 |
+
+Without Starbridge data, procurement alignment defaults to 50 (neutral).
+
+## PILLAR Forecast Categories
+
+PILLAR uses a 5-band forecast system with probability-weighted amounts:
+
+| Category | Probability Weight | Description |
+|----------|-------------------|-------------|
+| Won | 100% | Closed and booked |
+| Commit | 100% | Rep commits to closing this period |
+| Probable | 50% | Strong likelihood but not committed |
+| Upside | 25% | Possible but uncertain |
+| Projection | 15% | Long-shot or stretch target |
+
+## Forecast Bands
+
+| Band | Calculation |
+|------|------------|
+| Low Band | Won + Commit (100% weighted) |
+| Medium Band | + Probable (50% weighted) |
+| High Band | + Upside (25% weighted) |
+| Moonshot Band | + Projection (15% weighted) |
+
+## Opportunity Quality Rules (OQ-001 to OQ-011)
+
+These rules evaluate overall deal quality and winnability:
+
+| Rule | Name | Weight | Description |
+|------|------|--------|-------------|
+| OQ-001 | Deal size quality | 7 | Larger deals = higher strategic value |
+| OQ-002 | Win probability assessment | 8 | Adjusted probability (deductions for missing EB, next step, pushes) |
+| OQ-003 | Competitive positioning | 7 | No competitor = 90, strategy defined = 60, no strategy = 25 |
+| OQ-004 | Buyer readiness signals | 8 | Budget + exec + timeline + procurement (25 pts each) |
+| OQ-005 | Rep win rate factor | 5 | Historical rep performance |
+| OQ-006 | Expansion readiness composite | 8 | Champion + usage + whitespace + budget + NPS |
+| OQ-007 | Deal engagement quality | 6 | Meeting frequency + contact seniority + exec involvement |
+| OQ-008 | Procurement pathway clarity | 6 | Complexity + coop + fiscal alignment |
+| OQ-009 | Strategic value assessment | 5 | Reference potential, logo value, tier |
+| OQ-010 | Fiscal year timing alignment | 5 | Close date vs fiscal year alignment |
+| OQ-011 | Forecast confidence level | 7 | Pass-through of confidence_score |

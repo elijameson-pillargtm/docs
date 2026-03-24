@@ -1,0 +1,85 @@
+---
+title: 'Lead Score'
+description: 'Lead scoring model: behavioral + demographic + engagement components'
+icon: 'gauge-high'
+---
+
+# Lead Score
+
+The lead score is a composite 0-100 score stored in `leads.lead_score`. It combines three components with configurable weights and caps.
+
+## Score Components
+
+| Component | Default Max | Weight | Inputs |
+|-----------|------------|--------|--------|
+| Behavioral | 50 points | ~50% | Website visits, content downloads, email clicks, demo requests |
+| Demographic | 30 points | ~30% | Enrollment tier, title tier |
+| Engagement | 20 points | ~20% | Email opens, website visits (engagement-specific) |
+
+## Behavioral Scoring
+
+| Action | Points | Cap |
+|--------|--------|-----|
+| Website visit | 2 | 20 |
+| Content download | 5 | 25 |
+| Email click | 3 | 15 |
+| Demo requested | 15 | -- |
+
+## Demographic Scoring
+
+### Enrollment Tiers
+
+| Enrollment | Points |
+|------------|--------|
+| 50,000+ | 20 |
+| 20,000+ | 15 |
+| 10,000+ | 10 |
+| 0+ | 5 |
+
+### Title Tiers
+
+| Pattern | Points |
+|---------|--------|
+| superintendent, chief | 15 |
+| director | 12 |
+| Other | 5 (default) |
+
+## Engagement Scoring
+
+| Action | Points | Cap |
+|--------|--------|-----|
+| Email open | 2 | 20 |
+| Website visit | 1 | 10 |
+
+## MQL Qualification
+
+A lead qualifies as MQL when any trigger fires:
+
+| Trigger | Default Threshold |
+|---------|------------------|
+| Demo requested | true |
+| Content downloads | >= 3 |
+| Website visits | >= 10 |
+| Email clicks | >= 3 |
+| Email opens | >= 5 |
+| Lead score | >= 60 |
+
+## Intent Rules (Lead Context)
+
+When leads are evaluated by the scoring engine, the Intent category (12 rules) also applies:
+
+| Rule | Name | Weight | Lead Relevance |
+|------|------|--------|---------------|
+| INT-001 | Cross-sell signal volume | 8 | Multiple MQLs from same account |
+| INT-006 | MQL volume indicator | 6 | Direct MQL count for account |
+| INT-012 | Demo or trial requested | 8 | Demo request as strong buying signal |
+
+## Customization
+
+All lead scoring parameters are configurable per organization through `org_scoring_profiles`:
+
+- `behavioral_weights`: Points per action and caps
+- `demographic_weights`: Enrollment tiers and title tiers
+- `engagement_weights`: Engagement action points and caps
+- `behavioral_max` / `demographic_max` / `engagement_max`: Component caps
+- `mql_triggers`: Qualification thresholds

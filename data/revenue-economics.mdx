@@ -1,0 +1,169 @@
+---
+title: 'Revenue Economics'
+description: 'Org-level financial metrics, P&L tracking, headcount scenarios, and unit economics'
+icon: 'money-bill-trend-up'
+---
+
+# Revenue Economics
+
+The `org_metrics` table stores org-level financial and operational metrics on a periodic basis (monthly or quarterly). These power the Revenue Economics dashboard, forecast accuracy tracking, and ECON scoring rules.
+
+## Org Metrics (`org_metrics`)
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Unique identifier |
+| `org_id` | UUID | Organization tenant |
+| `period` | VARCHAR(20) | Period identifier (e.g., "2025-Q2", "2025-03") |
+| `period_type` | VARCHAR(20) | `quarterly` or `monthly` |
+
+### Revenue Metrics
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `arr` | DECIMAL(14,2) | Current Annual Recurring Revenue |
+| `arr_beginning` | DECIMAL(14,2) | ARR at period start |
+| `new_business_arr` | DECIMAL(14,2) | New logo ARR added |
+| `expansion_arr` | DECIMAL(14,2) | Expansion/upsell ARR |
+| `contraction_arr` | DECIMAL(14,2) | Downsell ARR |
+| `churn_arr` | DECIMAL(14,2) | Churned ARR |
+
+### Efficiency / P&L Metrics
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `total_revenue` | DECIMAL(14,2) | Total revenue |
+| `total_cogs` | DECIMAL(14,2) | Cost of goods sold |
+| `gross_profit` | DECIMAL(14,2) | Gross profit |
+| `total_opex` | DECIMAL(14,2) | Total operating expenses |
+| `ebitda` | DECIMAL(14,2) | EBITDA |
+| `total_sales_marketing_spend` | DECIMAL(14,2) | Total S&M spend |
+| `total_new_customers` | INTEGER | New customers acquired |
+
+### Headcount
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `total_employees` | INTEGER | Total employee count |
+| `sales_headcount` | INTEGER | Sales team size |
+| `cs_headcount` | INTEGER | Customer success team size |
+
+### Sales Metrics
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `new_business_cycle_days_median` | INTEGER | Median new business cycle length |
+| `expansion_cycle_days_median` | INTEGER | Median expansion cycle length |
+| `pipeline_total` | DECIMAL(14,2) | Total pipeline value |
+| `pipeline_coverage_ratio` | DECIMAL(6,2) | Pipeline / quota ratio |
+
+### Quota and Attainment
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `quota_attainment_json` | JSONB | Per-rep quota attainment data |
+
+### Cash and Unit Economics
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `monthly_burn` | DECIMAL(14,2) | Monthly cash burn rate |
+| `cash_balance` | DECIMAL(14,2) | Current cash balance |
+| `ltv_months` | INTEGER | Customer lifetime in months |
+
+## Products (`products`)
+
+Product catalog for whitespace and adoption analysis.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Unique identifier |
+| `org_id` | UUID | Organization tenant |
+| `name` | VARCHAR(200) | Product name |
+| `category` | VARCHAR(100) | Product category |
+| `annual_price` | DECIMAL(14,2) | Annual list price |
+| `arr_per_student` | DECIMAL(8,4) | ARR per student pricing |
+| `description` | TEXT | Product description |
+| `discount_floor_pct` | DECIMAL(5,2) | Minimum allowed discount |
+| `discount_max_pct` | DECIMAL(5,2) | Maximum allowed discount (default 15%) |
+| `min_deal_size` | DECIMAL(14,2) | Minimum deal size |
+| `is_active` | BOOLEAN | Whether product is currently offered |
+
+## Account Products (`account_products`)
+
+Per-account product adoption tracking.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Unique identifier |
+| `account_id` | UUID | Account (FK to `accounts`) |
+| `product_id` | UUID | Product (FK to `products`) |
+| `status` | VARCHAR(20) | `active`, `churned`, `pending` |
+| `start_date` | TIMESTAMP | Product activation date |
+| `seats_licensed` | INTEGER | Licensed seat count |
+| `seats_active` | INTEGER | Active seats |
+| `adoption_pct` | INTEGER | Adoption percentage (0-100) |
+| `contracted_arr` | DECIMAL(14,2) | Contracted ARR for this product |
+| `discount_pct` | DECIMAL(5,2) | Applied discount percentage |
+
+## Forecasting Tables
+
+### Forecast Overrides (`forecast_overrides`)
+
+Rep-level forecast assessments with PILLAR's 5-band categorization.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `opportunity_id` | UUID | Deal being assessed |
+| `owner_id` | UUID | Rep making the assessment |
+| `period` | VARCHAR(20) | Forecast period (e.g., "2025-Q2") |
+| `pillar_category` | ENUM | `Won`, `Commit`, `Probable`, `Upside`, `Projection` |
+| `amount` | DECIMAL(14,2) | Forecast amount |
+| `weighted_amount` | DECIMAL(14,2) | Probability-weighted amount |
+| `probability_pct` | INTEGER | Category probability: Won/Commit=100, Probable=50, Upside=25, Projection=15 |
+| `next_step` | TEXT | Dated deal narrative |
+| `next_step_date` | TIMESTAMP | Next step target date |
+| `exec_sponsor_engaged` | BOOLEAN | Executive sponsor engagement |
+| `confidence_rationale` | TEXT | Why this category was chosen |
+| `product_mix` | JSONB (string[]) | Products in the deal |
+
+### Forecast Snapshots (`forecast_snapshots`)
+
+Point-in-time captures for forecast accuracy tracking.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `org_id` | UUID | Organization |
+| `period` | VARCHAR(20) | Target period |
+| `snapshot_date` | TIMESTAMP | When snapshot was taken |
+| `snapshot_label` | VARCHAR(100) | Label (e.g., "Week 6 of Q2") |
+| `won_amount` | DECIMAL | Won total |
+| `commit_amount` | DECIMAL | Commit total |
+| `probable_amount` | DECIMAL | Probable total |
+| `upside_amount` | DECIMAL | Upside total |
+| `projection_amount` | DECIMAL | Projection total |
+| `weighted_total` | DECIMAL | Probability-weighted total |
+| `low_band` | DECIMAL | Won + Commit (100%) |
+| `medium_band` | DECIMAL | + Probable (50%) |
+| `high_band` | DECIMAL | + Upside (25%) |
+| `moonshot_band` | DECIMAL | + Projection (15%) |
+| `rep_breakdown` | JSONB | Per-rep data |
+| `deal_details` | JSONB | Per-deal data |
+
+### Pipeline Cohorts (`pipeline_cohorts`)
+
+Vintage-based pipeline analysis by quarter-created and quarter-closed.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `org_id` | UUID | Organization |
+| `cohort_period` | VARCHAR(20) | Quarter created (e.g., "2024-Q3") |
+| `close_period` | VARCHAR(20) | Quarter closed (null if still open) |
+| `deal_count` | INTEGER | Total deals in cohort |
+| `total_arr` | DECIMAL | Total ARR |
+| `won_count` / `won_arr` | INTEGER / DECIMAL | Won deals |
+| `lost_count` / `lost_arr` | INTEGER / DECIMAL | Lost deals |
+| `open_count` / `open_arr` | INTEGER / DECIMAL | Still open deals |
+| `win_rate_count` | DECIMAL | Win rate by count |
+| `win_rate_arr` | DECIMAL | Win rate by ARR |
+| `avg_cycle_days` | INTEGER | Average sales cycle length |

@@ -1,0 +1,89 @@
+---
+title: 'Data Sources'
+description: 'All data sources, sync cadences, and integration details'
+icon: 'database'
+---
+
+# Data Sources
+
+PILLAR ingests data from CRM systems, email/calendar platforms, district intelligence providers, and internal computation engines.
+
+## CRM Connectors
+
+Managed via the `crm_connections` table. Each org can connect one CRM provider.
+
+| Provider | Auth | Objects | Sync Cadence | Direction |
+|----------|------|---------|--------------|-----------|
+| Salesforce | OAuth 2.0 | Account, Contact, Opportunity, Lead, Task | Every 5 min (incremental) | Bidirectional |
+| HubSpot | OAuth 2.0 | Company, Contact, Deal, Ticket | Every 5 min (incremental) | Bidirectional |
+| Dynamics 365 | OAuth 2.0 | Account, Contact, Opportunity, Lead | Every 5 min (incremental) | Bidirectional |
+
+### Field Mapping
+
+CRM field mappings are stored in `crm_field_mappings` and are customizable per org. Each mapping specifies:
+
+- `pillar_table` / `pillar_field` -- Target PILLAR column
+- `crm_object` / `crm_field` -- Source CRM field
+- `transform` -- direct, lookup, formula, or picklist_map
+- `direction` -- inbound, outbound, or bidirectional
+
+Picklist value translations (e.g., PILLAR segment "Enterprise" to Salesforce "Enterprise Account") are stored in `crm_picklist_mappings`.
+
+## Email and Calendar
+
+Managed via the `integrations` table. Per-user authorization.
+
+| Provider | Auth | Data | Sync Cadence |
+|----------|------|------|--------------|
+| Google Workspace | OAuth 2.0 (per-user) | Email metadata, calendar events | Every 5 min |
+| Microsoft 365 | OAuth 2.0 (per-user) | Outlook metadata, calendar events | Every 5 min |
+
+Email body content is never stored. Only metadata (sender, recipient, timestamp, subject line) is captured as activities.
+
+## District Intelligence (Starbridge)
+
+Starbridge.ai provides 120+ buyer attributes for school districts, higher education institutions, and government entities.
+
+| Data Category | Examples | Sync |
+|---------------|----------|------|
+| Buyer Attributes | Budget, enrollment, tech spend propensity, AI adoption | On-demand + webhook |
+| Contacts (Job Changes) | Departures, new hires, promotions | Webhook (real-time) |
+| Contracts | Public contract records between buyers and vendors | On-demand |
+| Purchase Orders | Line-item procurement records | On-demand |
+| Conferences | EdTech conferences with attendee/vendor data | Periodic |
+| RFPs | Active bids and solicitations | Webhook (real-time) |
+| Documents | Board minutes, strategic plans | On-demand |
+
+Starbridge data is stored in both enrichment fields on the `accounts` table (120+ columns) and dedicated Starbridge entity tables (`starbridge_contracts`, `starbridge_rfps`, etc.).
+
+## Notifications
+
+| Provider | Type | Usage |
+|----------|------|-------|
+| Slack | Real-time | Signal routing to channels, weekly digest |
+| Email | Digest | Weekly summary, critical signal alerts |
+| Microsoft Teams | Real-time | Signal routing (alternative to Slack) |
+
+## Computed Sources (PILLAR Engine)
+
+| Computation | Refresh | Output Tables |
+|-------------|---------|---------------|
+| Scoring Engine (93 rules) | Every 5 min | `accounts` (score columns), `scoring_audit` |
+| Signal Generation | Every 5-6 hours | `signals` |
+| Forecast Snapshots | Daily | `forecast_snapshots` |
+| Pipeline Cohorts | Daily | `pipeline_cohorts` |
+| Org Metrics | On-demand | `org_metrics` |
+| TAM/SAM Calculations | On settings change | `tam_definitions`, `sam_territories` |
+
+## Sync Tracking
+
+All sync operations are logged in `connector_sync_log`:
+
+| Field | Description |
+|-------|-------------|
+| `connector_name` | Which connector ran |
+| `sync_type` | "full" or "incremental" |
+| `status` | "success", "error", or "partial" |
+| `records_synced` | Count of records processed |
+| `errors` | JSON array of error details |
+| `started_at` / `completed_at` | Timing |

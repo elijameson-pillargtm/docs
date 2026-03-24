@@ -1,0 +1,44 @@
+---
+title: 'Dashboard API'
+description: 'Command Center KPIs, weekly brief, and org-level metrics'
+icon: 'gauge'
+---
+
+# Dashboard API
+
+## Weekly Brief Data
+
+The Command Center compiles a weekly brief including:
+
+| Component | Description |
+|-----------|-------------|
+| `period_start` / `period_end` | Brief period boundaries |
+| `headline_metrics` | Key KPIs (ARR, pipeline, win rate, etc.) |
+| `top_priorities` | Ranked account priorities |
+| `renewals_next_30d` | Upcoming renewals |
+| `pipeline_summary` | Total, weighted, commit, best case pipeline |
+| `starbridge_highlights` | Notable district intelligence signals |
+
+## Org Metrics Compute
+
+```
+POST /api/org-metrics/compute
+```
+
+Triggers computation of org-level metrics (ARR waterfall, efficiency ratios, headcount metrics) and stores results in `org_metrics`.
+
+## Budget Variance
+
+```
+GET /api/budget-variance
+```
+
+Returns budget vs actual variance data for the Revenue Economics dashboard.
+
+## Territory Economics
+
+```
+GET /api/territory-economics
+```
+
+Returns territory-level P&L data including cost-to-yield ratios and headcount impact.

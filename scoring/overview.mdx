@@ -1,0 +1,81 @@
+---
+title: 'Scoring Engine Overview'
+description: 'How the PILLAR scoring engine works: 93+ rules, 8 categories, configurable weights'
+icon: 'calculator'
+---
+
+# Scoring Engine
+
+PILLAR's scoring engine evaluates every account against 93+ rules across 8 categories, producing a composite 0-100 health score. All weights are configurable per organization through the `org_scoring_profiles` and `scoring_config` tables.
+
+## Architecture
+
+1. **Context Building**: The engine assembles a `ScoringContext` for each account containing all related data: contacts, opportunities, renewals, activities, signals, products, and derived metrics
+2. **Rule Evaluation**: Each of the 93+ rules receives the context and produces a `RuleResult` with a 0-100 sub-score
+3. **Category Aggregation**: Rules are grouped into 8 categories. Each category score is a weighted average of its rule sub-scores
+4. **Composite Score**: The final score is a weighted sum of category scores
+5. **Audit Logging**: Every computation is logged to `scoring_audit` for traceability
+
+## 8 Categories
+
+| Category | Rules | Default Weight | Focus |
+|----------|-------|---------------|-------|
+| Engagement | 12 (ENG-001 to ENG-012) | 15% | Usage trends, activity volume, product adoption |
+| Fit | 12 (FIT-001 to FIT-012) | 10% | ICP alignment, segment, budget, procurement |
+| Intent | 12 (INT-001 to INT-012) | 15% | Buying signals, RFPs, grants, competitive windows |
+| Velocity | 11 (VEL-001 to VEL-011) | 10% | Deal speed, stage progression, meeting cadence |
+| Pipeline Health | 16 (PH-001 to PH-016) | 15% | Hygiene, forecast integrity, handoff compliance |
+| Relationship | 11 (REL-001 to REL-011) | 10% | Champion, exec sponsor, multi-threading |
+| Risk | 12 (RSK-001 to RSK-012) + 4 (OB-001 to OB-004) | 15% | Churn risk, budget decline, competitive threat, onboarding risk |
+| Opportunity Quality | 11 (OQ-001 to OQ-011) | 10% | Deal size, win probability, buyer readiness |
+
+## Rule Structure
+
+Every rule implements the `ScoringRule` interface:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `id` | string | Unique rule ID (e.g., "ENG-001") |
+| `name` | string | Human-readable name |
+| `category` | RuleCategory | One of 8 categories |
+| `description` | string | What the rule measures |
+| `weight` | number | Default weight (0-10) |
+| `requiredFields` | string[] | Data fields needed for evaluation |
+| `evaluate` | function | Produces a RuleResult from ScoringContext |
+
+## Rule Result
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `ruleId` | string | Rule identifier |
+| `score` | number | 0-100 sub-score |
+| `weight` | number | Rule weight |
+| `triggered` | boolean | Whether threshold conditions were met |
+| `rawValue` | string | Human-readable raw data value |
+| `metadata` | object | Additional context for debugging |
+
+## Severity Thresholds
+
+PILLAR uses calibrated thresholds that catch risk 2-3x earlier than industry benchmarks:
+
+| Level | PILLAR Threshold | Industry Standard |
+|-------|-----------------|-------------------|
+| Low | 0-20 | 0-50 |
+| Medium | 20-35 | 50-70 |
+| High | 35-55 | 70-85 |
+| Critical | 55-75+ | 85+ |
+
+## Model Version
+
+Current model version: `1.2.0-calibrated`
+
+Signal engine version: `3.0.0`
+
+## Configurable Weights
+
+Organizations can customize weights through:
+
+1. **Category weights**: Override the default 15/10/15/10/15/10/15/10 split via `org_scoring_profiles`
+2. **Rule weight overrides**: Adjust individual rule weights (0-10) per org
+3. **Scoring config table**: Fine-grained control per formula variable in `scoring_config`
+4. **ICP profiles**: Customize ICP fit scoring tiers, persona rules, and behavioral weights

@@ -1,0 +1,40 @@
+---
+title: 'Expansion Signals'
+description: 'Growth opportunity signals from whitespace, usage, grants, and strategic fit'
+icon: 'arrow-up-right-dots'
+---
+
+# Expansion Signals
+
+Expansion signals identify growth opportunities on existing accounts. These are positive signals indicating readiness to buy more.
+
+## Signal Types
+
+| Signal Type | Severity | Description |
+|-------------|----------|-------------|
+| `expansion_ready` | INFO | Expansion propensity score exceeds threshold (default: 70) |
+| `whitespace_opportunity` | INFO | Significant product whitespace detected |
+| `usage_threshold_met` | INFO | Product usage exceeded adoption threshold |
+| `cross_sell_signal` | INFO/WARNING | Cross-sell conditions met (high adoption + whitespace) |
+| `strategic_alignment` | WARNING | Starbridge: district strategic themes match product |
+| `grant_funding_available` | WARNING | Starbridge: grant funding available for relevant categories |
+| `low_adoption_risk` | WARNING | Product adoption dangerously low (risk of removal) |
+
+## Threshold Configuration
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `expansion_ready_score` | 70 | Propensity score threshold |
+| `cross_sell_min_adoption_pct` | 50 | Current product adoption must exceed this |
+| `cross_sell_max_products` | 6 | Max products before whitespace shrinks |
+
+## Recommended Actions
+
+| Signal | Typical Action |
+|--------|---------------|
+| Expansion ready | Schedule expansion discovery call, prepare whitespace analysis |
+| Whitespace opportunity | Share product roadmap, propose pilot for new modules |
+| Cross-sell signal | Propose complementary product, reference similar customer |
+| Strategic alignment | Align proposal to strategic plan language, use district themes in pitch |
+| Grant funding available | Prepare grant-aligned proposal, connect with procurement on timeline |
+| Low adoption risk | Schedule training/enablement session, assign CSM for adoption review |

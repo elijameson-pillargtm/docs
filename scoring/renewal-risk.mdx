@@ -1,0 +1,72 @@
+---
+title: 'Renewal Risk'
+description: '8-variable renewal risk model with Starbridge market context'
+icon: 'triangle-exclamation'
+---
+
+# Renewal Risk Score
+
+The renewal risk score (`renewals.risk_score`) is computed from 8 weighted variables. Higher scores indicate higher churn risk. The model version is `1.2.0-calibrated`.
+
+## 8-Variable Model
+
+| Variable | Default Weight | Input | Scoring Logic |
+|----------|---------------|-------|--------------|
+| Engagement Decay | 25% | `engagement_decay_pct` | Amplified curve: 10% drop = moderate, 35%+ = max risk |
+| Support Burden | 20% | `support_escalation_pct` | Tiered: 80%+ = 100, 60%+ = 70, scaled |
+| Contracting Lag | 15% | `contracting_lag_days` | 120+ days = 100, scaled down |
+| Exec Sponsor Gap | 10% | `exec_sponsor_active` | Binary: no sponsor = 100, active = 0 |
+| NPS Health | 10% | `nps_score` (0-10) | <6 = 100, 7 = 60, 8 = 30, 9+ = 0 |
+| Market Context | 10% | `budget_trend_yoy` (Starbridge) | Composite: budget trend (50%), tech budget % (30%), grant dependency (20%) |
+| Stakeholder Turnover | 5% | `stakeholder_turnover_count` | 0 = 0, 1 = 33, 2 = 67, 3+ = 100 |
+| Payment History | 5% | `late_payments` | 0 = 0, 1 = 30, 2 = 60, 3+ = 100 |
+
+## Market Context (Starbridge-Enhanced)
+
+When Starbridge data is available, the market context variable uses a composite:
+
+| Sub-factor | Weight | Logic |
+|------------|--------|-------|
+| Budget trend | 50% | < -5% YoY = 80, < 0% = 50, < 5% = 30, 5%+ = 0 |
+| Tech budget % of total | 30% | < 2% = 60, < 5% = 30, 5%+ = 0 |
+| Grant dependency | 20% | > 30% grant dependent = 20 risk points |
+
+When no Starbridge data is available, market context defaults to 50 (neutral).
+
+## Risk Rules (RSK-001 to RSK-012)
+
+| Rule | Name | Weight | Description |
+|------|------|--------|-------------|
+| RSK-001 | Computed renewal risk | 9 | Pass-through of renewal risk score |
+| RSK-002 | Budget decline risk | 7 | Risk from declining Starbridge budgets |
+| RSK-003 | Payment delinquency risk | 6 | Late payment patterns |
+| RSK-004 | Support escalation risk | 7 | High escalation rate and critical tickets |
+| RSK-005 | Competitive threat level | 7 | Competitor contracts, pricing pressure |
+| RSK-006 | Market context risk | 6 | Budget crises, grant dependency |
+| RSK-007 | Silent churn pattern | 9 | Compound: no activity + neutral NPS + declining usage |
+| RSK-008 | Revenue concentration risk | 8 | High ARR + high risk = urgent attention |
+| RSK-009 | Engagement decay rate | 7 | Speed of engagement decline |
+| RSK-010 | Imminent renewal risk | 9 | Approaching renewal + high risk + no save play |
+| RSK-011 | Procurement timing risk | 5 | High procurement complexity near renewal |
+| RSK-012 | NPS detractor risk | 7 | NPS <= 6 (detractor) |
+
+## Onboarding Risk Rules (OB-001 to OB-004)
+
+These rules are categorized under Risk and evaluate post-close implementation risk:
+
+| Rule | Name | Weight | Description |
+|------|------|--------|-------------|
+| OB-001 | Deal complexity score | 6 | Implementation complexity from deal size + product count |
+| OB-002 | Stakeholder depth at close | 7 | Contact breadth and quality at close |
+| OB-003 | Expectation alignment | 6 | Next steps and EB alignment on late-stage deals |
+| OB-004 | Implementation scope risk | 5 | Product count and deal size scope analysis |
+
+## Severity Classification
+
+| Score Range | Severity | Action |
+|-------------|----------|--------|
+| 0-20 | Low | Monitor |
+| 20-35 | Medium | Review in weekly cadence |
+| 35-55 | High | Proactive outreach, assign save play |
+| 55-75 | Critical | Immediate executive intervention |
+| 75+ | Critical | All-hands save effort |

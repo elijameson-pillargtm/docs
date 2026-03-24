@@ -1,0 +1,48 @@
+---
+title: 'Coverage Signals'
+description: 'Multi-threading gaps, territory imbalance, and single-threaded risk signals'
+icon: 'users-rectangle'
+---
+
+# Coverage Signals
+
+Coverage signals identify gaps in multi-threading, territory balance, and stakeholder coverage.
+
+## Signal Types
+
+| Signal Type | Severity Logic | Description |
+|-------------|---------------|-------------|
+| `coverage_gap` | CRITICAL if ratio < 1, WARNING if < 2 | Contacts per opportunity below minimum |
+| `single_threaded` | WARNING | Only 1 contact on an active opportunity |
+| `no_champion` | WARNING | No champion identified on the account |
+| `no_economic_buyer` | WARNING | No economic buyer identified on open deals |
+| `territory_imbalance` | WARNING > 20% deviation, CRITICAL > 40% | Territory load deviation from average |
+
+## Threshold Configuration
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `min_contacts_per_opp` | 3 | Minimum contacts for healthy multi-threading |
+| `single_thread_warning` | true | Fire signal when only 1 contact on an opp |
+| `territory_imbalance_warning_pct` | 20 | Deviation % for WARNING |
+| `territory_imbalance_critical_pct` | 40 | Deviation % for CRITICAL |
+
+## Relationship Rules that Drive Coverage Signals
+
+| Rule | Name | Weight | Relevance |
+|------|------|--------|-----------|
+| REL-001 | Champion identified and active | 9 | No champion = 10 score |
+| REL-002 | Executive sponsor coverage | 8 | No exec = 10 score |
+| REL-003 | Multi-threading depth | 7 | Unique buying roles count |
+| REL-009 | Buying committee completeness | 7 | Coverage of 4 key roles |
+| REL-011 | Single-thread concentration risk | 8 | 1 contact = 10 score, 0 contacts = 0 score |
+
+## Recommended Actions
+
+| Signal | Typical Action |
+|--------|---------------|
+| Coverage gap | Identify and map additional contacts, request introductions |
+| Single-threaded | Urgently multi-thread, identify at least 2 more contacts |
+| No champion | Cultivate internal advocate, identify potential champions |
+| No economic buyer | Research org chart, request introduction to budget holder |
+| Territory imbalance | Review territory assignments, rebalance account distribution |

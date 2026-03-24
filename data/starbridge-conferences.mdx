@@ -1,0 +1,43 @@
+---
+title: 'Conferences'
+description: 'Education and government technology conference intelligence'
+icon: 'people-group'
+---
+
+# Starbridge Conference Intelligence
+
+Starbridge tracks education and government technology conferences, providing vendor presence, attendee personas, and engagement opportunities.
+
+## Conference Fields (`starbridge_conferences`)
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Unique identifier |
+| `org_id` | UUID | Organization tenant |
+| `name` | VARCHAR(500) | Conference name |
+| `description` | TEXT | Conference description |
+| `start_date` | DATE | Start date |
+| `end_date` | DATE | End date |
+| `city` | VARCHAR(100) | Host city |
+| `state_code` | VARCHAR(10) | Host state |
+| `url` | VARCHAR(500) | Conference website |
+| `expected_attendee_count` | INTEGER | Expected attendees |
+| `cost_estimated_low` | DECIMAL(10,2) | Low cost estimate for participation |
+| `cost_estimated_high` | DECIMAL(10,2) | High cost estimate |
+| `expected_personas` | JSONB (string[]) | Expected attendee personas/titles |
+| `estimated_vendor_count` | INTEGER | Number of vendor exhibitors |
+| `verticals` | JSONB (string[]) | Industry verticals represented |
+| `vendor_summary` | TEXT | AI-generated vendor landscape summary |
+| `detected_vendors` | JSONB (string[]) | Known vendor attendees |
+| `starbridge_id` | VARCHAR(50) | Starbridge record ID |
+
+## Signal Generation
+
+Conference data generates `conference_engagement` signals (STARBRIDGE family, INFO severity) when a relevant conference is detected for accounts in the pipeline.
+
+## Use Cases
+
+- Identify conferences where target accounts will be present
+- Discover competitor vendor presence at events
+- Plan conference marketing strategy based on attendee personas
+- Track ROI of conference participation by linking attendee meetings to pipeline

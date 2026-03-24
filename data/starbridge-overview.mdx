@@ -1,0 +1,54 @@
+---
+title: 'Starbridge Overview'
+description: 'How Starbridge district intelligence integrates with PILLAR'
+icon: 'star'
+---
+
+# Starbridge Integration
+
+Starbridge.ai provides district intelligence for school districts, higher education institutions, and government entities. PILLAR ingests 120+ buyer attributes and stores them across account enrichment fields and dedicated entity tables.
+
+## Data Flow
+
+1. **Initial Sync**: When an account is matched by `starbridge_buyer_id` or `nces_id`, a full attribute pull enriches the account record with 120+ fields
+2. **Webhook Updates**: Real-time notifications for job changes, RFP publications, budget shifts, and document postings
+3. **On-Demand Refresh**: Manual or scheduled re-sync of buyer attributes
+4. **Signal Generation**: Starbridge data changes trigger signals in the STARBRIDGE, RENEWAL, EXPANSION, and ACCOUNT families
+
+## Data Categories
+
+| Category | Storage | Fields | Sync |
+|----------|---------|--------|------|
+| Buyer Attributes | `accounts` table columns | 80+ fields (budget, enrollment, scores, demographics) | On-demand + webhook |
+| Job Changes | `starbridge_job_changes` table | Departures, hires, promotions | Webhook (real-time) |
+| Contracts | `starbridge_contracts` table | Public contract records | On-demand |
+| Purchase Orders | `starbridge_purchase_orders` table | Line-item procurement data | On-demand |
+| Conferences | `starbridge_conferences` table | EdTech conference intelligence | Periodic |
+| RFPs | `starbridge_rfps` table | Bids and solicitations | Webhook (real-time) |
+| Documents | `starbridge_documents` table | Board minutes, strategic plans | On-demand |
+| Competitor Contracts | `competitor_contracts` table | Competitive spend intelligence | On-demand |
+
+## Scoring Impact
+
+Starbridge data feeds into multiple scoring categories:
+
+- **Fit**: Tech spend propensity (FIT-004), AI adoption (FIT-005), budget capacity (FIT-006), strategic theme match (FIT-007), procurement complexity (FIT-008), coop pathways (FIT-009), startup friendliness (FIT-011)
+- **Intent**: Grant funding (INT-003), competitive displacement window (INT-005), RFP activity (INT-007), budget trend (INT-008), strategic alignment (INT-009), hiring intent (INT-010), board discussions (INT-011)
+- **Risk**: Budget decline risk (RSK-002), market context risk (RSK-006), procurement timing risk (RSK-011)
+- **Forecast Confidence**: Procurement alignment variable (procurement_complexity, coop_pathway_exists, fiscal_year_aligned)
+- **Renewal Risk**: Market context variable (budget_trend_yoy, tech_budget_pct_of_total, grant_dependency_pct)
+
+## Signal Types from Starbridge
+
+| Signal Type | Family | Severity Logic |
+|-------------|--------|---------------|
+| `competitive_displacement_window` | PIPELINE | CRITICAL if <60d, WARNING if <180d |
+| `rfp_active` | PIPELINE | Always CRITICAL |
+| `board_discussion_relevant` | ACCOUNT | Always WARNING |
+| `strategic_alignment` | EXPANSION | Always WARNING |
+| `grant_funding_available` | EXPANSION | Always WARNING |
+| `budget_shift_detected` | RENEWAL | CRITICAL if decline >10%, WARNING if >5% |
+| `hiring_intent` | ACCOUNT | Always INFO |
+| `stakeholder_departure_starbridge` | ACCOUNT | CRITICAL if champion, WARNING otherwise |
+| `procurement_pathway_update` | STARBRIDGE | Varies |
+| `conference_engagement` | STARBRIDGE | Always INFO |

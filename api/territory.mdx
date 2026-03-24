@@ -1,0 +1,49 @@
+---
+title: 'Territory API'
+description: 'TAM/SAM territory management and equity tracking'
+icon: 'map'
+---
+
+# Territory API
+
+## Territory Settings
+
+```
+GET /api/settings/territories
+POST /api/settings/territories
+```
+
+Manages territory definitions, assignments, and SAM territory configuration.
+
+## Territory Costs
+
+```
+GET /api/settings/territory-costs
+POST /api/settings/territory-costs
+```
+
+Manages per-territory cost data for P&L calculations (fully-loaded rep costs, travel, tools, etc.).
+
+## TAM/SAM Data
+
+```
+GET /api/tam-sam
+```
+
+Returns the full TAM/SAM analysis including:
+- TAM definitions by sector
+- SAM territories with penetration metrics
+- ICP targets with tier assignments
+- Year-over-year growth tracking
+
+## Role Economics
+
+```
+GET /api/settings/role-economics
+POST /api/settings/role-economics
+```
+
+Manages role-based economics for headcount scenario planning:
+- Base salary, OTE, benefits, and fully-loaded cost per role
+- Quota assignment per role
+- Ramp timeline and productivity assumptions

@@ -1,0 +1,50 @@
+---
+title: 'Forecast API'
+description: 'Forecast overrides, snapshots, and pipeline cohort analysis'
+icon: 'chart-mixed'
+---
+
+# Forecast API
+
+## Forecast Data
+
+```
+GET /api/forecast
+POST /api/forecast
+```
+
+### GET
+Returns the current forecast view including:
+- Per-rep forecast summaries with quota attainment
+- 5-band probability-weighted totals (Won, Commit, Probable, Upside, Projection)
+- Low/Medium/High/Moonshot bands
+- Historical snapshot comparisons
+- Pipeline cohort vintage analysis
+
+### POST
+Creates or updates forecast overrides for specific opportunities in a period.
+
+## Forecast Override Object
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `opportunity_id` | UUID | Target deal |
+| `period` | string | Forecast period (e.g., "2025-Q2") |
+| `pillar_category` | enum | Won, Commit, Probable, Upside, Projection |
+| `amount` | decimal | Forecast amount |
+| `weighted_amount` | decimal | Auto-calculated probability-weighted amount |
+| `probability_pct` | integer | Category probability (100/100/50/25/15) |
+| `next_step` | string | Dated deal narrative |
+| `exec_sponsor_engaged` | boolean | Executive engagement status |
+| `confidence_rationale` | string | Why this category was assigned |
+| `product_mix` | string[] | Products in the deal |
+
+## Probability Weights
+
+| Category | Weight |
+|----------|--------|
+| Won | 100% |
+| Commit | 100% |
+| Probable | 50% |
+| Upside | 25% |
+| Projection | 15% |

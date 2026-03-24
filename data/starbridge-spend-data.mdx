@@ -1,0 +1,79 @@
+---
+title: 'Spend Data'
+description: 'Starbridge contracts and purchase order intelligence'
+icon: 'file-invoice-dollar'
+---
+
+# Starbridge Spend Data
+
+Starbridge provides publicly-available contract records and purchase order data for buyer organizations. This data powers competitive intelligence, displacement window signals, and procurement pathway analysis.
+
+## Contracts (`starbridge_contracts`)
+
+Public contract records between buyers and vendors.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Unique identifier |
+| `org_id` | UUID | Organization tenant |
+| `account_id` | UUID | Related account (FK to `accounts`) |
+| `title` | VARCHAR(500) | Contract title |
+| `summary` | TEXT | Contract summary |
+| `effective_date` | DATE | Contract start date |
+| `expiration_date` | DATE | Contract expiration date |
+| `status` | VARCHAR(50) | Contract status |
+| `total_amount` | DECIMAL(14,2) | Total contract value |
+| `buyer_name` | VARCHAR(300) | Buying organization |
+| `seller_name` | VARCHAR(300) | Selling vendor |
+| `starbridge_id` | VARCHAR(50) | Starbridge record ID |
+
+## Purchase Orders (`starbridge_purchase_orders`)
+
+Individual purchase order line items from public procurement records.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Unique identifier |
+| `org_id` | UUID | Organization tenant |
+| `account_id` | UUID | Related account (FK to `accounts`) |
+| `name` | VARCHAR(500) | Line item description |
+| `quantity` | INTEGER | Quantity ordered |
+| `unit_price` | DECIMAL(12,2) | Price per unit |
+| `discount` | DECIMAL(12,2) | Discount amount |
+| `total_amount` | DECIMAL(14,2) | Total line amount |
+| `effective_date` | DATE | Purchase date |
+| `renewal_date` | DATE | Next renewal date |
+| `buyer_name` | VARCHAR(300) | Buying organization |
+| `seller_name` | VARCHAR(300) | Selling vendor |
+| `starbridge_id` | VARCHAR(50) | Starbridge record ID |
+
+## Competitor Contracts (`competitor_contracts`)
+
+Competitive intelligence derived from Starbridge spend data.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Unique identifier |
+| `account_id` | UUID | Target account |
+| `competitor_name` | VARCHAR(200) | Competitor vendor name |
+| `product_category` | VARCHAR(200) | Product/service category |
+| `contract_amount` | DECIMAL(12,2) | Contract value |
+| `contract_start` | TIMESTAMP | Contract start date |
+| `contract_end` | TIMESTAMP | Contract expiration date |
+| `procurement_method` | VARCHAR(100) | How it was procured (RFP, coop, sole source) |
+| `source_document` | VARCHAR(500) | Source document URL |
+| `displacement_eligible` | BOOLEAN | Whether PILLAR can compete for this contract |
+| `synced_at` | TIMESTAMP | Last sync timestamp |
+
+## Signal Generation
+
+Spend data generates:
+
+- **`competitive_displacement_window`** (PIPELINE): When a competitor contract is within the `competitor_contract_expiry_days` threshold (default: 120 days). CRITICAL if <60 days to expiry, WARNING if <180 days.
+- **`competitor_contract_expiring`** (ACCOUNT): When tracked competitor contracts approach renewal.
+
+## Scoring Impact
+
+- **INT-005**: Competitive displacement window -- scores 100 when competitor expires in <=30 days
+- **RSK-005**: Competitive threat level -- factors in competitor presence, price ratio, and expiry timing
+- **OQ-003**: Competitive positioning strength -- evaluates whether a competitive strategy exists

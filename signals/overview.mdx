@@ -1,0 +1,90 @@
+---
+title: 'Signal Taxonomy Overview'
+description: '8 signal families, 30+ signal types, 7-state lifecycle'
+icon: 'bolt'
+---
+
+# Signal Taxonomy
+
+PILLAR generates signals when scoring outputs cross configurable thresholds or when external events (Starbridge webhooks) are detected. Signals are the primary action-driving mechanism in the platform.
+
+## Signal Engine
+
+- **Version**: 3.0.0
+- **Evaluation Frequency**: Every 5-6 hours (scoring-based), real-time (webhook-based)
+- **Output**: `GeneratedSignal` objects written to the `signals` table
+
+## 8 Signal Families
+
+| Family | Signal Count | Description |
+|--------|-------------|-------------|
+| RENEWAL | 7 types | Churn risk indicators from engagement, stakeholders, support, contracts |
+| PIPELINE | 7+ types | Deal health, forecast issues, handoff compliance, onboarding risk |
+| EXPANSION | 5 types | Growth opportunities from whitespace, usage, grants, strategic fit |
+| ACCOUNT | 4+ types | Account-level changes from contacts, competitors, meetings |
+| COVERAGE | 3 types | Multi-threading gaps, territory imbalance, single-threaded risk |
+| WORKFLOW | 3 types | SLA compliance, deal on/off track status |
+| STARBRIDGE | 2+ types | District intelligence updates (conferences, procurement) |
+| ECONOMICS | 6 types | Financial health: budget, unit economics, S&M efficiency |
+
+## 7-State Lifecycle
+
+```
+PENDING → ACTIVE → ACKNOWLEDGED → IN_PROGRESS → RESOLVED
+                                                → EXPIRED
+                → SUPPRESSED
+```
+
+Terminal states: RESOLVED, EXPIRED, SUPPRESSED
+
+## Severity Levels
+
+| Severity | Description | Routing |
+|----------|-------------|---------|
+| CRITICAL | Immediate action required | Slack notification, email alert, top of signal feed |
+| WARNING | Attention needed within 24-48 hours | Signal feed, weekly digest |
+| INFO | Informational, no immediate action | Signal feed only |
+
+## Recomputation Schedule
+
+| Schedule | Interval | Families |
+|----------|----------|---------|
+| Scoring refresh | Every 6 hours | RENEWAL, PIPELINE, EXPANSION |
+| Account health | Every 24 hours | ACCOUNT, COVERAGE |
+| Economics refresh | Every 24 hours | ECONOMICS |
+| Starbridge sync | Every 6 hours | STARBRIDGE (account data) |
+| Starbridge real-time | Webhook-driven | STARBRIDGE (RFPs, grants, departures) |
+
+## Signal Anatomy
+
+Every generated signal includes:
+
+| Component | Description |
+|-----------|-------------|
+| `signal_type` | Machine-readable type identifier |
+| `title` | Human-readable title |
+| `explanation_text` | Plain-language explanation of what was detected |
+| `evidence_refs` | JSON object with supporting metrics |
+| `recommended_action` | AI-generated recommended next action |
+| `score_value` | Numeric score that triggered the signal |
+| `severity` | CRITICAL, WARNING, or INFO |
+| `confidence` | 0-100 confidence in the signal |
+| `model_version` | Engine version that generated it |
+
+## Default Thresholds
+
+Key configurable thresholds:
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `renewal_critical_score` | 85 | Score for CRITICAL renewal signals |
+| `renewal_warning_score` | 50 | Score for WARNING renewal signals |
+| `pipeline_critical_score` | 70 | Hygiene score for CRITICAL pipeline signals |
+| `pipeline_warning_score` | 50 | Hygiene score for WARNING pipeline signals |
+| `expansion_ready_score` | 70 | Propensity for expansion signals |
+| `min_contacts_per_opp` | 3 | Minimum contacts for coverage |
+| `meeting_gap_days` | 30 | Days before meeting gap signal |
+| `push_count_warning` | 2 | Close date pushes for WARNING |
+| `push_count_critical` | 3 | Close date pushes for CRITICAL |
+| `stage_stagnation_days` | 30 | Days in stage before stagnation signal |
+| `competitor_contract_expiry_days` | 120 | Days before competitor contract expires |

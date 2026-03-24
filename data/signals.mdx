@@ -1,0 +1,82 @@
+---
+title: 'Signals'
+description: 'Signal data structure, lifecycle states, and family taxonomy'
+icon: 'bolt'
+---
+
+# Signals
+
+The `signals` table stores all generated signals. Each signal has a 7-state lifecycle, belongs to one of 8 families, and carries severity, evidence, and recommended actions.
+
+## Fields
+
+| Field | Type | Source | Description |
+|-------|------|--------|-------------|
+| `id` | UUID | System | Unique identifier |
+| `signal_type` | VARCHAR(100) | Engine | Signal type identifier (e.g., `engagement_decay`, `rfp_active`) |
+| `family` | ENUM | Engine | Signal family: `RENEWAL`, `EXPANSION`, `PIPELINE`, `ACCOUNT`, `COVERAGE`, `WORKFLOW`, `STARBRIDGE`, `GROWTH` |
+| `severity` | ENUM | Engine | `CRITICAL`, `WARNING`, `INFO` |
+| `state` | ENUM | System | Lifecycle state (see below) |
+| `score_value` | INTEGER | Engine | Numeric score that triggered the signal |
+| `title` | VARCHAR(500) | Engine | Human-readable signal title |
+| `explanation_text` | TEXT | Engine | Plain-language explanation of what was detected |
+| `evidence_refs` | JSONB | Engine | Supporting metrics and data references |
+| `recommended_action` | TEXT | Engine | AI-generated recommended next action |
+| `object_type` | VARCHAR(20) | Engine | `account`, `opportunity`, `renewal`, `contact`, `user` |
+| `object_id` | UUID | Engine | ID of the primary object |
+| `account_id` | UUID | Engine | Related account (FK to `accounts`) |
+| `renewal_id` | UUID | Engine | Related renewal (FK to `renewals`), nullable |
+| `opportunity_id` | UUID | Engine | Related opportunity (FK to `opportunities`), nullable |
+| `owner_id` | UUID | Engine | Account/deal owner (FK to `users`) |
+| `owner_recommendation` | VARCHAR(255) | Engine | Suggested action for the owner |
+| `recommended_play_id` | UUID | Engine | Suggested play template to execute |
+| `acknowledged_by` | UUID | User | Who acknowledged the signal |
+| `acknowledged_at` | TIMESTAMP | System | When acknowledged |
+| `resolved_at` | TIMESTAMP | System | When resolved |
+| `expires_at` | TIMESTAMP | Engine | Auto-expiration timestamp |
+| `model_version` | VARCHAR(50) | Engine | Scoring model version that generated this signal |
+| `confidence` | INTEGER | Engine | Confidence level (0-100) |
+| `created_at` | TIMESTAMP | System | Signal creation time |
+| `updated_at` | TIMESTAMP | System | Last state change time |
+
+## 7-State Lifecycle
+
+```
+PENDING → ACTIVE → ACKNOWLEDGED → IN_PROGRESS → RESOLVED
+                                                → EXPIRED
+                → SUPPRESSED
+```
+
+| State | Description | Valid Transitions |
+|-------|-------------|-------------------|
+| `PENDING` | Created, awaiting activation | ACTIVE, SUPPRESSED |
+| `ACTIVE` | Live and actionable | ACKNOWLEDGED, RESOLVED, EXPIRED, SUPPRESSED |
+| `ACKNOWLEDGED` | User has seen and accepted | IN_PROGRESS, RESOLVED, EXPIRED, SUPPRESSED |
+| `IN_PROGRESS` | Work underway to address | RESOLVED, EXPIRED |
+| `RESOLVED` | Issue addressed (terminal) | None |
+| `EXPIRED` | Signal expired without action (terminal) | None |
+| `SUPPRESSED` | Manually suppressed (terminal) | None |
+
+## Signal Families
+
+| Family | Signal Types | Description |
+|--------|-------------|-------------|
+| RENEWAL | engagement_decay, stakeholder_turnover, contracting_lag, exec_sponsor_gap, support_burden, nps_decline, budget_shift_detected | Churn risk indicators |
+| PIPELINE | pipeline_hygiene_alert, forecast_confidence_drop, close_date_pushed, competitive_displacement_window, rfp_active, handoff_incomplete, onboarding_risk_high | Deal health and forecast issues |
+| EXPANSION | whitespace_opportunity, usage_threshold_met, cross_sell_signal, strategic_alignment, grant_funding_available | Growth opportunities |
+| ACCOUNT | stakeholder_departure_starbridge, board_discussion_relevant, hiring_intent, meeting_gap, contact_disengagement | Account-level changes |
+| COVERAGE | coverage_gap, territory_imbalance, single_threaded | Multi-threading and territory issues |
+| WORKFLOW | sla_breach_warning, deal_off_track, deal_on_track | Process compliance |
+| STARBRIDGE | conference_engagement, procurement_pathway_update | District intelligence updates |
+| ECONOMICS | budget_overrun, territory_below_breakeven, headcount_plan_risk, unit_economics_degradation, retention_vs_acquisition, sm_efficiency_warning | Financial health signals |
+
+## Indexes
+
+| Index | Columns | Purpose |
+|-------|---------|---------|
+| `signals_family_idx` | `family` | Filter by family |
+| `signals_severity_idx` | `severity` | Filter by severity |
+| `signals_state_idx` | `state` | Filter active signals |
+| `signals_object_idx` | `object_type, object_id` | Lookup by entity |
+| `signals_type_idx` | `signal_type` | Filter by type |
+| `signals_account_idx` | `account_id` | Filter by account |

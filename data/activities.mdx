@@ -1,0 +1,61 @@
+---
+title: 'Activities'
+description: 'Activity tracking for calls, emails, meetings, and notes'
+icon: 'clock'
+---
+
+# Activities
+
+The `activities` table records all interactions on accounts, contacts, and opportunities. Activities are synced from CRM and email/calendar integrations. Email body content is never stored -- only metadata.
+
+## Fields
+
+| Field | Type | Source | Description |
+|-------|------|--------|-------------|
+| `id` | UUID | System | Unique identifier |
+| `type` | VARCHAR(50) | CRM/System | Activity type: `call`, `email`, `meeting`, `note` |
+| `subject` | VARCHAR(500) | CRM Sync | Activity subject line |
+| `description` | TEXT | CRM Sync | Activity description (no email body content) |
+| `account_id` | UUID | System | Related account (FK to `accounts`) |
+| `contact_id` | UUID | System | Related contact (FK to `contacts`) |
+| `opportunity_id` | UUID | System | Related opportunity (FK to `opportunities`) |
+| `user_id` | UUID | System | User who performed the activity (FK to `users`) |
+| `occurred_at` | TIMESTAMP | CRM/System | When the activity occurred |
+| `duration_minutes` | INTEGER | CRM/System | Duration in minutes (for calls/meetings) |
+| `notes` | TEXT | Manual | Free-text notes |
+| `crm_external_id` | VARCHAR(100) | CRM | External CRM activity ID |
+| `created_at` | TIMESTAMP | System | Record creation time |
+
+## Activity Types
+
+| Type | Source | Description |
+|------|--------|-------------|
+| `call` | CRM Sync | Phone calls logged in CRM |
+| `email` | Google/Microsoft Sync | Email metadata (subject, timestamp, participants) |
+| `meeting` | Calendar Sync | Calendar events and meetings |
+| `note` | CRM Sync | Manual notes and comments |
+
+## Privacy
+
+- Email body content is **never** stored
+- Only email metadata (sender, recipient, timestamp, subject) is captured
+- Email sync requires per-user OAuth authorization
+- Calendar sync captures event titles and participants, not descriptions
+
+## Scoring Impact
+
+Activities are consumed by multiple scoring rules:
+
+- **ENG-002**: Days since last activity
+- **ENG-003**: Activity volume (30 day)
+- **ENG-004**: Email and meeting engagement ratio
+- **ENG-007**: Activity trend acceleration (30d vs prior 60d)
+- **VEL-003**: Meeting cadence
+- **VEL-004**: Engagement response time
+
+## Indexes
+
+| Index | Columns | Purpose |
+|-------|---------|---------|
+| `activities_account_idx` | `account_id` | Filter by account |
+| `activities_date_idx` | `occurred_at` | Sort by date |

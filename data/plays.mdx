@@ -1,0 +1,79 @@
+---
+title: 'Plays'
+description: 'Signal-triggered playbooks with task-based execution tracking'
+icon: 'play'
+---
+
+# Plays
+
+The `plays` table stores signal-triggered playbooks. When a signal fires, a play can be recommended and executed as a series of ordered tasks.
+
+## Play Fields
+
+| Field | Type | Source | Description |
+|-------|------|--------|-------------|
+| `id` | UUID | System | Unique identifier |
+| `name` | VARCHAR(300) | Template | Play name |
+| `template_id` | VARCHAR(100) | System | Template identifier for play type |
+| `state` | ENUM | System | Play lifecycle state |
+| `trigger_signal_id` | UUID | System | Signal that triggered this play (FK to `signals`) |
+| `account_id` | UUID | System | Target account (FK to `accounts`) |
+| `owner_id` | UUID | System | Play owner/executor (FK to `users`) |
+| `sla_hours` | INTEGER | Template | SLA for play completion (default: 72 hours) |
+| `started_at` | TIMESTAMP | System | When execution started |
+| `completed_at` | TIMESTAMP | System | When all tasks completed |
+| `created_at` | TIMESTAMP | System | Record creation time |
+
+## Play States
+
+| State | Description |
+|-------|-------------|
+| `DRAFT` | Created but not yet started |
+| `ACTIVE` | In progress, tasks being executed |
+| `PAUSED` | Temporarily paused |
+| `COMPLETED` | All tasks finished |
+| `ABANDONED` | Play canceled before completion |
+
+## Play Tasks
+
+The `play_tasks` table stores ordered steps within a play.
+
+| Field | Type | Source | Description |
+|-------|------|--------|-------------|
+| `id` | UUID | System | Unique identifier |
+| `play_id` | UUID | System | Parent play (FK to `plays`, cascade delete) |
+| `title` | VARCHAR(300) | Template | Task title |
+| `description` | TEXT | Template | Task instructions |
+| `order_num` | INTEGER | Template | Execution order (1-based) |
+| `completed` | BOOLEAN | User | Whether the task is done |
+| `completed_at` | TIMESTAMP | System | Completion timestamp |
+| `assigned_to` | UUID | System | Task assignee (FK to `users`) |
+
+## Task System
+
+The platform also has a general `tasks` table for platform-driven actions (not just play tasks):
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Unique identifier |
+| `org_id` | UUID | Organization tenant |
+| `title` | VARCHAR(500) | Task title |
+| `description` | TEXT | Task details |
+| `source_type` | ENUM | `nba`, `signal`, `play`, `mql_handoff`, `manual` |
+| `source_id` | VARCHAR(200) | ID of triggering entity |
+| `source_context` | JSONB | Snapshot of source data at creation |
+| `account_id` | UUID | Related account |
+| `contact_id` | UUID | Related contact |
+| `lead_id` | UUID | Related lead |
+| `opportunity_id` | UUID | Related opportunity |
+| `renewal_id` | UUID | Related renewal |
+| `assigned_to` | UUID | Assignee |
+| `assigned_by` | UUID | Who created the task |
+| `status` | ENUM | `pending`, `in_progress`, `completed`, `dismissed` |
+| `priority` | ENUM | `critical`, `high`, `medium`, `low` |
+| `category` | ENUM | `call`, `email`, `meeting`, `review`, `play_execution`, `lead_qualification`, `escalation` |
+| `due_date` | TIMESTAMP | Due date |
+| `completed_at` | TIMESTAMP | Completion timestamp |
+| `dismissed_at` | TIMESTAMP | Dismissal timestamp |
+| `dismissed_reason` | TEXT | Why the task was dismissed |
+| `role_context` | VARCHAR(50) | Which role view created this task |

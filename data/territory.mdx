@@ -1,0 +1,92 @@
+---
+title: 'Territory'
+description: 'TAM/SAM territory modeling, ICP targets, and equity tracking'
+icon: 'map'
+---
+
+# Territory
+
+PILLAR provides three-tier territory modeling: TAM definitions, SAM territories, and ICP targets. These tables power the Territory dashboard with equity analysis and P&L tracking.
+
+## TAM Definitions (`tam_definitions`)
+
+Top-level Total Addressable Market segments.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Unique identifier |
+| `org_id` | UUID | Organization tenant |
+| `name` | VARCHAR(200) | TAM segment name (e.g., "Public K-12 Districts") |
+| `sector` | VARCHAR(100) | Sector: K-12, Higher Ed, Charter, Municipality |
+| `total_institutions` | INTEGER | Total institutions in this TAM |
+| `total_enrollment` | INTEGER | Aggregate student enrollment |
+| `avg_contract_value` | DECIMAL(14,2) | Average contract value |
+| `tam_arr` | DECIMAL(14,2) | Total ARR potential (institutions x avg contract) |
+| `current_customers` | INTEGER | Currently active customers |
+| `former_customers` | INTEGER | Previously churned customers |
+| `remaining_tam` | INTEGER | Untapped institutions |
+| `fiscal_year` | VARCHAR(10) | Fiscal year (e.g., "FY25") |
+| `notes` | TEXT | Additional context |
+
+## SAM Territories (`sam_territories`)
+
+Serviceable Addressable Market per territory, assigned to an AE/CSM.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Unique identifier |
+| `org_id` | UUID | Organization tenant |
+| `tam_id` | UUID | Parent TAM definition |
+| `territory_name` | VARCHAR(200) | Territory name |
+| `owner_id` | UUID | Territory owner (AE/CSM) |
+| `fiscal_year` | VARCHAR(10) | Fiscal year |
+| `total_institutions` | INTEGER | Total institutions in territory |
+| `total_enrollment` | INTEGER | Aggregate enrollment |
+| `icp_accounts` | INTEGER | ICP-qualified account count |
+| `icp_enrollment` | INTEGER | ICP accounts' enrollment |
+| `avg_contract_value` | DECIMAL(14,2) | Average contract value |
+| `sam_arr` | DECIMAL(14,2) | SAM ARR potential |
+| `customer_count` | INTEGER | Active customers |
+| `customer_arr` | DECIMAL(14,2) | Customer ARR |
+| `former_customer_count` | INTEGER | Former customers |
+| `prospect_count` | INTEGER | Prospects (never been customer) |
+| `new_logo_count` | INTEGER | New logos won this fiscal year |
+| `yr1_acv_achieved` | DECIMAL(14,2) | Year 1 ACV achieved |
+| `penetration_pct` | DECIMAL(5,2) | yr1_acv / sam_arr |
+| `accounts_sold_pct` | DECIMAL(5,2) | customers / icp_accounts |
+| `prev_year_acv` | DECIMAL(14,2) | Prior year ACV |
+| `prev_year_customer_count` | INTEGER | Prior year customer count |
+| `yoy_growth_pct` | DECIMAL(5,2) | Year-over-year growth |
+| `icp_tier_breakdown` | JSONB | Breakdown by ICP tier |
+
+## ICP Targets (`icp_targets`)
+
+Individual ICP accounts within a territory for granular tracking.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Unique identifier |
+| `sam_territory_id` | UUID | Parent SAM territory |
+| `account_id` | UUID | Linked PILLAR account (null if not in CRM) |
+| `institution_name` | VARCHAR(300) | Institution name |
+| `state` | VARCHAR(10) | US state code |
+| `enrollment` | INTEGER | Student enrollment |
+| `icp_score` | INTEGER | ICP fit score |
+| `icp_tier` | VARCHAR(20) | Tier assignment (Tier 1, Tier 2, etc.) |
+| `status` | VARCHAR(20) | `customer`, `former_customer`, `prospect` |
+| `current_arr` | DECIMAL(14,2) | Current ARR if customer |
+| `estimated_potential_arr` | DECIMAL(14,2) | Estimated potential ARR |
+| `nces_id` | VARCHAR(20) | NCES identifier |
+| `district_type` | VARCHAR(50) | District type classification |
+| `notes` | TEXT | Additional context |
+
+## Basic Territories (`territories`)
+
+Simple territory assignment table for CRM-synced territories.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Unique identifier |
+| `name` | VARCHAR(200) | Territory name |
+| `owner_id` | UUID | Territory owner |
+| `region` | VARCHAR(200) | Region grouping |

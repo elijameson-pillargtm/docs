@@ -1,0 +1,37 @@
+---
+title: 'Accounts API'
+description: 'Account detail, health scores, and related entities'
+icon: 'building'
+---
+
+# Accounts API
+
+## Account Detail
+
+```
+GET /api/accounts/[id]
+```
+
+Returns the full account record including:
+- All 100+ account fields
+- Scoring outputs (health, priority, risk, expansion, whitespace)
+- Starbridge enrichment data
+- Related contacts, opportunities, renewals, signals
+
+## Account Scoring
+
+Account scores are computed by the scoring engine and stored directly on the account record. The scoring engine runs every 5 minutes.
+
+## Related Data
+
+The account detail view aggregates:
+
+| Relation | Description |
+|----------|-------------|
+| Contacts | All contacts with buying roles and engagement scores |
+| Opportunities | Open and historical deals with hygiene/confidence scores |
+| Renewals | Active and historical renewals with risk scores |
+| Signals | All signals associated with the account |
+| Activities | Recent activity history |
+| Products | Account products with adoption metrics |
+| Competitor Contracts | Starbridge competitive intelligence |

@@ -1,0 +1,67 @@
+---
+title: 'Blueprint API'
+description: 'GTM maturity assessment, module activation, and readiness tracking'
+icon: 'clipboard-check'
+---
+
+# Blueprint API
+
+The Blueprint is PILLAR's 142-item GTM maturity diagnostic across 5 pillars and 5 modules.
+
+## Assessment Framework
+
+### 5 Pillars
+- Strategy
+- People
+- Process
+- Systems
+- Metrics
+
+### 5 Modules
+- Data
+- Insights
+- Signals
+- Governance
+- Workflow
+
+### 4 Maturity Tiers
+- Foundation
+- Emerging
+- Mature
+- Advanced
+
+## Assessment Items
+
+```
+GET /api/blueprint/items (via blueprint_items table)
+```
+
+Returns the 142-item framework. Each item belongs to a pillar, category, and module. Items are scored 0/1/2.
+
+## Assessment Management
+
+Assessments are stored in `blueprint_assessments` with individual responses in `blueprint_responses`. Each org can have multiple assessments; only one is marked `is_current`.
+
+### Assessment Output
+
+| Field | Description |
+|-------|-------------|
+| `total_score` | Sum of all item scores |
+| `total_items` | Number of items assessed |
+| `overall_pct` | Score as percentage of maximum |
+| `tier` | Computed maturity tier |
+| `pillar_scores` | Per-pillar score breakdown (JSONB) |
+| `module_readiness` | Per-module readiness percentages (JSONB) |
+
+## Module Activation
+
+Managed via `blueprint_module_activations`:
+
+| Status | Description |
+|--------|-------------|
+| `inactive` | Module not yet activated |
+| `activating` | Module being onboarded |
+| `active` | Module live and operational |
+| `suspended` | Module temporarily paused |
+
+All state changes are logged in `blueprint_activation_log` for full audit trail.

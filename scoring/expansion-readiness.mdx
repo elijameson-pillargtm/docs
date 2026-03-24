@@ -1,0 +1,59 @@
+---
+title: 'Expansion Readiness'
+description: 'Expansion propensity scoring with 8 variables and Starbridge enhancement'
+icon: 'arrow-up-right-dots'
+---
+
+# Expansion Propensity Score
+
+The expansion propensity score (`accounts.expansion_propensity`) measures the likelihood of an account expanding its purchase. Higher = more likely to expand. Uses 8 weighted variables.
+
+## 8-Variable Model
+
+| Variable | Default Weight | Input | Scoring Logic |
+|----------|---------------|-------|--------------|
+| Whitespace | 20% | `whitespace_pct` | Direct pass-through (0-100) |
+| Usage Depth | 15% | `usage_depth` | Direct pass-through (0-100) |
+| NPS Health | 10% | `nps_score` | 9+ = 100, 8 = 70, 7 = 40, <7 = 10 |
+| Champion Status | 10% | `champion_active` | Active = 100, None = 10 |
+| Cross-sell Signals | 10% | Signal count | 3+ = 100, 2 = 66, 1 = 33, 0 = 0 |
+| Budget Available | 10% | `budget_available` | Yes = 80, No = 20 |
+| Tech Spend Propensity | 15% | Starbridge `tech_spend_propensity` | Direct pass-through, 50 if no data |
+| Strategic Theme Match | 10% | Starbridge strategic alignment | Match = 80 (+ 20 if grant available), No match = 10 |
+
+## Intent Rules (INT-001 to INT-012)
+
+The Intent category drives expansion signal detection:
+
+| Rule | Name | Weight | Description |
+|------|------|--------|-------------|
+| INT-001 | Cross-sell signal volume | 8 | Active expansion signals on the account |
+| INT-002 | Budget availability confirmed | 7 | Budget confirmed with trend adjustment |
+| INT-003 | Grant funding opportunity | 7 | Starbridge grant funding creates time-bound windows |
+| INT-004 | Product whitespace | 6 | Catalog gap percentage |
+| INT-005 | Competitive displacement window | 8 | Competitor contract expiring soon |
+| INT-006 | MQL volume indicator | 6 | Multiple MQLs from the account |
+| INT-007 | RFP activity detected | 9 | Active RFP is strongest intent signal |
+| INT-008 | Budget growth trend | 6 | YoY budget trajectory from Starbridge |
+| INT-009 | Strategic theme match | 6 | District priorities align with product |
+| INT-010 | Hiring intent signal | 5 | Starbridge detects relevant hiring |
+| INT-011 | Board discussion relevance | 5 | Product mentions in board discussions |
+| INT-012 | Demo or trial requested | 8 | Direct buying intent from demo requests |
+
+## Velocity Rules (VEL-001 to VEL-011)
+
+Velocity indicates how fast expansion deals progress:
+
+| Rule | Name | Weight | Description |
+|------|------|--------|-------------|
+| VEL-001 | Deal stage velocity | 8 | Days in stage relative to median |
+| VEL-002 | Close date slippage | 7 | Push count (0 = 100, 3+ = 5) |
+| VEL-003 | Meeting cadence | 7 | Meetings per 30 days |
+| VEL-004 | Engagement response time | 6 | Activity density in last 14 days |
+| VEL-005 | Pipeline stage progression | 7 | Stage advancement and backward movement |
+| VEL-006 | Score momentum (7d) | 5 | 7-day score change |
+| VEL-007 | Renewal proximity urgency | 7 | Days to renewal |
+| VEL-008 | Next step clarity | 6 | Proportion of deals with next steps |
+| VEL-009 | Contracting momentum | 6 | Contract activity progress |
+| VEL-010 | Score momentum (30d) | 5 | 30-day score change |
+| VEL-011 | Opportunity probability trend | 6 | Current deal probability |
