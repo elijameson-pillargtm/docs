@@ -8,7 +8,7 @@ icon: 'receipt'
 
 Starbridge provides publicly-available contract records and purchase order data for buyer organizations. This data powers competitive intelligence, displacement window signals, and procurement pathway analysis.
 
-## Contracts (`starbridge_contracts`)
+## Contracts (starbridge\_contracts)
 
 Public contract records between buyers and vendors.
 
@@ -27,7 +27,7 @@ Public contract records between buyers and vendors.
 | `seller_name` | VARCHAR(300) | Selling vendor |
 | `starbridge_id` | VARCHAR(50) | Starbridge record ID |
 
-## Purchase Orders (`starbridge_purchase_orders`)
+## Purchase Orders (starbridge\_purchase\_orders)
 
 Individual purchase order line items from public procurement records.
 
@@ -47,7 +47,7 @@ Individual purchase order line items from public procurement records.
 | `seller_name` | VARCHAR(300) | Selling vendor |
 | `starbridge_id` | VARCHAR(50) | Starbridge record ID |
 
-## Competitor Contracts (`competitor_contracts`)
+## Competitor Contracts (competitor\_contracts)
 
 Competitive intelligence derived from Starbridge spend data.
 
@@ -69,11 +69,11 @@ Competitive intelligence derived from Starbridge spend data.
 
 Spend data generates:
 
-- **`competitive_displacement_window`** (PIPELINE): When a competitor contract is within the `competitor_contract_expiry_days` threshold (default: 120 days). CRITICAL if <60 days to expiry, WARNING if <180 days.
+- **competitive_displacement_window** (PIPELINE): When a competitor contract is within the competitor_contract_expiry_days threshold (default: 120 days). CRITICAL if under 60 days to expiry, WARNING if under 180 days.
 - **`competitor_contract_expiring`** (ACCOUNT): When tracked competitor contracts approach renewal.
 
 ## Scoring Impact
 
-- **INT-005**: Competitive displacement window -- scores 100 when competitor expires in <=30 days
+- **INT-005**: Competitive displacement window -- scores 100 when competitor expires within 30 days
 - **RSK-005**: Competitive threat level -- factors in competitor presence, price ratio, and expiry timing
 - **OQ-003**: Competitive positioning strength -- evaluates whether a competitive strategy exists
