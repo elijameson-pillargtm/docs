@@ -2,8 +2,8 @@
   "$schema": "https://mintlify.com/schema.json",
   "name": "PILLAR Data Reference",
   "logo": {
-    "dark": "/logo/pillar-dark.png",
-    "light": "/logo/pillar-light.png"
+    "dark": "/logo/pillar-dark.svg",
+    "light": "/logo/pillar-light.svg"
   },
   "favicon": "/favicon.svg",
   "colors": {
@@ -16,26 +16,53 @@
     }
   },
   "topbarLinks": [
-    { "name": "App", "url": "https://app.pillargtm.com" }
+    {
+      "name": "App",
+      "url": "https://app.pillargtm.com"
+    }
   ],
   "topbarCtaButton": {
     "name": "Get Started",
     "url": "https://app.pillargtm.com"
   },
   "tabs": [
-    { "name": "Data Model", "url": "data" },
-    { "name": "Scoring Rules", "url": "scoring" },
-    { "name": "Signals", "url": "signals" },
-    { "name": "API Reference", "url": "api" }
+    {
+      "name": "Data Model",
+      "url": "data"
+    },
+    {
+      "name": "Scoring Rules",
+      "url": "scoring"
+    },
+    {
+      "name": "Signals",
+      "url": "signals"
+    },
+    {
+      "name": "API Reference",
+      "url": "api"
+    }
   ],
   "anchors": [
-    { "name": "Blueprint Assessment", "icon": "clipboard-check", "url": "https://pillargtm.com/blueprint" },
-    { "name": "Support", "icon": "envelope", "url": "mailto:support@pillargtm.com" }
+    {
+      "name": "Blueprint Assessment",
+      "icon": "clipboard-check",
+      "url": "https://pillargtm.com/blueprint"
+    },
+    {
+      "name": "Support",
+      "icon": "envelope",
+      "url": "mailto:support@pillargtm.com"
+    }
   ],
   "navigation": [
     {
       "group": "Overview",
-      "pages": ["introduction", "architecture", "data-sources"]
+      "pages": [
+        "introduction",
+        "architecture",
+        "data-sources"
+      ]
     },
     {
       "group": "Data Model",
