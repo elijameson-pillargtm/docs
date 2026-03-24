@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 32" width="140" height="32">
+  <rect x="4" y="20" width="6" height="12" rx="1.5" fill="#2D5BDA"/>
+  <rect x="13" y="14" width="6" height="18" rx="1.5" fill="#2D5BDA"/>
+  <rect x="22" y="8" width="6" height="24" rx="1.5" fill="#2D5BDA"/>
+  <text x="36" y="26" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" letter-spacing="3" fill="#1E293B">PILLAR</text>
+</svg>
