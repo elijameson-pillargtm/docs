@@ -42,12 +42,12 @@ Starbridge data feeds into multiple scoring categories:
 
 | Signal Type | Family | Severity Logic |
 |-------------|--------|---------------|
-| `competitive_displacement_window` | PIPELINE | CRITICAL if <60d, WARNING if <180d |
+| competitive_displacement_window | PIPELINE | CRITICAL if under 60d, WARNING if under 180d |
 | `rfp_active` | PIPELINE | Always CRITICAL |
 | `board_discussion_relevant` | ACCOUNT | Always WARNING |
 | `strategic_alignment` | EXPANSION | Always WARNING |
 | `grant_funding_available` | EXPANSION | Always WARNING |
-| `budget_shift_detected` | RENEWAL | CRITICAL if decline >10%, WARNING if >5% |
+| budget_shift_detected | RENEWAL | CRITICAL if decline over 10%, WARNING if over 5% |
 | `hiring_intent` | ACCOUNT | Always INFO |
 | `stakeholder_departure_starbridge` | ACCOUNT | CRITICAL if champion, WARNING otherwise |
 | `procurement_pathway_update` | STARBRIDGE | Varies |

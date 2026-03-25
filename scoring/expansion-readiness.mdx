@@ -14,7 +14,7 @@ The expansion propensity score (`accounts.expansion_propensity`) measures the li
 |----------|---------------|-------|--------------|
 | Whitespace | 20% | `whitespace_pct` | Direct pass-through (0-100) |
 | Usage Depth | 15% | `usage_depth` | Direct pass-through (0-100) |
-| NPS Health | 10% | `nps_score` | 9+ = 100, 8 = 70, 7 = 40, <7 = 10 |
+| NPS Health | 10% | `nps_score` | 9+ = 100, 8 = 70, 7 = 40, under 7 = 10 |
 | Champion Status | 10% | `champion_active` | Active = 100, None = 10 |
 | Cross-sell Signals | 10% | Signal count | 3+ = 100, 2 = 66, 1 = 33, 0 = 0 |
 | Budget Available | 10% | `budget_available` | Yes = 80, No = 20 |
