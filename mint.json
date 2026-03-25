@@ -76,7 +76,8 @@
         "data/signals",
         "data/plays",
         "data/territory",
-        "data/revenue-economics"
+        "data/revenue-economics",
+        "data/ai-intelligence"
       ]
     },
     {

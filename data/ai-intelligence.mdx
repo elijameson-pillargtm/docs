@@ -1,0 +1,92 @@
+---
+title: 'AI Intelligence'
+description: 'Claude-powered AI capabilities across the PILLAR platform'
+icon: 'brain'
+---
+
+# AI Intelligence Layer
+
+PILLAR integrates Anthropic's Claude AI to provide contextual intelligence across scoring, signals, account analysis, and recommended actions. All AI features use the Claude API with organization-scoped data isolation.
+
+## AI Capabilities
+
+### 1. Pre-Computed Signal Actions
+
+When CRITICAL signals are generated, Claude analyzes the full account context and produces role-specific recommended actions.
+
+| Component | Detail |
+|-----------|--------|
+| Model | Claude (via Anthropic API) |
+| Trigger | Scoring cron detects CRITICAL signal |
+| Input | Signal data + account context (ARR, health, contacts, deals, renewal date) |
+| Output | Contextual action, reasoning, urgency, confidence score |
+| Storage | `signals.ai_action` (JSONB) |
+| Cost | ~$0.01 per signal, capped at 10 per cron run |
+| Fallback | Rule-based actions from `role-actions.ts` |
+
+**Example output:**
+```json
+{
+  "action": "Schedule executive sponsor call with Springfield SD. Their renewal is in 45 days with $350K ARR at risk. Superintendent Dr. Williams has been unresponsive since January.",
+  "reasoning": "High-value renewal with declining engagement and no executive touchpoint in 8 months. Executive intervention increases save rate by 3x on deals over $100K.",
+  "urgency": "immediate",
+  "confidence": 92
+}
+```
+
+### 2. Account Intelligence
+
+On-demand AI analysis accessible via Account 360.
+
+| Endpoint | Purpose |
+|----------|---------|
+| `/api/ai/account-intelligence` | Deep account analysis with deal strategy, risk assessment, expansion opportunities |
+| `/api/ai/narrative` | AI-generated account narrative for meeting prep and QBRs |
+| `/api/ai/action-plan` | Strategic action plan generation for specific accounts |
+| `/api/ai/coaching` | Rep coaching suggestions based on deal patterns |
+| `/api/ai/board-narrative` | Board-ready narrative generation for executive reporting |
+
+### 3. Role-Specific Action Routing
+
+Each signal type has role-appropriate recommended actions defined in `role-actions.ts`:
+
+| Role | Action Style | Example |
+|------|-------------|---------|
+| CRO/CEO | Strategic, executive-level | "Schedule executive sponsor call. Your involvement increases save rate by 3x." |
+| VP Sales | Coaching, pipeline-focused | "Coach rep on deal strategy. Review next steps and decision timeline." |
+| VP CS | Retention, relationship-focused | "Assign save play to senior CSM. Review renewal terms." |
+| RevOps | Analytical, data-focused | "Pull renewal history and usage data. Prepare executive briefing package." |
+| Rep/CSM | Tactical, action-oriented | "Execute save play tasks. Schedule customer check-in within 48 hours." |
+
+### 4. Weekly Digest Intelligence
+
+The weekly digest email includes AI-curated highlights:
+- Top risk accounts with context
+- Pipeline movement summary
+- Recommended focus areas for the week
+
+## Configuration
+
+| Setting | Location | Default |
+|---------|----------|---------|
+| `ANTHROPIC_API_KEY` | Vercel Environment Variables | Required for AI features |
+| AI enrichment cap | Scoring cron | 10 signals per org per run |
+| Temperature | AI action generation | 0.2 (low, for consistency) |
+| Max tokens | AI action generation | 300 |
+
+## Data Privacy
+
+- AI prompts include only the authenticated organization's data
+- No cross-org data leakage in AI context
+- AI outputs are stored per-signal, scoped by org_id
+- Anthropic does not train on API data (per their data policy)
+
+## AI-Generated Fields
+
+| Table | Field | Type | Description |
+|-------|-------|------|-------------|
+| `signals` | `ai_action` | JSONB | AI-generated recommended action with reasoning and confidence |
+| `accounts` | `ai_adoption_summary` | TEXT | Starbridge AI adoption analysis |
+| `accounts` | `startup_friendliness_summary` | TEXT | Starbridge startup friendliness analysis |
+| `accounts` | `propensity_to_spend_summary` | TEXT | Starbridge spending propensity analysis |
+| `accounts` | `procurement_summary` | TEXT | Starbridge procurement navigation guide |

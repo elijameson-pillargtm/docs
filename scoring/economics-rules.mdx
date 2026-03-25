@@ -17,8 +17,8 @@ The Economics rules evaluate financial health, budget adherence, unit economics,
 | Category | Risk |
 | Weight | 6 |
 | Description | Checks whether actual spend exceeds planned budget by more than 10% |
-| Scoring | ≤ 5% variance = 100, ≤ 10% = 75, ≤ 20% = 40, ≤ 30% = 20, > 30% = 5 |
-| Trigger | Variance > 10% |
+| Scoring | ≤ 5% variance = 100, ≤ 10% = 75, ≤ 20% = 40, ≤ 30% = 20, over 30% = 5 |
+| Trigger | Variance over 10% |
 
 ### ECON-002: Territory Below Breakeven
 
@@ -27,8 +27,8 @@ The Economics rules evaluate financial health, budget adherence, unit economics,
 | Category | Risk |
 | Weight | 7 |
 | Description | Flags territories where cost-to-yield ratio exceeds 0.30 (spending >30% of revenue on sales cost) |
-| Scoring | ≤ 0.15 = 100, ≤ 0.20 = 80, ≤ 0.30 = 60, ≤ 0.50 = 30, > 0.50 = 5 |
-| Trigger | Cost-to-yield > 0.30 |
+| Scoring | ≤ 0.15 = 100, ≤ 0.20 = 80, ≤ 0.30 = 60, ≤ 0.50 = 30, over 0.50 = 5 |
+| Trigger | Cost-to-yield over 0.30 |
 
 ### ECON-003: Headcount Plan Risk
 
@@ -67,8 +67,8 @@ The Economics rules evaluate financial health, budget adherence, unit economics,
 | Category | Risk |
 | Weight | 5 |
 | Description | Flags when acquire-vs-retain cost ratio exceeds 4.0x |
-| Scoring | ≤ 2x = 100, ≤ 3x = 80, ≤ 4x = 60, ≤ 6x = 30, > 6x = 10 |
-| Trigger | Ratio > 4.0x |
+| Scoring | ≤ 2x = 100, ≤ 3x = 80, ≤ 4x = 60, ≤ 6x = 30, over 6x = 10 |
+| Trigger | Ratio over 4.0x |
 
 ### ECON-007: S&M Efficiency Warning
 
@@ -77,8 +77,8 @@ The Economics rules evaluate financial health, budget adherence, unit economics,
 | Category | Risk |
 | Weight | 6 |
 | Description | Checks if Sales & Marketing spend exceeds 55% of revenue |
-| Scoring | ≤ 30% = 100, ≤ 40% = 80, ≤ 50% = 60, ≤ 55% = 40, ≤ 70% = 20, > 70% = 5 |
-| Trigger | S&M > 55% of revenue |
+| Scoring | ≤ 30% = 100, ≤ 40% = 80, ≤ 50% = 60, ≤ 55% = 40, ≤ 70% = 20, over 70% = 5 |
+| Trigger | S&M over 55% of revenue |
 
 ## Economics Signals
 
@@ -86,9 +86,9 @@ Each economics rule can generate a corresponding signal:
 
 | Signal Type | Family | Severity Logic |
 |-------------|--------|---------------|
-| `budget_overrun` | ECONOMICS | CRITICAL > 25%, WARNING > 10% |
-| `territory_below_breakeven` | ECONOMICS | CRITICAL > 0.50, WARNING > 0.30 |
+| `budget_overrun` | ECONOMICS | CRITICAL over 25%, WARNING over 10% |
+| `territory_below_breakeven` | ECONOMICS | CRITICAL over 0.50, WARNING over 0.30 |
 | `headcount_plan_risk` | ECONOMICS | CRITICAL if P&L below -$100K, WARNING if below $0 |
 | `unit_economics_degradation` | ECONOMICS | CRITICAL if LTV:CAC below 2, WARNING if below 3 |
-| `retention_vs_acquisition` | ECONOMICS | CRITICAL if ratio > 6, WARNING if > 4 |
-| `sm_efficiency_warning` | ECONOMICS | CRITICAL if S&M > 70%, WARNING if > 55% |
+| `retention_vs_acquisition` | ECONOMICS | CRITICAL if ratio over 6, WARNING if over 4 |
+| `sm_efficiency_warning` | ECONOMICS | CRITICAL if S&M over 70%, WARNING if over 55% |
