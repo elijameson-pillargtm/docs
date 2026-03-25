@@ -22,9 +22,9 @@ A deal is evaluated as on-track or off-track using three dimensions:
 
 | Dimension | On-Track Threshold | Off-Track Threshold |
 |-----------|-------------------|---------------------|
-| Contact coverage | >= 3 contacts | under 3 contacts |
+| Contact coverage | ≥ 3 contacts | under 3 contacts |
 | Activity recency | Activity within 14 days | No activity > 14 days |
-| Composite score | Score >= 60 | Score under 60 |
+| Composite score | Score ≥ 60 | Score under 60 |
 
 ## Threshold Configuration
 
@@ -41,8 +41,8 @@ The velocity rules track score momentum:
 
 | Rule | Period | Trigger |
 |------|--------|---------|
-| VEL-006 | 7-day score change | Triggered when delta >= 10 points |
-| VEL-010 | 30-day score change | Triggered when delta >= 10 points |
+| VEL-006 | 7-day score change | Triggered when delta ≥ 10 points |
+| VEL-010 | 30-day score change | Triggered when delta ≥ 10 points |
 
 Rising scores (positive delta) indicate improving health. Declining scores generate risk signals.
 

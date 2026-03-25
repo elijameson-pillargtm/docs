@@ -12,7 +12,7 @@ The pipeline hygiene score (`opportunities.hygiene_score`) measures deal health.
 
 | Variable | Default Weight | Input | Scoring Logic |
 |----------|---------------|-------|--------------|
-| Stage Velocity | 20% | `days_in_stage / stage_median_days` | >= 2x median = 100, >= 1.5x = 70 |
+| Stage Velocity | 20% | `days_in_stage / stage_median_days` | ≥ 2x median = 100, ≥ 1.5x = 70 |
 | Close Date Slips | 20% | `push_count` | 3+ pushes = 100, 2 = 60, 1 = 30 |
 | Next Step | 20% | `has_next_step` | Missing = 100, defined = 0 |
 | Contact Coverage | 15% | `contact_count` | 3+ contacts = 0, 2 = 40, 1 or fewer = 100 |
@@ -42,7 +42,7 @@ These rules enforce Sales-to-CS handoff readiness on late-stage deals (Negotiati
 
 | Rule | Name | Weight | Description |
 |------|------|--------|-------------|
-| PH-013 | Handoff stakeholder map | 7 | Late-stage deals need >= 3 contacts mapped |
+| PH-013 | Handoff stakeholder map | 7 | Late-stage deals need ≥ 3 contacts mapped |
 | PH-014 | Handoff success criteria | 7 | Late-stage deals must have defined next steps |
 | PH-015 | Handoff economic buyer | 6 | Late-stage deals must have identified EB |
 | PH-016 | Handoff composite compliance | 8 | Combined: stakeholder map + success criteria + EB (33/33/34 weighted) |
