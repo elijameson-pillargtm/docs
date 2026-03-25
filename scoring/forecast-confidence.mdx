@@ -1,7 +1,7 @@
 ---
 title: 'Forecast Confidence'
 description: 'Forecast confidence computation with 7 variables including procurement alignment'
-icon: 'chart-mixed'
+icon: 'chart-line'
 ---
 
 # Forecast Confidence Score
@@ -26,7 +26,7 @@ When Starbridge data is available:
 
 | Sub-factor | Weight | Logic |
 |------------|--------|-------|
-| Procurement complexity | 40% | > 70 = 20, > 50 = 50, <= 50 = 80 |
+| Procurement complexity | 40% | over 70 = 20, over 50 = 50, 50 or under = 80 |
 | Coop pathway exists | 35% | Yes = 80, No = 30 |
 | Fiscal year aligned | 25% | Aligned = 80, Misaligned = 20 |
 
