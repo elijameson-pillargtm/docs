@@ -37,8 +37,8 @@ The Economics rules evaluate financial health, budget adherence, unit economics,
 | Category | Risk |
 | Weight | 8 |
 | Description | Evaluates whether the headcount scenario's net P&L impact is negative |
-| Scoring | >= $200K = 100, >= $50K = 80, >= $0 = 60, >= -$100K = 30, < -$100K = 5 |
-| Trigger | Net P&L impact < $0 |
+| Scoring | at or above $200K = 100, at or above $50K = 80, at or above $0 = 60, at or above -$100K = 30, below -$100K = 5 |
+| Trigger | Net P&L impact below $0 |
 
 ### ECON-004: Pipeline Coverage Gap
 
@@ -47,8 +47,8 @@ The Economics rules evaluate financial health, budget adherence, unit economics,
 | Category | Pipeline Health |
 | Weight | 6 |
 | Description | Checks whether pipeline coverage is below 1.5x quota |
-| Scoring | >= 3x = 100, >= 2.5x = 85, >= 2x = 70, >= 1.5x = 55, >= 1x = 30, < 1x = 10 |
-| Trigger | Coverage < 1.5x |
+| Scoring | 3x+ = 100, 2.5x+ = 85, 2x+ = 70, 1.5x+ = 55, 1x+ = 30, below 1x = 10 |
+| Trigger | Coverage below 1.5x |
 
 ### ECON-005: Unit Economics Degradation
 
@@ -57,8 +57,8 @@ The Economics rules evaluate financial health, budget adherence, unit economics,
 | Category | Risk |
 | Weight | 7 |
 | Description | Checks LTV:CAC ratio (under 3 is poor) and payback period (>18 months is too long) |
-| Scoring | LTV:CAC < 2 = max 10, < 3 = max 40, < 4 = max 70. Payback > 24mo = max 10, > 18mo = max 35, > 12mo = max 65 |
-| Trigger | LTV:CAC < 3 or payback > 18 months |
+| Scoring | LTV:CAC below 2 = max 10, below 3 = max 40, below 4 = max 70. Payback over 24mo = max 10, over 18mo = max 35, over 12mo = max 65 |
+| Trigger | LTV:CAC below 3 or payback over 18 months |
 
 ### ECON-006: Retention vs Acquisition Cost Imbalance
 
@@ -88,7 +88,7 @@ Each economics rule can generate a corresponding signal:
 |-------------|--------|---------------|
 | `budget_overrun` | ECONOMICS | CRITICAL > 25%, WARNING > 10% |
 | `territory_below_breakeven` | ECONOMICS | CRITICAL > 0.50, WARNING > 0.30 |
-| `headcount_plan_risk` | ECONOMICS | CRITICAL if P&L < -$100K, WARNING if < $0 |
-| `unit_economics_degradation` | ECONOMICS | CRITICAL if LTV:CAC < 2, WARNING if < 3 |
+| `headcount_plan_risk` | ECONOMICS | CRITICAL if P&L below -$100K, WARNING if below $0 |
+| `unit_economics_degradation` | ECONOMICS | CRITICAL if LTV:CAC below 2, WARNING if below 3 |
 | `retention_vs_acquisition` | ECONOMICS | CRITICAL if ratio > 6, WARNING if > 4 |
 | `sm_efficiency_warning` | ECONOMICS | CRITICAL if S&M > 70%, WARNING if > 55% |

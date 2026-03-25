@@ -12,7 +12,7 @@ Coverage signals identify gaps in multi-threading, territory balance, and stakeh
 
 | Signal Type | Severity Logic | Description |
 |-------------|---------------|-------------|
-| `coverage_gap` | CRITICAL if ratio < 1, WARNING if < 2 | Contacts per opportunity below minimum |
+| `coverage_gap` | CRITICAL if ratio under 1, WARNING if under 2 | Contacts per opportunity below minimum |
 | `single_threaded` | WARNING | Only 1 contact on an active opportunity |
 | `no_champion` | WARNING | No champion identified on the account |
 | `no_economic_buyer` | WARNING | No economic buyer identified on open deals |

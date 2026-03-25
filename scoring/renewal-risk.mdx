@@ -27,8 +27,8 @@ When Starbridge data is available, the market context variable uses a composite:
 
 | Sub-factor | Weight | Logic |
 |------------|--------|-------|
-| Budget trend | 50% | < -5% YoY = 80, < 0% = 50, < 5% = 30, 5%+ = 0 |
-| Tech budget % of total | 30% | < 2% = 60, < 5% = 30, 5%+ = 0 |
+| Budget trend | 50% | below -5% YoY = 80, below 0% = 50, below 5% = 30, 5%+ = 0 |
+| Tech budget % of total | 30% | below 2% = 60, below 5% = 30, 5%+ = 0 |
 | Grant dependency | 20% | > 30% grant dependent = 20 risk points |
 
 When no Starbridge data is available, market context defaults to 50 (neutral).
