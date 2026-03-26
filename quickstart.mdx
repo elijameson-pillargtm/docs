@@ -1,0 +1,97 @@
+---
+title: 'Getting Started'
+description: 'Set up PILLAR and start scoring your pipeline in under 30 minutes'
+icon: 'rocket'
+---
+
+# Getting Started
+
+PILLAR connects to your CRM, enriches every account with district intelligence, and starts generating health scores, risk signals, and revenue insights automatically. This guide walks you through setup.
+
+## Step 1: Accept Your Invitation
+
+Your organization admin will send you an invite via email. Click the link to create your account. PILLAR uses Supabase Auth with Row-Level Security, so your data is isolated to your organization from the moment you sign in.
+
+<Card title="Authentication Details" icon="lock" href="/api/authentication">
+  Learn more about auth flows, user roles, and RLS policies
+</Card>
+
+## Step 2: Connect Your CRM
+
+Navigate to **Settings > Connectors** and authenticate with your CRM. PILLAR supports:
+
+| CRM | Sync Frequency | Objects Synced |
+|-----|---------------|----------------|
+| Salesforce | Every 5 minutes | Accounts, Contacts, Opportunities, Leads |
+| HubSpot | Every 5 minutes | Companies, Contacts, Deals, Tickets |
+
+The initial sync typically completes in 5-15 minutes depending on the size of your CRM. You can monitor progress in the Connectors dashboard.
+
+<Card title="Connectors API" icon="plug" href="/api/connectors">
+  Technical details on connector configuration and sync status
+</Card>
+
+## Step 3: Connect Email and Calendar
+
+PILLAR ingests email metadata and calendar events to power activity-based signals. Navigate to **Settings > Integrations** and connect:
+
+- **Google Workspace** — email send/receive metadata, calendar events
+- **Microsoft 365** — email and calendar (coming soon)
+
+PILLAR never reads email body content. Only metadata (sender, recipient, timestamp, subject line) is ingested for activity scoring.
+
+## Step 4: Configure Scoring Weights
+
+PILLAR's scoring engine ships with default weights tuned for EdTech GTM teams. You can customize weights for any of the 8 scoring categories:
+
+<CardGroup cols={2}>
+  <Card title="Account Health" icon="heart-pulse" href="/scoring/account-health">
+    Overall account vitality combining engagement, pipeline, and renewal signals
+  </Card>
+  <Card title="ICP Fit" icon="bullseye" href="/scoring/icp-fit">
+    How closely an account matches your ideal customer profile
+  </Card>
+  <Card title="Lead Score" icon="user-plus" href="/scoring/lead-score">
+    Behavioral and demographic scoring for inbound leads
+  </Card>
+  <Card title="Renewal Risk" icon="triangle-exclamation" href="/scoring/renewal-risk">
+    8-variable model predicting churn probability
+  </Card>
+</CardGroup>
+
+Navigate to **Settings > Scoring** to adjust category weights. Changes take effect on the next scoring cycle (within 5 minutes).
+
+## Step 5: Review Your Dashboard
+
+Once your CRM sync completes, your dashboard populates automatically:
+
+- **Pipeline Overview** — total pipeline value, stage distribution, hygiene scores
+- **Account Health** — top accounts by health score, accounts needing attention
+- **Signals** — active signals requiring action, organized by severity
+- **Territory View** — geographic distribution and territory equity metrics
+
+## Step 6: Understand Your Signals
+
+PILLAR generates signals when scoring outputs cross configurable thresholds or when external events are detected. Signals are the primary action-driving mechanism in the platform.
+
+<CardGroup cols={2}>
+  <Card title="Signal Taxonomy" icon="bolt" href="/signals/overview">
+    8 signal families, 30+ types, 7-state lifecycle
+  </Card>
+  <Card title="Scoring Engine" icon="calculator" href="/scoring/overview">
+    93+ rules across 8 categories with configurable weights
+  </Card>
+</CardGroup>
+
+## What Happens Next
+
+After initial setup, PILLAR continuously:
+
+1. **Syncs** CRM data every 5 minutes
+2. **Enriches** accounts with Starbridge district intelligence
+3. **Scores** every account against 93+ rules
+4. **Generates signals** when thresholds are crossed
+5. **Routes notifications** to Slack and email
+6. **Updates dashboards** with real-time insights
+
+Your team can start acting on signals immediately. No manual data entry required.

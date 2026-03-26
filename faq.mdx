@@ -1,0 +1,95 @@
+---
+title: 'FAQ'
+description: 'Frequently asked questions about the PILLAR GTM Operating System'
+icon: 'circle-question'
+---
+
+# Frequently Asked Questions
+
+## Setup and Onboarding
+
+<AccordionGroup>
+  <Accordion title="How long does the initial CRM sync take?">
+    The initial sync typically completes in 5-15 minutes depending on the number of records in your CRM. Salesforce orgs with 50,000+ accounts may take up to 30 minutes. You can monitor sync progress in **Settings > Connectors**. After the initial sync, PILLAR syncs bidirectionally every 5 minutes.
+  </Accordion>
+
+  <Accordion title="Which CRMs does PILLAR support?">
+    PILLAR currently supports **Salesforce** and **HubSpot** with full bidirectional sync. Both integrations use OAuth 2.0 for secure authentication and sync Accounts, Contacts, Opportunities, and Leads (or their HubSpot equivalents). Dynamics 365 support is on the roadmap.
+  </Accordion>
+
+  <Accordion title="What email/calendar integrations are available?">
+    PILLAR integrates with **Google Workspace** for email metadata and calendar event ingestion. Microsoft 365 support is coming soon. PILLAR never reads email body content — only metadata (sender, recipient, timestamp, subject line) is used for activity-based scoring.
+  </Accordion>
+
+  <Accordion title="How do I invite team members?">
+    Navigate to **Settings > Team** to invite users by email. Each user is assigned a role (Admin, Manager, or Rep) that controls their access level. All users within your organization share the same data, isolated by Row-Level Security from other tenants.
+  </Accordion>
+</AccordionGroup>
+
+## Scoring Engine
+
+<AccordionGroup>
+  <Accordion title="Can I customize scoring weights?">
+    Yes. Every scoring category and individual rule weight is configurable per organization. Navigate to **Settings > Scoring** to adjust weights. Changes take effect on the next scoring cycle (within 5 minutes). PILLAR ships with defaults tuned for EdTech GTM teams, but you can tailor them to your specific business.
+  </Accordion>
+
+  <Accordion title="How often are scores recalculated?">
+    Scores are recomputed every 5-6 hours for scoring-based evaluations, and in real-time for webhook-triggered events (like Starbridge district intelligence updates). The scoring engine evaluates all 93+ rules against the full `ScoringContext` for each account.
+  </Accordion>
+
+  <Accordion title="What's the difference between a score and a signal?">
+    A **score** is a continuous numeric value (0-100) computed by the scoring engine — for example, an account health score of 72. A **signal** is a discrete event generated when a score crosses a threshold or an external event is detected — for example, "Account Health dropped below 50." Scores measure state; signals drive action.
+  </Accordion>
+
+  <Accordion title="How does the ICP Fit score work?">
+    ICP Fit evaluates how closely an account matches your ideal customer profile across firmographic, technographic, and behavioral dimensions. The model considers district size, budget allocation, technology adoption patterns, and historical win rates for similar accounts. See the [ICP Fit documentation](/scoring/icp-fit) for the full rule set.
+  </Accordion>
+</AccordionGroup>
+
+## Signals
+
+<AccordionGroup>
+  <Accordion title="How are signals routed to my team?">
+    Signals are routed via **Slack** (real-time) and **email** (weekly digest). You can configure routing rules by signal family, severity, and assignee in **Settings > Notifications**. Critical signals are always delivered immediately; lower-severity signals are batched into the weekly digest.
+  </Accordion>
+
+  <Accordion title="What are the signal severity levels?">
+    PILLAR uses four severity levels: **Critical** (immediate action required), **High** (action needed within 24 hours), **Medium** (review this week), and **Low** (informational). Severity is determined by the magnitude of the score change or the nature of the triggering event.
+  </Accordion>
+
+  <Accordion title="Can I suppress or snooze a signal?">
+    Yes. Signals follow a 7-state lifecycle: Pending, Active, Acknowledged, In Progress, Resolved, Expired, and Suppressed. You can suppress a signal to remove it from your active queue. Suppressed signals are still logged and visible in the signal history.
+  </Accordion>
+</AccordionGroup>
+
+## Data and Security
+
+<AccordionGroup>
+  <Accordion title="How is my data secured?">
+    PILLAR uses **Supabase** with Row-Level Security (RLS) enforcing strict multi-tenant data isolation. Every database query is filtered by `org_id`, ensuring your data is never accessible to other organizations. Authentication uses JWT tokens issued by Supabase Auth, and all data is encrypted in transit (TLS 1.3) and at rest.
+  </Accordion>
+
+  <Accordion title="What is Starbridge district intelligence?">
+    **Starbridge.ai** provides 120+ buyer attributes for K-12 school districts and higher education institutions, including budget data, technology adoption, procurement history, RFP activity, job changes, and conference attendance. PILLAR enriches every matching account with Starbridge data automatically via webhook and on-demand API calls.
+  </Accordion>
+
+  <Accordion title="Does PILLAR read my email content?">
+    No. PILLAR only ingests email **metadata** — sender, recipient, timestamp, and subject line. Email body content is never read, stored, or processed. This metadata powers activity-based scoring and engagement signals.
+  </Accordion>
+
+  <Accordion title="Can I export my data?">
+    Yes. PILLAR provides full data export via the API. You can also export dashboards and reports as PDF. All data remains yours — PILLAR operates as a processing layer on top of your existing CRM data.
+  </Accordion>
+</AccordionGroup>
+
+## Blueprint Assessment
+
+<AccordionGroup>
+  <Accordion title="What is the Blueprint Assessment?">
+    The Blueprint Assessment is a free GTM maturity evaluation that scores your organization across 5 pillars (Strategy, People, Process, Systems, and Metrics) with 142 questions spanning 27 categories. You receive a detailed report with pillar-level scores, strengths, gaps, and a maturity tier classification. [Take the assessment](https://pillargtm.com/blueprint).
+  </Accordion>
+
+  <Accordion title="How do Blueprint results relate to PILLAR?">
+    Blueprint identifies where your GTM operations are strong and where gaps exist. Each pillar and category maps directly to PILLAR platform capabilities. For example, low Process scores indicate areas where PILLAR's automated scoring, signals, and plays can drive immediate improvement. See the [Blueprint deep-dive](/blueprint) for the full mapping.
+  </Accordion>
+</AccordionGroup>

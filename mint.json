@@ -51,8 +51,8 @@
     },
     {
       "name": "Support",
-      "icon": "envelope",
-      "url": "mailto:support@pillargtm.com"
+      "icon": "life-ring",
+      "url": "/support"
     }
   ],
   "navigation": [
@@ -60,8 +60,18 @@
       "group": "Overview",
       "pages": [
         "introduction",
+        "quickstart",
         "architecture",
         "data-sources"
+      ]
+    },
+    {
+      "group": "Resources",
+      "pages": [
+        "blueprint",
+        "faq",
+        "changelog",
+        "support"
       ]
     },
     {
