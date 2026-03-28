@@ -1,0 +1,58 @@
+---
+title: 'Financial Data'
+description: 'Upload quarterly P&L metrics for Board Report and Command Center'
+icon: 'chart-bar'
+---
+
+# Financial Data
+
+PILLAR's Board Report and Command Center display financial metrics alongside CRM-synced revenue data. Financial data (EBITDA, burn rate, cash balance, unit economics) comes from your finance team, not your CRM.
+
+## How It Works
+
+1. Navigate to **Settings > Financial Data**
+2. Download the CSV template
+3. Fill in your quarterly or monthly P&L data
+4. Upload the CSV — PILLAR validates and imports
+
+Each row is one period (e.g., `2026-Q1`). PILLAR upserts on the unique combination of organization + period, so re-uploading the same period overwrites the previous values.
+
+## CSV Template
+
+Download the template from the Financial Data settings page, or use this format:
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `period` | String (required) | Period identifier, e.g., "2026-Q1" or "2026-03" |
+| `period_type` | String (required) | "quarterly" or "monthly" |
+| `arr` | Number | Annual Recurring Revenue |
+| `new_business_arr` | Number | New business ARR added this period |
+| `expansion_arr` | Number | Expansion ARR from existing customers |
+| `contraction_arr` | Number | ARR lost to downgrades |
+| `churn_arr` | Number | ARR lost to cancellations |
+| `total_revenue` | Number | Total recognized revenue this period |
+| `total_cogs` | Number | Cost of goods sold |
+| `gross_profit` | Number | Revenue minus COGS |
+| `total_opex` | Number | Total operating expenses |
+| `ebitda` | Number | Earnings before interest, taxes, depreciation, amortization |
+| `total_sales_marketing_spend` | Number | Combined S&M spend |
+| `total_new_customers` | Integer | New logos acquired |
+| `total_employees` | Integer | Total headcount |
+| `sales_headcount` | Integer | Sales team headcount |
+| `cs_headcount` | Integer | Customer success headcount |
+| `monthly_burn` | Number | Monthly cash burn rate |
+| `cash_balance` | Number | Cash on hand |
+| `ltv_months` | Integer | Average customer lifetime in months |
+
+## What Feeds the Board Report
+
+The Board Report combines two data sources:
+
+1. **CRM-synced data** (automatic): Pipeline, ARR by account, renewal dates, opportunity stages, win/loss rates
+2. **Financial data** (uploaded): EBITDA, burn rate, cash balance, headcount, unit economics
+
+This separation is by design. CRMs don't store P&L data. Most $5-50M ARR companies track financials in QuickBooks, Xero, or spreadsheets. The CSV import bridges the gap without requiring an accounting system integration.
+
+## Update Frequency
+
+Most organizations update financial data quarterly, aligned with their board reporting cadence. Monthly updates are supported for companies that track P&L monthly.

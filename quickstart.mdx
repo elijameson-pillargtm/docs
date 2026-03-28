@@ -18,17 +18,42 @@ Your organization admin will send you an invite via email. Click the link to cre
 
 ## Step 2: Connect Your CRM
 
-Navigate to **Settings > Connectors** and authenticate with your CRM. PILLAR supports:
+Navigate to **Settings > Integrations** and click **Connect** on your CRM provider. PILLAR supports:
 
-| CRM | Sync Frequency | Objects Synced |
-|-----|---------------|----------------|
-| Salesforce | Every 5 minutes | Accounts, Contacts, Opportunities, Leads |
-| HubSpot | Every 5 minutes | Companies, Contacts, Deals, Tickets |
+| CRM | Sync Frequency | Objects Synced | Score Write-Back |
+|-----|---------------|----------------|-----------------|
+| Salesforce | Every 15 minutes | Accounts, Contacts, Opportunities, Leads | Health, Risk, Priority scores |
+| HubSpot | Every 15 minutes | Companies, Contacts, Deals, Tickets | Health, Risk, Priority scores |
 
-The initial sync typically completes in 5-15 minutes depending on the size of your CRM. You can monitor progress in the Connectors dashboard.
+The initial sync typically completes in 5-15 minutes depending on the size of your CRM.
+
+### Field Mapping
+
+After connecting, PILLAR auto-discovers your CRM schema and maps fields to PILLAR columns. You can review and customize mappings via the **Field Mapping** button on each connector card.
+
+- **Auto-Discovery**: PILLAR reads your CRM's actual field schema and fuzzy-matches known fields automatically
+- **Custom Mappings**: Add mappings for custom fields (e.g., `Contract_End_Date__c` → `accounts.contract_end`)
+- **Transform Types**: Direct (copy), Picklist Map (enum translation), Formula (computed), Lookup (ID resolution)
+- **Required Fields**: PILLAR flags which fields must be mapped for scoring to work (name, ARR, segment, stage, close_date)
+
+### Score Write-Back
+
+PILLAR pushes computed scores back to your CRM as custom fields:
+
+| PILLAR Score | Salesforce Field | HubSpot Property |
+|-------------|-----------------|-----------------|
+| Health Score (0-100) | `PILLAR_Health_Score__c` | `pillar_health_score` |
+| Risk Score (0-100) | `PILLAR_Risk_Score__c` | `pillar_risk_score` |
+| Priority Score (0-100) | `PILLAR_Priority_Score__c` | `pillar_priority_score` |
+
+<Note>
+You'll need to create these custom fields in your CRM before enabling write-back. In Salesforce, create three custom Number fields on the Account object. In HubSpot, create three custom Number properties on the Company object.
+</Note>
+
+Use the **Push Scores** button on the connector card in Settings > Integrations to trigger a score sync.
 
 <Card title="Connectors API" icon="plug" href="/api/connectors">
-  Technical details on connector configuration and sync status
+  Technical details on connector configuration, sync status, and field mappings
 </Card>
 
 ## Step 3: Connect Email and Calendar
@@ -40,7 +65,18 @@ PILLAR ingests email metadata and calendar events to power activity-based signal
 
 PILLAR never reads email body content. Only metadata (sender, recipient, timestamp, subject line) is ingested for activity scoring.
 
-## Step 4: Configure Scoring Weights
+## Step 4: Upload Financial Data
+
+Navigate to **Settings > Financial Data** to upload quarterly P&L metrics for the Board Report. PILLAR provides a CSV template you can download and fill in with:
+
+- Revenue metrics: ARR, new business, expansion, contraction, churn
+- P&L: total revenue, COGS, gross profit, OPEX, EBITDA
+- Unit economics: monthly burn, cash balance, LTV
+- Headcount: total employees, sales, CS
+
+These metrics feed the Board Report dashboard and are separate from CRM-synced pipeline data. Most companies update these quarterly from their accounting system.
+
+## Step 5: Configure Scoring Weights
 
 PILLAR's scoring engine ships with default weights tuned for EdTech GTM teams. You can customize weights for any of the 8 scoring categories:
 
@@ -59,39 +95,28 @@ PILLAR's scoring engine ships with default weights tuned for EdTech GTM teams. Y
   </Card>
 </CardGroup>
 
-Navigate to **Settings > Scoring** to adjust category weights. Changes take effect on the next scoring cycle (within 5 minutes).
+Navigate to **Settings > Scoring** to adjust category weights. Changes take effect on the next scoring cycle.
 
-## Step 5: Review Your Dashboard
+## Step 6: Review Your Dashboard
 
 Once your CRM sync completes, your dashboard populates automatically:
 
-- **Pipeline Overview** — total pipeline value, stage distribution, hygiene scores
+- **Command Center** — portfolio-level ARR, NRR, GRR, pipeline, and risk distribution
 - **Account Health** — top accounts by health score, accounts needing attention
 - **Signals** — active signals requiring action, organized by severity
-- **Territory View** — geographic distribution and territory equity metrics
-
-## Step 6: Understand Your Signals
-
-PILLAR generates signals when scoring outputs cross configurable thresholds or when external events are detected. Signals are the primary action-driving mechanism in the platform.
-
-<CardGroup cols={2}>
-  <Card title="Signal Taxonomy" icon="bolt" href="/signals/overview">
-    8 signal families, 30+ types, 7-state lifecycle
-  </Card>
-  <Card title="Scoring Engine" icon="calculator" href="/scoring/overview">
-    93+ rules across 8 categories with configurable weights
-  </Card>
-</CardGroup>
+- **Revenue Bowtie** — full funnel from lead to expansion with conversion rates
+- **Board Report** — executive-ready view combining CRM data with financial metrics
 
 ## What Happens Next
 
 After initial setup, PILLAR continuously:
 
-1. **Syncs** CRM data every 5 minutes
+1. **Syncs** CRM data every 15 minutes
 2. **Enriches** accounts with Starbridge district intelligence
 3. **Scores** every account against 93+ rules
 4. **Generates signals** when thresholds are crossed
 5. **Routes notifications** to Slack and email
-6. **Updates dashboards** with real-time insights
+6. **Pushes scores** back to your CRM custom fields
+7. **Updates dashboards** with real-time insights
 
 Your team can start acting on signals immediately. No manual data entry required.

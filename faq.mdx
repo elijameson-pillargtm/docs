@@ -10,11 +10,11 @@ icon: 'circle-question'
 
 <AccordionGroup>
   <Accordion title="How long does the initial CRM sync take?">
-    The initial sync typically completes in 5-15 minutes depending on the number of records in your CRM. Salesforce orgs with 50,000+ accounts may take up to 30 minutes. You can monitor sync progress in **Settings > Connectors**. After the initial sync, PILLAR syncs bidirectionally every 5 minutes.
+    The initial sync typically completes in 5-15 minutes depending on the number of records in your CRM. Salesforce orgs with 50,000+ accounts may take up to 30 minutes. You can monitor sync progress in **Settings > Integrations**. After the initial sync, PILLAR pulls data from your CRM every 15 minutes and can push computed scores (health, risk, priority) back to custom fields in your CRM.
   </Accordion>
 
   <Accordion title="Which CRMs does PILLAR support?">
-    PILLAR currently supports **Salesforce** and **HubSpot** with full bidirectional sync. Both integrations use OAuth 2.0 for secure authentication and sync Accounts, Contacts, Opportunities, and Leads (or their HubSpot equivalents). Dynamics 365 support is on the roadmap.
+    PILLAR currently supports **Salesforce** and **HubSpot** with OAuth 2.0 authentication. Both integrations sync Accounts, Contacts, Opportunities, and Leads (or their HubSpot equivalents) into PILLAR every 15 minutes. PILLAR also pushes health scores, risk scores, and priority scores back to custom fields in your CRM. Dynamics 365 support is on the roadmap.
   </Accordion>
 
   <Accordion title="What email/calendar integrations are available?">
