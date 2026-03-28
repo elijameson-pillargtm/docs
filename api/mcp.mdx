@@ -1,0 +1,123 @@
+---
+title: 'MCP Server'
+description: 'Connect PILLAR to Claude, Cursor, VS Code, and any AI assistant via the Model Context Protocol'
+icon: 'robot'
+---
+
+# PILLAR MCP Server
+
+PILLAR is the first AI-native GTM operating system with a native MCP (Model Context Protocol) server. Query your revenue architecture — account health, pipeline, signals, renewals, and scoring — directly from any AI assistant.
+
+## Quick Start
+
+### 1. Generate an API Key
+
+Navigate to **Settings > Integrations** and scroll to the **API Keys & MCP Server** section. Click **Generate API Key** and save the key — it's only shown once.
+
+### 2. Configure Your AI Assistant
+
+Add the following to your Claude Desktop, Cursor, or VS Code MCP configuration:
+
+```json
+{
+  "mcpServers": {
+    "pillar": {
+      "url": "https://app.pillargtm.com/api/mcp",
+      "headers": {
+        "Authorization": "Bearer pk_live_your_key_here"
+      }
+    }
+  }
+}
+```
+
+### 3. Start Querying
+
+Ask your AI assistant natural language questions about your revenue data:
+
+- "What's my pipeline summary?"
+- "Which accounts are at risk this quarter?"
+- "Show me critical signals"
+- "Get the account 360 for Houston ISD"
+
+## Endpoint
+
+```
+POST https://app.pillargtm.com/api/mcp
+GET  https://app.pillargtm.com/api/mcp  (server discovery)
+```
+
+Authentication: Bearer API key in the `Authorization` header.
+
+## Available Tools (15)
+
+### Core Intelligence
+
+| Tool | Description |
+|------|-------------|
+| `get_dashboard` | Full GTM health snapshot: ARR, pipeline, NRR, at-risk accounts, signal count |
+| `get_pipeline_summary` | Pipeline totals: open, commit, best-case, weighted, NRR, ARR |
+| `search_accounts` | Search accounts by name, segment, or territory with health/risk/priority scores |
+| `get_account_360` | Full account detail: scores, contacts, signals, opportunities, district intelligence |
+| `get_active_signals` | Active signals filtered by severity (CRITICAL/WARNING/INFO) or family (RENEWAL/PIPELINE/EXPANSION) |
+| `get_account_health` | Health, risk, and priority scores with scoring decomposition |
+| `get_renewal_risk` | Upcoming renewals with risk scores, filtered by days out (30/60/90) |
+
+### Operational
+
+| Tool | Description |
+|------|-------------|
+| `get_forecast` | Quarterly forecast: won, commit, probable, upside breakdown |
+| `get_revenue_bowtie` | Full acquire → close → retain/expand funnel with conversion rates |
+| `get_territory_economics` | Territory P&L: revenue, costs, yield, health classification |
+| `get_leads` | Lead funnel with ICP fit and behavioral scores |
+| `acknowledge_signal` | Update a signal's status (ACKNOWLEDGED, IN_PROGRESS, RESOLVED) |
+| `create_play` | Create an intervention play for an account (SAVE_PLAY, EXPANSION_PLAY) |
+| `get_board_report` | Executive summary: ARR, NRR, GRR, pipeline, risk, EBITDA |
+| `get_scoring_rules` | All 93+ scoring rules with weights and categories |
+
+## Compatible AI Assistants
+
+PILLAR's MCP server works with any MCP-compatible client:
+
+- **Claude Desktop** — Anthropic's AI assistant
+- **Claude Code** — CLI development assistant
+- **Cursor** — AI-first code editor
+- **VS Code** — GitHub Copilot with MCP support
+- **ChatGPT Desktop** — OpenAI's assistant
+- **Windsurf** — Codeium's AI editor
+- **Zed** — High-performance editor with MCP
+
+## Security
+
+- API keys are stored as SHA-256 hashes — the raw key is never persisted
+- Each key is scoped to a single organization via Row-Level Security
+- Keys can be revoked instantly from Settings > Integrations
+- All data is org-scoped — you can only query your own organization's data
+- MCP server inherits PILLAR's multi-tenant isolation
+
+## Example Conversations
+
+**CRO Morning Briefing:**
+> "What does my GTM health look like this morning?"
+>
+> Claude calls `get_dashboard` → returns ARR, pipeline, at-risk accounts, signal count, forecast health
+
+**Renewal Review:**
+> "Which renewals are at risk in the next 30 days?"
+>
+> Claude calls `get_renewal_risk` with `days_out: 30` → returns at-risk renewals with scores and account details
+
+**Account Deep Dive:**
+> "Tell me everything about the Houston ISD account"
+>
+> Claude calls `search_accounts` with `query: "Houston ISD"` → then `get_account_360` with the account ID → returns full account intelligence
+
+**Signal Triage:**
+> "Show me all critical signals and acknowledge the top one"
+>
+> Claude calls `get_active_signals` with `severity: "CRITICAL"` → then `acknowledge_signal` on the first result
+
+## Rate Limits
+
+The MCP server inherits PILLAR's standard API rate limits. For most tools, this is effectively unlimited for normal AI assistant usage patterns. If you encounter rate limiting, contact support.

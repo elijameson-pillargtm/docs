@@ -142,7 +142,8 @@
         "api/signals",
         "api/forecast",
         "api/territory",
-        "api/blueprint"
+        "api/blueprint",
+        "api/mcp"
       ]
     }
   ],
