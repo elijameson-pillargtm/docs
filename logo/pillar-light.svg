@@ -1,26 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <style>
-    .bar { fill: #2D5BDA; }
-    .bar1 { animation: pulse1 2.4s ease-in-out infinite; }
-    .bar2 { animation: pulse2 2.4s ease-in-out infinite; }
-    .bar3 { animation: pulse3 2.4s ease-in-out infinite; }
-    @keyframes pulse1 {
-      0%, 100% { height: 12px; y: 20px; }
-      33% { height: 18px; y: 14px; }
-      66% { height: 10px; y: 22px; }
-    }
-    @keyframes pulse2 {
-      0%, 100% { height: 18px; y: 14px; }
-      33% { height: 12px; y: 20px; }
-      66% { height: 22px; y: 10px; }
-    }
-    @keyframes pulse3 {
-      0%, 100% { height: 24px; y: 8px; }
-      33% { height: 16px; y: 16px; }
-      66% { height: 20px; y: 12px; }
-    }
-  </style>
-  <rect class="bar bar1" x="4" y="20" width="6" height="12" rx="1.5"/>
-  <rect class="bar bar2" x="13" y="14" width="6" height="18" rx="1.5"/>
-  <rect class="bar bar3" x="22" y="8" width="6" height="24" rx="1.5"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 140" width="600" height="140">
+  <!-- Icon -->
+  <rect x="0" y="0" width="130" height="11" rx="1.6" fill="#1E293B"/>
+  <rect x="7"   y="79" width="18" height="42"  fill="#2D5BDA"/>
+  <rect x="31"  y="63" width="18" height="58"  fill="#2D5BDA"/>
+  <rect x="55"  y="47" width="18" height="74"  fill="#2D5BDA"/>
+  <rect x="79"  y="30" width="18" height="91"  fill="#2D5BDA"/>
+  <rect x="105" y="14" width="18" height="107" fill="#2D5BDA"/>
+  <rect x="0" y="121" width="130" height="11" rx="1.6" fill="#1E293B"/>
+  <!-- Wordmark -->
+  <text x="190" y="74" font-family="Outfit,Inter,system-ui,sans-serif" font-weight="700" font-size="52" letter-spacing="5" fill="#1E293B" dominant-baseline="central">PILLAR</text>
 </svg>
