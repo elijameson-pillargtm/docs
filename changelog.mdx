@@ -10,6 +10,20 @@ All notable changes to the PILLAR platform are documented here. Releases follow 
 
 ---
 
+## v3.2.0 — March 31, 2026
+
+**Revenue Impact, Expansion Pipeline, Governance Enforcement**
+
+- **Revenue Impact Dashboard** — new `/impact` page with signal-to-outcome attribution. Traces every dollar PILLAR touched: signal generated → play triggered → outcome logged. KPIs: ARR Protected, Save Rate, Avg Days Early, Pipeline Influenced. Expandable attribution chain rows with account detail, signal context, and play task completion status.
+- **Expansion Pipeline Dashboard** — new `/expansion` page with product heatmap (accounts x products), whitespace ARR calculation, expansion propensity scoring, recommended next product, and active expansion signals.
+- **Mandatory Play Outcomes** — when all play tasks are completed, an outcome modal requires RENEWED/CHURNED/EXPANDED/LOST before the play can close. Auto-updates linked renewal disposition and logs governance entry.
+- **SLA Enforcement** — signal acknowledgment SLAs (CRITICAL: 4h, WARNING: 24h) and play SLA breach detection. Generates WORKFLOW escalation signals and governance log entries for non-compliance. Runs in the hourly cron scoring job.
+- **Starbridge API Key Self-Service** — customers can now enter their Starbridge API key directly in Settings > Integrations. Key encrypted with AES-256-GCM, stored per-org.
+- **`complete_play` MCP Tool** — new MCP tool for AI agents to close plays with mandatory outcomes via Claude Desktop, Cursor, or any MCP-compatible client.
+- **16 MCP Tools** — total tool count increased from 15 to 16 with the addition of `complete_play`.
+
+---
+
 ## v3.1.0 — March 2026
 
 **Blueprint Assessment MVP**

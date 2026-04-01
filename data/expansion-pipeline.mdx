@@ -1,0 +1,77 @@
+---
+title: "Expansion Pipeline"
+description: "Product whitespace, expansion propensity scoring, and cross-sell opportunities across the portfolio."
+icon: "arrows-up-to-line"
+---
+
+# Expansion Pipeline
+
+The Expansion Pipeline dashboard shows the scored expansion opportunity across your entire account base — which accounts have product whitespace, how ready they are to expand, and what the dollar opportunity is.
+
+## The Finite TAM Argument
+
+In a finite market (~13,000 school districts, ~2,000 higher ed institutions), the fastest path to ARR growth isn't net new logos — it's expanding inside accounts you already serve. PILLAR maps product whitespace and scores expansion propensity across the base.
+
+## Product Heatmap
+
+The core view is a grid of **accounts (rows) x products (columns)**:
+
+| Cell State | Color | Meaning |
+|------------|-------|---------|
+| Owned, high adoption (60%+) | Green | Healthy product relationship |
+| Owned, low adoption (<60%) | Amber | Adoption risk — may not renew this product |
+| Not owned | Grey | Whitespace opportunity — estimated ARR shown |
+
+## KPI Metrics
+
+| Metric | Description |
+|--------|-------------|
+| **Whitespace ARR** | Total estimated ARR across all missing products for all accounts |
+| **High Propensity** | Count of accounts with expansion propensity >= 60 |
+| **Avg Adoption** | Average product adoption percentage across owned products |
+| **Expansion Signals** | Active signals in the EXPANSION and STARBRIDGE families |
+
+## Expansion Propensity Scoring
+
+Each account receives an expansion propensity score (0-100) based on:
+
+- **Health score** — healthy accounts are more likely to expand
+- **Whitespace percentage** — more missing products = more opportunity
+- **Champion engagement** — is there an active champion who can advocate?
+- **Adoption rate** — high adoption on existing products signals readiness
+- **Budget context** — is the district in growth, stable, or cutting?
+
+| Score Range | Label | Meaning |
+|-------------|-------|---------|
+| 70-100 | High | Account is ready for expansion conversation |
+| 40-69 | Medium | Potential exists but needs nurturing |
+| 0-39 | Low | Focus on retention before expansion |
+
+## Recommended Next Product
+
+For each account, PILLAR recommends the highest-value missing product based on:
+- Annual price of the missing product
+- Fit with the account's existing product mix
+- District characteristics and priorities
+
+## Expandable Account Rows
+
+Click any row to see:
+- **Account summary** — ARR, health, whitespace %, adoption %, link to Account 360
+- **Missing products** — list with estimated ARR per product
+- **Recommended next product** — highlighted with blue badge
+- **Expansion signals** — active signals from EXPANSION and STARBRIDGE families
+
+## API Endpoint
+
+```
+GET /api/expansion
+```
+
+Returns `kpi`, `products` (full product catalog), and `pipeline` (all accounts with product detail, whitespace, propensity, signals).
+
+## Access
+
+Available to: CRO/CEO, VP Sales, VP CS, RevOps
+
+Navigate to: `/expansion` or click "Expansion" in the Command Center nav pills.

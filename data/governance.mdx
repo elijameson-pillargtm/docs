@@ -1,0 +1,117 @@
+---
+title: "Governance & Enforcement"
+description: "Mandatory outcomes, SLA enforcement, and the closed-loop system that makes Revenue Impact attribution possible."
+icon: "shield-check"
+---
+
+# Governance & Enforcement
+
+PILLAR's governance layer ensures that the signal-to-outcome attribution chain is complete. Without enforcement, signals get ignored, plays go unfinished, and outcomes aren't logged — breaking the Revenue Impact dashboard.
+
+## Mandatory Play Outcomes
+
+When all tasks in a play are completed, PILLAR **requires** the user to log an outcome before the play can close.
+
+### Outcome Modal
+
+When the last task checkbox is checked:
+1. An outcome modal appears automatically
+2. The user selects an outcome: **Renewed**, **Churned**, **Expanded**, or **Lost**
+3. The user provides an outcome reason (text field)
+4. On submit, PILLAR:
+   - Marks the play as COMPLETED with the outcome
+   - Auto-updates the linked renewal's disposition (RENEWED, CHURNED, etc.)
+   - Resolves the trigger signal
+   - Logs a governance entry
+
+### Why This Matters
+
+Without mandatory outcomes:
+- Revenue Impact shows $0 in ARR Protected (no attribution chain)
+- Renewals stay in APPROACHING/URGENT forever
+- Signal resolution never happens
+- The board can't see what PILLAR actually contributed
+
+### API Enforcement
+
+The PATCH `/api/plays/[id]` endpoint returns HTTP 400 if `state: "COMPLETED"` is sent without an `outcome` field:
+
+```json
+{
+  "error": "Outcome is required when completing a play (RENEWED, CHURNED, EXPANDED, LOST)"
+}
+```
+
+## Auto-Disposition
+
+When a play outcome is logged, PILLAR automatically updates the linked renewal:
+
+| Play Outcome | Renewal Disposition | Risk Score |
+|-------------|-------------------|------------|
+| RENEWED | RENEWED | Set to 0 |
+| CHURNED | CHURNED | Unchanged |
+| EXPANDED | RENEWED | Unchanged |
+| LOST | CHURNED | Unchanged |
+
+The renewal is found via two paths:
+1. `renewals.save_play_id = play.id` (direct link)
+2. `plays.trigger_signal_id → signals.renewal_id` (signal chain)
+
+## SLA Enforcement
+
+PILLAR enforces SLAs on two dimensions, running as part of the hourly cron scoring job:
+
+### Signal Acknowledgment SLA
+
+| Severity | SLA Threshold | Escalation |
+|----------|--------------|------------|
+| CRITICAL | 4 hours | WORKFLOW signal generated, original signal marked `escalated: true` |
+| WARNING | 24 hours | WORKFLOW signal generated, original signal marked `escalated: true` |
+
+When a signal sits in ACTIVE state past its SLA without being acknowledged:
+- A new CRITICAL WORKFLOW signal is generated: "Signal Unacknowledged: [title] — Xh past SLA"
+- The original signal's `escalated` flag is set to `true` (preventing duplicate escalations)
+- A governance log entry is created with `severity: violation`, `governance_status: non_compliant`
+
+### Play SLA Breach
+
+When an active play exceeds its `sla_hours` (typically 72h):
+- A new CRITICAL WORKFLOW signal is generated: "SLA Breached: [play name] — [account] — Xh overdue"
+- A governance log entry is created
+- Deduplication: only one breach signal per play per 24 hours
+
+### Cron Execution
+
+Both enforcement functions run in the `/api/cron/scoring` pipeline after `autoTriggerPlays()`:
+
+```
+runBatchPipeline() → scoreLeads() → scoreEconomics()
+→ computeOrgMetrics() → autoTriggerPlays()
+→ enforceSLAs()  ← signal ack + play breach
+→ enrichCriticalSignals()
+```
+
+## Governance Log
+
+All enforcement actions are written to the `governance_log` table:
+
+| Field | Value |
+|-------|-------|
+| `category` | "process" or "deal" |
+| `entity_type` | "signal" or "play" |
+| `severity` | "violation" for breaches, "info" for completions |
+| `governance_status` | "non_compliant" for breaches, "compliant" for outcomes |
+
+## MCP Integration
+
+The `complete_play` MCP tool enforces the same governance:
+
+```
+complete_play(
+  play_id: "uuid",
+  outcome: "RENEWED" | "CHURNED" | "EXPANDED" | "LOST",
+  outcome_reason: "Negotiated 2-year renewal with 10% discount"
+)
+```
+
+This allows AI agents (Claude Desktop, Cursor) to close plays with mandatory outcomes through the MCP protocol.

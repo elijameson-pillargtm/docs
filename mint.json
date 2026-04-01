@@ -87,6 +87,9 @@
         "data/plays",
         "data/territory",
         "data/revenue-economics",
+        "data/revenue-impact",
+        "data/expansion-pipeline",
+        "data/governance",
         "data/financial-data",
         "data/ai-intelligence"
       ]

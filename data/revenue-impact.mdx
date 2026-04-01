@@ -1,0 +1,104 @@
+---
+title: "Revenue Impact"
+description: "Signal-to-outcome attribution — every dollar PILLAR touched, traced back to the signal that surfaced it."
+icon: "chart-line-up"
+---
+
+# Revenue Impact
+
+Revenue Impact is PILLAR's attribution engine. It traces every dollar the platform touched back to the signal that surfaced it, the play that acted on it, and the outcome that resulted.
+
+## Why It Matters
+
+The question every CRO asks: "How do I know this is working?" Revenue Impact answers with auditable, timestamped attribution — not estimates, not correlations, but a direct chain from signal to action to outcome.
+
+## Attribution Chain
+
+Every tracked intervention follows this chain:
+
+```
+Signal Generated → Play Triggered → Tasks Executed → Outcome Logged
+```
+
+Each link is timestamped and stored:
+
+| Link | Source | Key Fields |
+|------|--------|------------|
+| Signal | `signals` table | `id`, `title`, `family`, `severity`, `created_at` |
+| Play | `plays` table | `trigger_signal_id`, `started_at`, `completed_at`, `outcome` |
+| Tasks | `play_tasks` table | `completed`, `completed_at`, `assigned_to` |
+| Outcome | `plays` + `renewals` | `outcome` (RENEWED/CHURNED/EXPANDED/LOST), `outcome_reason` |
+
+## KPI Metrics
+
+The Revenue Impact dashboard computes:
+
+| Metric | Calculation |
+|--------|-------------|
+| **Total Revenue Impact** | ARR Protected + Expansion ARR |
+| **ARR Protected** | Sum of renewal ARR where `save_play_id` is set AND `disposition = RENEWED` |
+| **Expansion ARR** | Closed-won expansion/upsell opportunities where a PILLAR signal preceded the deal |
+| **Save Rate** | Renewed / (Renewed + Churned) for renewals with an active save play |
+| **Avg Days Early** | Average days between signal generation and renewal date |
+| **Pipeline Influenced** | Open opportunities where a PILLAR signal exists on the same account |
+| **ARR In Progress** | At-risk renewal ARR with active save plays currently running |
+
+## API Endpoint
+
+```
+GET /api/revenue-impact
+```
+
+Returns:
+
+```json
+{
+  "kpi": {
+    "total_revenue_impact": 180000,
+    "arr_protected": 180000,
+    "expansion_arr": 0,
+    "arr_in_progress": 420000,
+    "save_rate": 100,
+    "avg_days_early": 29,
+    "pipeline_influenced_arr": 1042000
+  },
+  "signals": {
+    "total": 47,
+    "by_family": { "RENEWAL": 9, "EXPANSION": 8, ... },
+    "by_severity": { "CRITICAL": 6, "WARNING": 17, "INFO": 24 }
+  },
+  "plays": {
+    "total": 15,
+    "triggered": 12,
+    "active": 9,
+    "completed": 4
+  },
+  "attribution_chain": [
+    {
+      "account_name": "Fairfax County PS",
+      "signal_title": "Superintendent Departure...",
+      "play_name": "Renewal Save Play",
+      "arr": 340000,
+      "days_early": 75,
+      "outcome": "APPROACHING",
+      "play_tasks": [
+        { "title": "Executive outreach call", "completed": true },
+        ...
+      ]
+    }
+  ]
+}
+```
+
+## Expandable Attribution Rows
+
+Each row in the attribution chain can be expanded to show:
+- **Account summary** — ARR, health score, risk score, renewal date, link to Account 360
+- **Signal detail** — full explanation text and recommended action
+- **Play tasks** — checklist with completion status and dates
+
+## Access
+
+Available to: CRO/CEO, VP Sales, VP CS, RevOps
+
+Navigate to: `/impact` or click "Revenue Impact" in the Command Center nav pills.

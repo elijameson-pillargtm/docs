@@ -8,11 +8,23 @@ icon: 'star'
 
 Starbridge.ai provides district intelligence for school districts, higher education institutions, and government entities. PILLAR ingests 120+ buyer attributes and stores them across account enrichment fields and dedicated entity tables.
 
+## Connecting Starbridge
+
+Customers connect their own Starbridge API key through the PILLAR Settings UI:
+
+1. Navigate to **Settings > Integrations**
+2. Find **Starbridge** under the Enrichment section
+3. Click **Connect**
+4. Paste your Starbridge API key in the modal
+5. Click **Save & Connect**
+
+The key is encrypted (AES-256-GCM) and stored per-organization. PILLAR never exposes the raw key after initial entry. Each organization manages their own Starbridge relationship — PILLAR is the consumption layer, not the data source.
+
 ## Data Flow
 
 1. **Initial Sync**: When an account is matched by `starbridge_buyer_id` or `nces_id`, a full attribute pull enriches the account record with 120+ fields
 2. **Webhook Updates**: Real-time notifications for job changes, RFP publications, budget shifts, and document postings
-3. **On-Demand Refresh**: Manual or scheduled re-sync of buyer attributes
+3. **On-Demand Refresh**: Manual or scheduled re-sync via the "Sync Now" button in Settings > Integrations
 4. **Signal Generation**: Starbridge data changes trigger signals in the STARBRIDGE, RENEWAL, EXPANSION, and ACCOUNT families
 
 ## Data Categories
