@@ -34,7 +34,40 @@ When CRITICAL signals are generated, Claude analyzes the full account context an
 }
 ```
 
-### 2. Account Intelligence
+### 2. AI Coaching Intelligence
+
+Comprehensive, per-rep coaching reports generated on-demand from the VP Sales or VP CS Coaching tab. Claude analyzes the rep's entire portfolio to produce actionable coaching guidance.
+
+| Component | Detail |
+|-----------|--------|
+| Model | Claude Sonnet 4.6 with adaptive thinking |
+| Trigger | VP clicks a rep name in the Coaching tab |
+| Max Duration | 60 seconds (streaming) |
+| Input | Full rep context: accounts, opportunities, signals, renewals, activities, quota, KPIs |
+
+**Data analyzed per rep:**
+- **Portfolio**: All owned accounts with health scores, risk scores, NPS, champion/exec sponsor status, expansion propensity, whitespace %
+- **Pipeline**: All opportunities with stage, probability, hygiene score, days in stage, push count, economic buyer status, contact count, next step
+- **Signals**: All active signals on owned accounts, broken down by family and severity, actioned vs unactioned
+- **Quota**: Annual and quarterly quota, attainment %, closed-won amount, weighted pipeline
+- **Renewals**: Upcoming renewals within 90 days with risk scores and NPS
+- **Activities**: Last 10-20 activities for engagement pattern analysis
+
+**Output schema:**
+| Field | Description |
+|-------|-------------|
+| `coaching_summary` | 4-5 sentence executive summary |
+| `overall_grade` | A/B/C/D/F letter grade |
+| `strengths` | 2-3 data-backed strengths with specific metrics |
+| `development_areas` | Named areas with specific examples and coaching actions |
+| `priority_deals` | 3-5 most critical deals with issue, recommended action, and urgency (immediate/this_week/this_quarter) |
+| `priority_accounts` | 3-5 accounts requiring coaching intervention |
+| `signal_response_rate` | Total/actioned/unactioned/critical unactioned with coaching note |
+| `pipeline_health` | Coverage %, gap amount, avg hygiene, deals without buyer, pushed/stalled counts |
+| `quota_outlook` | Attainment %, closed amount, pipeline amount, weighted pipeline, will-they-hit-quota assessment |
+| `one_on_one_agenda` | 3-5 prioritized bullet points for the VP's next 1:1 with this rep |
+
+### 3. Account Intelligence
 
 On-demand AI analysis accessible via Account 360.
 
@@ -43,7 +76,7 @@ On-demand AI analysis accessible via Account 360.
 | `/api/ai/account-intelligence` | Deep account analysis with deal strategy, risk assessment, expansion opportunities |
 | `/api/ai/narrative` | AI-generated account narrative for meeting prep and QBRs |
 | `/api/ai/action-plan` | Strategic action plan generation for specific accounts |
-| `/api/ai/coaching` | Rep coaching suggestions based on deal patterns |
+| `/api/ai/coaching` | Comprehensive rep coaching report (see above) |
 | `/api/ai/board-narrative` | Board-ready narrative generation for executive reporting |
 
 ### 3. Role-Specific Action Routing
