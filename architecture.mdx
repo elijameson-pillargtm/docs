@@ -52,7 +52,23 @@ Each rule produces a 0-100 sub-score with a weight (0-10). Category scores are w
 
 The signal engine evaluates scoring outputs against configurable thresholds to generate actionable signals. Signals have a 7-state lifecycle (PENDING, ACTIVE, ACKNOWLEDGED, IN_PROGRESS, RESOLVED, EXPIRED, SUPPRESSED) and are routed to 8 families: RENEWAL, PIPELINE, EXPANSION, ACCOUNT, COVERAGE, WORKFLOW, STARBRIDGE, and ECONOMICS.
 
-### 5. Presentation Layer
+### 5. Decision Engine (Strategic Intelligence)
+
+The Decision Engine sits above the scoring and signal layers, consuming their outputs to model financial consequences and generate strategic recommendations. It does not produce entity-level scores — it produces **strategic outputs**.
+
+Five layers of intelligence:
+
+1. **Territory Health Composite** — 0-100 score per territory from 5 weighted dimensions (financial 30%, coverage 25%, signals 20%, velocity 15%, attainment 10%). Persisted to `sam_territories` for cross-dashboard access.
+2. **Signal → Financial Cascade** — Every critical signal mapped to ARR at risk, cost-to-yield impact, NRR points, and headcount plan viability. Deduplicated by account.
+3. **What-If Modeling** — POST endpoint accepts account reassignments and headcount additions, returns projected before/after territory health and P&L impact.
+4. **Automated Rebalance** — System-generated proposals: reassign at-risk accounts from weak reps to strong reps (ranked by win rate + attainment + efficiency), add SDR support, or restructure negative-ROI territories.
+5. **Board Scenario Modeling** — Three scenarios (current trajectory, optimized execution, downside risk) computed from actual pipeline cohort win rates, renewal risk scores, and role economics. Every assumption shows the formula: input × rate = output.
+
+Access: `cro_ceo`, `vp_sales`, `revops` only.
+
+See the full [Decision Engine data model](/data/decision-engine) and [API reference](/api/decision-engine).
+
+### 6. Presentation Layer
 
 Next.js 14 (App Router) with role-based dashboards:
 
@@ -62,6 +78,7 @@ Next.js 14 (App Router) with role-based dashboards:
 - **Health Map** -- Heatmap of account health scores
 - **Signal Viewer** -- Signal feed with acknowledgment workflow
 - **Territory Dashboard** -- SAM equity and P&L analytics
+- **Decision Engine** -- Territory health, financial cascades, rebalance, board scenarios
 - **Blueprint Assessment** -- 142-item GTM maturity diagnostic
 
 ### 6. Security

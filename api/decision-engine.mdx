@@ -1,0 +1,243 @@
+---
+title: 'Decision Engine API'
+description: 'Strategic intelligence — territory health, financial cascades, what-if modeling, board scenarios'
+icon: 'brain'
+---
+
+# Decision Engine API
+
+The Decision Engine API synthesizes signal data, territory economics, role economics, pipeline cohorts, and headcount planning into strategic decisions with financial modeling.
+
+## GET `/api/decision-engine`
+
+Returns the full Decision Engine output: territory health scores, financial cascades, rebalance recommendations, board scenarios, and rep performance KPIs.
+
+**Auth:** Requires authenticated session. Scoped to org via `org_id`.
+
+**Access:** `cro_ceo`, `vp_sales`, `revops`
+
+### Response Shape
+
+```json
+{
+  "summary": {
+    "org_arr": 8340000,
+    "territory_count": 14,
+    "avg_territory_health": 63,
+    "healthy_territories": 6,
+    "caution_territories": 6,
+    "critical_territories": 2,
+    "total_at_risk_arr": 646000,
+    "total_pipeline": 6879000,
+    "rebalance_proposals": 2,
+    "financial_cascades": 9
+  },
+
+  "territory_health": [
+    {
+      "territory_id": "uuid",
+      "territory_name": "Texas Central",
+      "owner_id": "uuid",
+      "owner_name": "Tyler Kim",
+      "pipeline_coverage_ratio": 0,
+      "deal_velocity_days": 12,
+      "quota_attainment_pct": 0,
+      "active_signals": 1,
+      "critical_signals": 0,
+      "unactioned_signals": 1,
+      "rep_fully_loaded_cost": 75247,
+      "customer_arr": 53000,
+      "sam_arr": 255000,
+      "cost_to_yield_ratio": 1.42,
+      "implied_cac": 75247,
+      "breakeven_arr": 75247,
+      "pipeline_gap": 0,
+      "health_score": 35,
+      "health_status": "critical",
+      "health_components": {
+        "signal_score": 95,
+        "financial_score": 0,
+        "coverage_score": 100,
+        "velocity_score": 100,
+        "attainment_score": 99
+      }
+    }
+  ],
+
+  "financial_impacts": [
+    {
+      "signal_id": "uuid",
+      "signal_type": "renewal_risk_elevated",
+      "severity": "CRITICAL",
+      "account_name": "Baltimore City PS",
+      "account_id": "uuid",
+      "arr_at_risk": 103000,
+      "territory_name": "Mid-Atlantic",
+      "current_cost_to_yield": 0.29,
+      "projected_cost_to_yield_if_lost": 0.32,
+      "territory_drops_below_breakeven": false,
+      "nrr_impact_points": 1.2,
+      "headcount_plan_impacted": false,
+      "cascade_description": "If Baltimore City PS ($103K ARR) churns: Mid-Atlantic cost-to-yield goes from 0.29 to 0.32. Org NRR impact: -1.2 points."
+    }
+  ],
+
+  "rebalance_proposals": [
+    {
+      "type": "reassign_accounts",
+      "title": "Reassign 3 at-risk accounts from Lisa Rodriguez to Derek Johnson",
+      "description": "Lisa Rodriguez has a 33% win rate and 55 avg health...",
+      "from_territory": "Midwest",
+      "to_territory": "Southeast",
+      "accounts_affected": 3,
+      "arr_moved": 328000,
+      "cost_delta": 0,
+      "projected_coverage_improvement": 17,
+      "projected_yield_improvement": 111760,
+      "breakeven_months": 0,
+      "confidence": "high"
+    }
+  ],
+
+  "board_scenarios": [
+    {
+      "label": "Current Trajectory",
+      "subtitle": "No changes to team structure or process",
+      "probability": 60,
+      "projected_arr": 10845160,
+      "projected_nrr": 130.0,
+      "projected_grr": 97.9,
+      "target_attainment_pct": 179,
+      "headcount_delta": 0,
+      "headcount_cost_delta": 0,
+      "headcount_roles": [],
+      "assumptions": [
+        "Total pipeline: $6.9M ($4.6M closing this quarter). Win rate: 39.0% (from 4 historical cohorts) → $2.7M new ARR",
+        "At-risk: 2 critical accounts (50.0% churn rate) + 6 moderate (20.0% churn rate) → $178K churned of $646K at risk",
+        "Net ARR: +$2.7M new − $178K churn = +$2.5M"
+      ],
+      "risk_factors": [
+        "9 accounts in active financial cascade ($646K ARR)",
+        "3 reps below 40% win rate: Ryan Thompson (33%), Tyler Kim (38%), Lisa Rodriguez (33%)"
+      ]
+    }
+  ],
+
+  "rep_performance": [
+    {
+      "user_id": "uuid",
+      "name": "Kavita Patel",
+      "role": "Rep_CSM",
+      "quota": 1800000,
+      "won_deals": 4,
+      "lost_deals": 2,
+      "open_deals": 16,
+      "win_rate_pct": 67,
+      "won_arr": 290000,
+      "open_pipeline": 1755000,
+      "avg_deal_velocity_days": 10,
+      "account_count": 13,
+      "avg_account_health": 81,
+      "total_customer_arr": 1928000,
+      "quota_attainment_pct": 64,
+      "fully_loaded_cost": 311500,
+      "cost_per_dollar_won": 1.07
+    }
+  ],
+
+  "data_sources": {
+    "historical_win_rate": 39,
+    "cohort_count": 4,
+    "base_win_rate": 39,
+    "optimized_win_rate": 47,
+    "downside_win_rate": 23,
+    "base_churn_rate": 28
+  },
+
+  "generated_at": "2026-04-03T06:01:14.849Z"
+}
+```
+
+### Side Effects
+
+On every GET request, the Decision Engine persists territory health scores to `sam_territories`:
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `health_score` | INTEGER | Composite territory health (0-100) |
+| `health_status` | VARCHAR | `healthy`, `caution`, or `critical` |
+| `health_components` | JSONB | Five dimension scores |
+| `health_computed_at` | TIMESTAMP | When last computed |
+
+This is a non-blocking write-back so other dashboards can read territory health without calling the full Decision Engine.
+
+---
+
+## POST `/api/decision-engine`
+
+What-if modeling — propose a change and see the projected financial impact.
+
+**Body:**
+
+```json
+{
+  "action": "reassign_accounts",
+  "params": {
+    "from_owner_id": "uuid",
+    "to_owner_id": "uuid",
+    "account_ids": ["uuid", "uuid"]
+  }
+}
+```
+
+### Actions
+
+#### `reassign_accounts`
+
+Model moving accounts between territories.
+
+**Params:** `from_owner_id`, `to_owner_id`, `account_ids`
+
+**Response:** Before/after territory health, pipeline coverage change, cost-to-yield shift.
+
+#### `add_headcount`
+
+Model adding a new hire to a territory.
+
+**Params:** `role_type` (ae, csm, sdr), `territory_id`
+
+**Response:**
+
+```json
+{
+  "action": "add_headcount",
+  "role_type": "ae",
+  "territory_name": "California",
+  "fully_loaded_cost": 239000,
+  "current_territory_health": 58,
+  "revenue_optimistic": 1020000,
+  "revenue_realistic": 780000,
+  "revenue_pessimistic": 540000,
+  "roi_optimistic": 3.27,
+  "roi_realistic": 2.26,
+  "roi_pessimistic": 1.26,
+  "breakeven_month": 8,
+  "projected_health_after": 65
+}
+```
+
+### Data Dependencies
+
+The Decision Engine queries these tables in parallel:
+
+| Table | Fields Used |
+|-------|-------------|
+| `sam_territories` | Territory definitions, costs, customer ARR, SAM ARR |
+| `accounts` | Health scores, ARR, risk scores, owner, territory |
+| `opportunities` | All stages (including Closed Lost for win rates) |
+| `signals` | Active/acknowledged/in-progress signals |
+| `users` | Quotas, roles, active status |
+| `role_economics` | Fully loaded costs by role type |
+| `renewals` | Risk scores, dispositions |
+| `org_metrics` | Current/previous period ARR, NRR |
+| `pipeline_cohorts` | Historical win rates by quarter |

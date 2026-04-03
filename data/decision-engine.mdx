@@ -1,0 +1,164 @@
+---
+title: 'Decision Engine'
+description: 'Strategic intelligence layer — territory health, financial cascades, rebalance recommendations, board scenarios'
+icon: 'brain'
+---
+
+# Decision Engine
+
+The Decision Engine is PILLAR's strategic intelligence layer. It sits above the scoring engine and signal generator, consuming their outputs to model financial consequences, generate territory rebalance recommendations, and produce board-ready scenario projections.
+
+<Note>
+The Decision Engine does not produce entity-level scores (those come from the [Scoring Engine](/scoring/overview)). It produces **strategic outputs**: territory health composites, financial cascade models, rebalance proposals, and board scenarios.
+</Note>
+
+## How It Works
+
+```
+Scoring Rules (entity-level)
+  → Account health: 38
+  → Renewal risk: 62
+  → Pipeline hygiene: 75
+
+Decision Engine (strategic layer)
+  → Territory health composite (aggregates entity scores)
+  → Financial cascade (what does this risk cost the territory?)
+  → Rebalance recommendation (which rep should own this?)
+  → Board scenario (what happens to ARR/NRR under 3 assumptions?)
+```
+
+## Five Layers
+
+### Layer 1: Territory Health Composite
+
+Each territory receives a 0-100 health score computed from five weighted dimensions:
+
+| Dimension | Weight | Source | Scoring |
+|-----------|--------|--------|---------|
+| **Financial** | 30% | Territory cost-to-yield ratio | CTY ≤ 0.3 → 100, ≤ 0.5 → 75, ≤ 0.7 → 50, ≤ 1.0 → 25, > 1.0 → 0 |
+| **Coverage** | 25% | Pipeline coverage ratio (AE) or account retention % (CSM) | AE: 3x+ → 100, 2x → 70, 1x → 40. CSM: 80%+ healthy → 100, 60% → 75 |
+| **Signals** | 20% | Critical and unactioned signal counts | 100 - (critical × 20) - (unactioned × 5), min 0 |
+| **Velocity** | 15% | Avg days-in-stage for open deals | ≤ 15d → 100, ≤ 25d → 70, ≤ 35d → 40, > 35d → 20 |
+| **Attainment** | 10% | Quota attainment (AE) or retention quality (CSM) | AE: 80%+ → 100, 50% → 70, 25% → 40 |
+
+**Hard ceilings:**
+- Territory with cost-to-yield > 1.0 is capped at health 35 (critical)
+- Territory with cost-to-yield > 0.8 is capped at health 55 (caution)
+
+**Status classification:**
+- **Healthy**: score ≥ 65
+- **Caution**: score 40–64
+- **Critical**: score < 40
+
+Territory health scores are persisted to `sam_territories.health_score`, `sam_territories.health_status`, and `sam_territories.health_components` on every Decision Engine invocation.
+
+### Layer 2: Signal → Financial Cascade
+
+Every critical or warning signal of type `renewal_risk`, `churn`, or `usage_cliff` triggers a financial cascade analysis:
+
+| Output | Description |
+|--------|-------------|
+| `arr_at_risk` | Account ARR that would be lost on churn |
+| `current_cost_to_yield` | Territory CTY before churn |
+| `projected_cost_to_yield_if_lost` | Territory CTY if this account churns |
+| `territory_drops_below_breakeven` | Boolean: would churn push CTY > 1.0? |
+| `nrr_impact_points` | Percentage points of NRR lost (ARR / org ARR × 100) |
+| `headcount_plan_impacted` | Boolean: does projected yield fall below territory cost? |
+| `cascade_description` | Human-readable narrative of the full cascade |
+
+Cascades are deduplicated by account — one cascade per at-risk account, using the highest-severity signal.
+
+### Layer 3: What-If Modeling (POST)
+
+The Decision Engine accepts what-if scenarios via POST:
+
+**`reassign_accounts`** — Model moving accounts between territories:
+- Before/after territory health comparison
+- Pipeline coverage impact
+- Cost-to-yield shift
+
+**`add_headcount`** — Model adding a new hire:
+- Year-1 revenue projection (optimistic/realistic/pessimistic)
+- Fully loaded cost from role_economics
+- ROI and breakeven month
+- Pipeline generation estimate
+
+### Layer 4: Automated Rebalance Recommendations
+
+The engine generates four types of proposals:
+
+| Type | Trigger | Logic |
+|------|---------|-------|
+| **reassign_accounts** (performance) | Reps with < 40% win rate owning at-risk accounts | Move at-risk accounts from weaker reps to stronger reps (ranked by composite: 50% win rate + 30% attainment/health + 20% efficiency) |
+| **reassign_accounts** (coverage) | Territories with < 1.5x coverage while others have > 3.5x | Move healthy accounts from over-covered to under-covered territories |
+| **add_sdr_support** | Critical territories with > $200K pipeline gap | Add SDR at role_economics cost, compute breakeven from avg deal size × historical win rate |
+| **restructure** | Territories with cost-to-yield > 0.8 | Merge into a healthy territory with > 2.0x coverage |
+
+### Layer 5: Board Scenario Modeling
+
+Three scenarios computed from actual operational data:
+
+| Input | Source |
+|-------|--------|
+| Pipeline win rate | `pipeline_cohorts` historical average (4 most recent completed cohorts) |
+| Churn rate | Derived from renewal risk scores: critical accounts × 50% + moderate × 20% |
+| Quarterly quota | Sum of Rep_CSM quotas / 4 (excludes Manager roll-ups) |
+| Headcount costs | `role_economics` fully loaded annual by role type |
+
+**Current Trajectory** (60% probability):
+- Win rate: historical average (e.g., 39%)
+- Churn rate: base rate from renewal risk distribution
+- No territory changes
+
+**Optimized Execution** (25% probability):
+- Win rate: +20% relative lift (deal coaching benchmark)
+- Churn rate: -60% from save play execution
+- Account reassignments from weaker to stronger reps
+
+**Downside Risk** (15% probability):
+- Win rate: -40% degradation
+- Churn rate: +80% (no intervention)
+- Forced restructure: -1 AE
+
+Each scenario produces: projected ARR, NRR, GRR, quarterly attainment, headcount delta, cost delta, assumptions (with math), and risk factors (referencing real accounts and reps).
+
+## Rep Performance KPIs
+
+The Decision Engine computes per-rep performance metrics used for reassignment intelligence:
+
+| KPI | Description |
+|-----|-------------|
+| `win_rate_pct` | Won / (Won + Lost) × 100 |
+| `won_arr` | Total ARR from Closed Won deals |
+| `open_pipeline` | Total ARR from open deals |
+| `avg_deal_velocity_days` | Mean days-in-stage for open deals (excludes Discovery) |
+| `account_count` | Number of active accounts owned |
+| `avg_account_health` | Mean health score across owned accounts |
+| `quota_attainment_pct` | Won ARR / quarterly quota × 100 (AEs only) |
+| `fully_loaded_cost` | Annual cost from territory allocation |
+| `cost_per_dollar_won` | Fully loaded cost / won ARR (lower = more efficient) |
+
+Reps are ranked by a composite score:
+- **50%** win rate
+- **30%** quota attainment (AEs) or avg account health (CSMs)
+- **20%** efficiency (inverse of cost-per-dollar-won)
+
+## Data Flow
+
+```
+sam_territories (costs)  ─┐
+accounts (health, ARR)   ─┤
+opportunities (pipeline) ─┤──→ Decision Engine API ──→ territory_health[]
+signals (risk)           ─┤                          ──→ financial_impacts[]
+users (quota, role)      ─┤                          ──→ rebalance_proposals[]
+role_economics (costs)   ─┤                          ──→ board_scenarios[]
+renewals (risk_score)    ─┤                          ──→ rep_performance[]
+pipeline_cohorts (rates) ─┘                          ──→ sam_territories (write-back)
+org_metrics (NRR, GRR)
+```
+
+## Access Control
+
+The Decision Engine is accessible to: `cro_ceo`, `vp_sales`, `revops`.
+
+It is not accessible to: operators (AE/CSM), growth_marketing, product, vp_cs. These roles see the outputs surfaced in their respective dashboards (Command Center KPIs, Territory P&L) but do not access the full strategic modeling interface.

@@ -92,7 +92,8 @@
         "data/governance",
         "data/pipeline-triage",
         "data/financial-data",
-        "data/ai-intelligence"
+        "data/ai-intelligence",
+        "data/decision-engine"
       ]
     },
     {
@@ -147,6 +148,7 @@
         "api/forecast",
         "api/territory",
         "api/blueprint",
+        "api/decision-engine",
         "api/mcp"
       ]
     }
