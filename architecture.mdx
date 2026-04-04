@@ -12,89 +12,75 @@ PILLAR follows a layered architecture that ingests data from multiple sources, c
 
 ### 1. Data Ingestion Layer
 
-CRM connectors (Salesforce, HubSpot, Dynamics 365) sync bidirectionally every 5 minutes using OAuth 2.0. Email and calendar data flows from Google Workspace and Microsoft 365. Starbridge district intelligence arrives via webhook and on-demand API calls.
-
-All connectors are managed through the `crm_connections` and `integrations` tables, with customizable field mappings in `crm_field_mappings`.
+CRM connectors (Salesforce, HubSpot, Dynamics 365) sync data using OAuth 2.0. PILLAR pulls account, contact, opportunity, and lead data from your CRM on a regular cadence and pushes computed scores (health, risk, priority) back to custom fields in your CRM so reps see PILLAR intelligence inside their existing tools. Email and calendar metadata flows from Google Workspace and Microsoft 365. Starbridge district intelligence arrives via webhook and on-demand API calls.
 
 ### 2. Data Model Layer
 
-PostgreSQL (Supabase) with Drizzle ORM. Core entities:
+PILLAR maintains a comprehensive data model with core entities:
 
-| Entity | Table | Relationships |
-|--------|-------|---------------|
-| Organizations | `organizations` | Top-level tenant |
-| Users | `users` | Belong to an org, own accounts/deals |
-| Accounts | `accounts` | 100+ fields, owns contacts/opps/renewals |
-| Contacts | `contacts` | Belong to accounts, buying roles |
-| Opportunities | `opportunities` | Pipeline with hygiene/confidence scores |
-| Renewals | `renewals` | 8-variable risk scoring |
-| Signals | `signals` | 7-state lifecycle, 8 families |
-| Plays | `plays` | Triggered from signals, task-based |
-| Activities | `activities` | Email, meeting, call, note |
-| Leads | `leads` | Lifecycle from new to opportunity |
+| Entity | Description |
+|--------|-------------|
+| Organizations | Top-level tenant for multi-org isolation |
+| Users | Team members with role-based access |
+| Accounts | Customer and prospect records with 100+ enrichment fields |
+| Contacts | Stakeholders with buying role classification |
+| Opportunities | Pipeline deals with hygiene and confidence scores |
+| Renewals | Contract renewals with multi-variable risk scoring |
+| Signals | Actionable alerts with lifecycle management |
+| Plays | Signal-triggered playbooks with task execution |
+| Activities | Interaction history (email, meeting, call, note) |
+| Leads | Inbound leads with behavioral scoring and lifecycle tracking |
 
 ### 3. Scoring Engine
 
-93+ rules across 8 categories evaluate every account on a 5-minute cycle:
+A comprehensive rules engine evaluates every account across 8 categories:
 
-- **Engagement** (12 rules) -- Usage trends, activity volume, product adoption
-- **Fit** (12 rules) -- ICP alignment, segment, budget, procurement
-- **Intent** (12 rules) -- Buying signals, RFPs, grants, competitive windows
-- **Velocity** (11 rules) -- Deal speed, stage progression, meeting cadence
-- **Pipeline Health** (16 rules) -- Hygiene, forecast integrity, handoff compliance
-- **Relationship** (11 rules) -- Champion, exec sponsor, multi-threading
-- **Risk** (12 rules) -- Churn patterns, budget decline, competitive threat
-- **Opportunity Quality** (11 rules) -- Deal size, win probability, buyer readiness
+- **Engagement** -- Usage trends, activity volume, product adoption
+- **Fit** -- ICP alignment, segment, budget, procurement
+- **Intent** -- Buying signals, RFPs, grants, competitive windows
+- **Velocity** -- Deal speed, stage progression, meeting cadence
+- **Pipeline Health** -- Hygiene, forecast integrity, handoff compliance
+- **Relationship** -- Champion, exec sponsor, multi-threading
+- **Risk** -- Churn patterns, budget decline, competitive threat
+- **Opportunity Quality** -- Deal size, win probability, buyer readiness
 
-Each rule produces a 0-100 sub-score with a weight (0-10). Category scores are weighted averages, and the composite score is a weighted sum of category scores.
+Each rule produces a 0-100 sub-score. Category scores are weighted averages, and the composite score is a weighted sum of category scores. All weights are configurable.
 
 ### 4. Signal Generation Engine
 
-The signal engine evaluates scoring outputs against configurable thresholds to generate actionable signals. Signals have a 7-state lifecycle (PENDING, ACTIVE, ACKNOWLEDGED, IN_PROGRESS, RESOLVED, EXPIRED, SUPPRESSED) and are routed to 8 families: RENEWAL, PIPELINE, EXPANSION, ACCOUNT, COVERAGE, WORKFLOW, STARBRIDGE, and ECONOMICS.
+The signal engine evaluates scoring outputs against configurable thresholds to generate actionable signals. Signals have a 7-state lifecycle (Pending, Active, Acknowledged, In Progress, Resolved, Expired, Suppressed) and are routed across 8 families: Renewal, Pipeline, Expansion, Account, Coverage, Workflow, Starbridge, and Economics.
 
 ### 5. Decision Engine (Strategic Intelligence)
 
-The Decision Engine sits above the scoring and signal layers, consuming their outputs to model financial consequences and generate strategic recommendations. It does not produce entity-level scores — it produces **strategic outputs**.
+The Decision Engine sits above the scoring and signal layers, consuming their outputs to model financial consequences and generate strategic recommendations. It produces strategic outputs rather than entity-level scores.
 
 Five layers of intelligence:
 
-1. **Territory Health Composite** — 0-100 score per territory from 5 weighted dimensions (financial 30%, coverage 25%, signals 20%, velocity 15%, attainment 10%). Persisted to `sam_territories` for cross-dashboard access.
-2. **Signal → Financial Cascade** — Every critical signal mapped to ARR at risk, cost-to-yield impact, NRR points, and headcount plan viability. Deduplicated by account.
-3. **What-If Modeling** — POST endpoint accepts account reassignments and headcount additions, returns projected before/after territory health and P&L impact.
-4. **Automated Rebalance** — System-generated proposals: reassign at-risk accounts from weak reps to strong reps (ranked by win rate + attainment + efficiency), add SDR support, or restructure negative-ROI territories.
-5. **Board Scenario Modeling** — Three scenarios (current trajectory, optimized execution, downside risk) computed from actual pipeline cohort win rates, renewal risk scores, and role economics. Every assumption shows the formula: input × rate = output.
+1. **Territory Health Composite** -- A 0-100 score per territory computed from multiple weighted dimensions including financial health, pipeline coverage, signal density, deal velocity, and quota attainment
+2. **Signal-to-Financial Cascade** -- Every critical signal mapped to ARR at risk, cost-to-yield impact, NRR impact, and headcount plan viability
+3. **What-If Modeling** -- Accepts proposed account reassignments and headcount additions, returns projected before/after territory health and P&L impact
+4. **Automated Rebalance** -- System-generated proposals to optimize territory assignments and coverage
+5. **Board Scenario Modeling** -- Three scenarios (current trajectory, optimized execution, downside risk) computed from actual pipeline cohort data and operational metrics
 
-Access: `cro_ceo`, `vp_sales`, `revops` only.
-
-See the full [Decision Engine data model](/data/decision-engine) and [API reference](/api/decision-engine).
+Access: Executive and RevOps roles only.
 
 ### 6. Presentation Layer
 
-Next.js 14 (App Router) with role-based dashboards:
+Role-based dashboards including:
 
 - **Command Center** -- Executive overview with KPIs
 - **Pipeline Board** -- Kanban with hygiene overlays
-- **Forecast Dashboard** -- 5-band probability-weighted forecast
+- **Forecast Dashboard** -- Multi-band probability-weighted forecast
 - **Health Map** -- Heatmap of account health scores
 - **Signal Viewer** -- Signal feed with acknowledgment workflow
 - **Territory Dashboard** -- SAM equity and P&L analytics
 - **Decision Engine** -- Territory health, financial cascades, rebalance, board scenarios
 - **Blueprint Assessment** -- 142-item GTM maturity diagnostic
 
-### 6. Security
+### 7. Security
 
-Row-Level Security (RLS) on all tables. Multi-tenant via `org_id`. Role-based access: Leader, Manager, Rep_CSM, Admin, Executive_RO. OAuth tokens encrypted at rest.
+Row-Level Security on all data. Multi-tenant isolation. Role-based access control with five levels: Leader, Manager, Rep/CSM, Admin, and Executive Read-Only. OAuth tokens encrypted at rest.
 
-## Technology Stack
+## Integrations
 
-| Component | Technology |
-|-----------|------------|
-| Database | PostgreSQL (Supabase) |
-| ORM | Drizzle ORM |
-| Backend | Next.js 14 API Routes |
-| Frontend | Next.js 14, React, Tailwind CSS |
-| Auth | Supabase Auth |
-| Hosting | Vercel |
-| District Intelligence | Starbridge.ai API |
-| CRM Integration | Salesforce, HubSpot, Dynamics 365 |
-| Notifications | Slack, Email (digest) |
+PILLAR integrates with 20+ tools across CRM, email, calendar, district intelligence, and notification platforms. See [Data Sources](/data-sources) for the full list.

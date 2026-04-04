@@ -6,64 +6,45 @@ icon: 'chart-line'
 
 # Opportunities
 
-The `opportunities` table represents active and historical deals. Each opportunity carries scoring outputs for pipeline hygiene and forecast confidence, plus Starbridge procurement intelligence.
+Opportunities represent active and historical deals in your pipeline. Each opportunity carries PILLAR scoring outputs for pipeline hygiene and forecast confidence, plus Starbridge procurement intelligence.
 
-## Core Fields
+## Core Information
 
-| Field | Type | Source | Description |
-|-------|------|--------|-------------|
-| `id` | UUID | System | Unique identifier |
-| `account_id` | UUID | System | Parent account (FK to `accounts`) |
-| `name` | VARCHAR(300) | CRM Sync | Deal name |
-| `amount` | DECIMAL(14,2) | CRM Sync | Deal value |
-| `stage` | ENUM | CRM Sync | `Discovery`, `Evaluation`, `Proposal`, `Negotiation`, `Closed Won`, `Closed Lost` |
-| `probability` | INTEGER | CRM Sync | Win probability (0-100) |
-| `close_date` | TIMESTAMP | CRM Sync | Expected close date |
-| `forecast_category` | ENUM | CRM/Manual | `Commit`, `Best Case`, `Upside`, `Pipeline`, `Omitted` |
-| `opportunity_type` | ENUM | CRM/Manual | `net_new_business`, `renewal`, `expansion`, `cross_sell` |
-| `owner_id` | UUID | CRM Sync | Deal owner (FK to `users`) |
-| `created_date` | TIMESTAMP | CRM Sync | When the deal was created |
+| Field | Description |
+|-------|-------------|
+| Account | Parent account the deal is associated with |
+| Deal Name | Name of the opportunity |
+| Amount | Deal value |
+| Stage | Pipeline stage (Discovery through Closed Won/Lost) |
+| Probability | Win probability (0-100) |
+| Close Date | Expected close date |
+| Forecast Category | Commit, Best Case, Upside, Pipeline, or Omitted |
+| Opportunity Type | Net new business, renewal, expansion, or cross-sell |
+| Owner | Deal owner (AE or CSM) |
 
 ## Scoring Outputs
 
-| Field | Type | Range | Description |
-|-------|------|-------|-------------|
-| `hygiene_score` | INTEGER | 0-100 | Pipeline hygiene (higher = more problems) |
-| `confidence_score` | INTEGER | 0-100 | Forecast confidence (higher = more confident) |
-| `days_in_stage` | INTEGER | 0+ | Days in current stage |
-| `push_count` | INTEGER | 0+ | Number of close date pushes |
-| `contact_count` | INTEGER | 0+ | Contacts associated with the deal |
-| `has_economic_buyer` | BOOLEAN | -- | Whether an economic buyer is identified |
-| `has_next_step` | BOOLEAN | -- | Whether a next step is defined |
-| `next_step` | TEXT | -- | Free-text next step description |
-| `last_meeting_date` | TIMESTAMP | -- | Most recent meeting date |
-| `competitor` | VARCHAR(200) | -- | Named competitor on the deal |
+| Score | Description |
+|-------|-------------|
+| Hygiene Score | Pipeline hygiene assessment (higher = more problems) |
+| Confidence Score | Forecast confidence level (higher = more confident) |
+| Days in Stage | Time in current pipeline stage |
+| Push Count | Number of close date pushes |
+| Contact Count | Stakeholders mapped to the deal |
+| Economic Buyer | Whether a budget holder has been identified |
+| Next Step | Whether an actionable next step is defined |
 
 ## Starbridge Enrichment
 
-| Field | Type | Source | Description |
-|-------|------|--------|-------------|
-| `procurement_complexity` | INTEGER | Starbridge | Procurement difficulty for this deal (0-100) |
-| `cooperative_pathway` | VARCHAR(300) | Starbridge | Available coop purchasing pathway |
-| `budget_status` | VARCHAR(200) | Starbridge | Budget availability status |
-| `strategic_fit` | TEXT | Starbridge | Strategic alignment assessment |
-| `rfp_status` | VARCHAR(300) | Starbridge | Active RFP/solicitation status |
-| `grant_match` | TEXT | Starbridge | Grant funding match analysis |
+When Starbridge data is available, opportunities are enriched with:
+
+- **Procurement Complexity** -- How difficult the buying process is for this institution
+- **Cooperative Pathway** -- Available cooperative purchasing agreements
+- **Budget Status** -- Whether budget is available and approved
+- **Strategic Fit** -- How well your product aligns with the institution's priorities
+- **RFP Status** -- Active solicitations relevant to this opportunity
+- **Grant Match** -- Available grant funding that could support the purchase
 
 ## CRM Sync
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `crm_external_id` | VARCHAR(100) | External CRM record ID |
-| `updated_at` | TIMESTAMP | Last modification time |
-
-## Indexes
-
-| Index | Columns | Purpose |
-|-------|---------|---------|
-| `opp_account_idx` | `account_id` | Filter by account |
-| `opp_owner_idx` | `owner_id` | Filter by owner |
-| `opp_stage_idx` | `stage` | Filter by stage |
-| `opp_close_date_idx` | `close_date` | Sort by close date |
-| `opp_confidence_idx` | `confidence_score` | Sort by confidence |
-| `opp_type_idx` | `opportunity_type` | Filter by deal type |
+Opportunities are synced from your connected CRM and updated with PILLAR scoring outputs.

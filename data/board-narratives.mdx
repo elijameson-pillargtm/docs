@@ -1,0 +1,108 @@
+---
+title: 'Board Narratives'
+description: 'AI-generated board-ready narratives powered by Claude, with structured sections, data points, and pre-computed KPIs'
+icon: 'file-lines'
+---
+
+# Board Narratives
+
+The Board Narrative engine assembles a comprehensive data bundle from across the PILLAR platform and uses Claude to generate structured, board-ready narratives. Each narrative contains multiple sections with prose content, supporting data points, trend indicators, and severity classifications.
+
+<Note>
+Board Narratives are powered by Anthropic's Claude AI. The engine enforces pre-computed KPIs to ensure generated numbers match PILLAR's verified data exactly.
+</Note>
+
+## How It Works
+
+```
+PILLAR data (accounts, renewals, signals, plays, territories, org metrics)
+  → Data bundle assembly (parallel fetch of all relevant tables)
+  → Pre-computed KPI injection (verified numbers Claude must use verbatim)
+  → Prompt construction (tone + narrative type + section instructions)
+  → Claude API call (structured JSON response)
+  → Narrative persistence (saved to board_narratives table)
+```
+
+## Narrative Types
+
+| Type | Title | Sections |
+|------|-------|----------|
+| `executive_summary` | Executive Summary | Revenue Health, Portfolio Risk, Pipeline & Growth, Territory Performance, Signal Intelligence |
+| `quarterly_review` | Quarterly Business Review | Quarter in Review, Revenue Composition, Customer Health Trends, Operational Efficiency, Forward Outlook |
+| `renewal_forecast` | Renewal Forecast & Retention Analysis | Renewal Pipeline Overview, Risk Assessment, Retention Trajectory, Account-Level Concerns, Save & Expansion Opportunities |
+| `territory_health` | Territory Health & Coverage Report | Territory Overview, Top Performing, Underperforming, Balance Analysis, Signal Density |
+| `pipeline_update` | Pipeline & Growth Update | Pipeline Summary, Deal Velocity, New Business Pipeline, Expansion Pipeline, Forecast Confidence |
+
+Each narrative type generates 5 core sections plus an optional "Strategic Recommendations" section when `includeRecommendations` is enabled.
+
+## Tone Options
+
+| Tone | Style |
+|------|-------|
+| `board_formal` | Authoritative third person, present tense, precise language. 2-3 paragraphs per section. |
+| `exec_concise` | Punchy, direct, action-oriented. Short paragraphs, lead with key insight. |
+| `detailed_analytical` | Thorough, data-rich, with clear reasoning chains and supporting evidence. |
+
+## Data Assembly
+
+The engine assembles data from the following sources in a single parallel fetch:
+
+| Source | Data |
+|--------|------|
+| **Accounts** | Total count, ARR, health scores, risk scores, segment/tier breakdown, at-risk list, top accounts |
+| **Renewals** | Upcoming renewals, renewable ARR, at-risk renewal ARR, dispositions |
+| **Signals** | Active signal count by severity and category, recent critical signals |
+| **Plays** | Active/completed counts, completion rate |
+| **Territories** | Per-territory account count, ARR, average health |
+| **Org Metrics** | ARR, NRR, GRR, CAC, LTV/CAC, margins, pipeline, Rule of 40 |
+| **Blueprint** | GTM maturity scores by category (if available) |
+
+## Pre-Computed KPIs
+
+To prevent the AI from hallucinating numbers, the engine pre-computes all aggregate KPIs and injects them into the prompt with explicit instructions to use them verbatim:
+
+- Total Portfolio ARR
+- At-risk account count and ARR (with % of portfolio)
+- Total renewable ARR and at-risk renewal ARR (with % of renewable)
+- Critical and warning signal counts
+- Top territory metrics (name, accounts, ARR, health)
+- Lowest health territory metrics
+- Play execution stats (active, completed, completion rate)
+- Average health and risk scores
+
+## Narrative Sections
+
+Each section in the generated narrative contains:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `heading` | string | Section title |
+| `content` | string | Markdown prose content (2-4 paragraphs) |
+| `dataPoints` | array | 2-4 key metrics with label, value, and trend direction |
+| `severity` | string | `positive`, `neutral`, `caution`, or `critical` |
+
+Data points include trend indicators:
+
+| Trend | Meaning |
+|-------|---------|
+| `up` | Metric is increasing |
+| `down` | Metric is decreasing |
+| `flat` | No significant change |
+
+## Data Model
+
+PILLAR stores generated narratives with full data snapshots for auditability. Each narrative includes the type, period, generated sections with content and data points, the complete data bundle used for generation (audit trail), tone, model version, and generation metadata.
+
+> Detailed data model schemas are available in the PILLAR Implementation Guide provided to active customers.
+
+## API Endpoints
+
+```
+POST /api/narratives/generate
+```
+
+See the [Narratives API](/api/narratives) reference for full endpoint documentation.
+
+## Access
+
+Available to: CRO/CEO, VP Sales, RevOps (executive roles)

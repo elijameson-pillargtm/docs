@@ -8,32 +8,20 @@ icon: 'file-contract'
 
 Starbridge monitors public procurement portals for RFPs, bids, and solicitations from buyer organizations. Active RFPs generate high-priority signals.
 
-## RFP Fields (`starbridge_rfps`)
+## RFP Data
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | UUID | Unique identifier |
-| `org_id` | UUID | Organization tenant |
-| `account_id` | UUID | Issuing account (FK to `accounts`) |
-| `title` | VARCHAR(500) | RFP title |
-| `summary` | TEXT | AI-generated RFP summary |
-| `source_url` | VARCHAR(500) | Link to original RFP document |
-| `release_date` | DATE | When the RFP was published |
-| `close_date` | DATE | Submission deadline |
-| `bid_instructions` | TEXT | How to submit a response |
-| `buyer_name` | VARCHAR(300) | Issuing organization name |
-| `starbridge_id` | VARCHAR(50) | Starbridge record ID |
+Each RFP record includes:
+
+- RFP title and AI-generated summary
+- Link to the original RFP document
+- Release date and submission deadline
+- Bid submission instructions
+- Issuing organization name
 
 ## Signal Generation
 
-Active RFPs generate `rfp_active` signals:
-
-- **Family**: PIPELINE
-- **Severity**: Always CRITICAL (RFPs are time-sensitive buying events)
-- **Recommended Action**: Review RFP requirements, assess fit, prepare response
+Active RFPs generate critical-severity pipeline signals because RFPs are time-sensitive buying events. Recommended action: Review RFP requirements, assess fit, prepare response.
 
 ## Scoring Impact
 
-- **INT-007**: RFP activity detected -- scores 95 when an active RFP signal exists (weight: 9, highest in intent category)
-- **Forecast Confidence**: RFP presence increases procurement alignment sub-score
-- Active RFPs indicate strong buying intent and are one of the most powerful expansion signals
+RFP activity is one of the strongest intent signals in PILLAR's scoring engine. An active RFP significantly increases the Intent category score, and its presence improves forecast confidence through the procurement alignment dimension.

@@ -1,94 +1,49 @@
 ---
 title: 'Economics Rules'
-description: 'ECON-001 through ECON-007: Revenue economics and financial health rules'
+description: 'Revenue economics and financial health monitoring'
 icon: 'coins'
 ---
 
-# Economics Rules (ECON-001 to ECON-007)
+# Economics Rules
 
-The Economics rules evaluate financial health, budget adherence, unit economics, headcount plan viability, and S&M efficiency. Higher triggered scores indicate greater financial risk.
+The Economics rules evaluate financial health at the organizational and territory level. They monitor budget adherence, unit economics, headcount plan viability, and sales and marketing efficiency.
 
-## Rules
+## What It Monitors
 
-### ECON-001: Budget Overrun Detection
+### Budget Adherence
+Detects when actual spend exceeds planned budget beyond configurable thresholds, helping finance and RevOps teams catch overruns early.
 
-| Property | Value |
-|----------|-------|
-| Category | Risk |
-| Weight | 6 |
-| Description | Checks whether actual spend exceeds planned budget by more than 10% |
-| Scoring | ≤ 5% variance = 100, ≤ 10% = 75, ≤ 20% = 40, ≤ 30% = 20, over 30% = 5 |
-| Trigger | Variance over 10% |
+### Territory Economics
+Flags territories where the cost-to-yield ratio indicates spending is too high relative to revenue generated, signaling a need for rebalancing.
 
-### ECON-002: Territory Below Breakeven
+### Headcount Plan Viability
+Evaluates whether headcount scenarios yield positive P&L impact, helping leadership make data-driven hiring decisions.
 
-| Property | Value |
-|----------|-------|
-| Category | Risk |
-| Weight | 7 |
-| Description | Flags territories where cost-to-yield ratio exceeds 0.30 (spending >30% of revenue on sales cost) |
-| Scoring | ≤ 0.15 = 100, ≤ 0.20 = 80, ≤ 0.30 = 60, ≤ 0.50 = 30, over 0.50 = 5 |
-| Trigger | Cost-to-yield over 0.30 |
+### Pipeline Coverage
+Checks whether pipeline coverage meets healthy multiples of quota, alerting when coverage gaps could jeopardize attainment.
 
-### ECON-003: Headcount Plan Risk
+### Unit Economics
+Monitors LTV:CAC ratio and payback period to ensure sustainable growth economics.
 
-| Property | Value |
-|----------|-------|
-| Category | Risk |
-| Weight | 8 |
-| Description | Evaluates whether the headcount scenario's net P&L impact is negative |
-| Scoring | at or above $200K = 100, at or above $50K = 80, at or above $0 = 60, at or above -$100K = 30, below -$100K = 5 |
-| Trigger | Net P&L impact below $0 |
+### Acquisition vs. Retention Balance
+Flags when investment in new customer acquisition is disproportionate relative to retention spending.
 
-### ECON-004: Pipeline Coverage Gap
-
-| Property | Value |
-|----------|-------|
-| Category | Pipeline Health |
-| Weight | 6 |
-| Description | Checks whether pipeline coverage is below 1.5x quota |
-| Scoring | 3x+ = 100, 2.5x+ = 85, 2x+ = 70, 1.5x+ = 55, 1x+ = 30, below 1x = 10 |
-| Trigger | Coverage below 1.5x |
-
-### ECON-005: Unit Economics Degradation
-
-| Property | Value |
-|----------|-------|
-| Category | Risk |
-| Weight | 7 |
-| Description | Checks LTV:CAC ratio (under 3 is poor) and payback period (>18 months is too long) |
-| Scoring | LTV:CAC below 2 = max 10, below 3 = max 40, below 4 = max 70. Payback over 24mo = max 10, over 18mo = max 35, over 12mo = max 65 |
-| Trigger | LTV:CAC below 3 or payback over 18 months |
-
-### ECON-006: Retention vs Acquisition Cost Imbalance
-
-| Property | Value |
-|----------|-------|
-| Category | Risk |
-| Weight | 5 |
-| Description | Flags when acquire-vs-retain cost ratio exceeds 4.0x |
-| Scoring | ≤ 2x = 100, ≤ 3x = 80, ≤ 4x = 60, ≤ 6x = 30, over 6x = 10 |
-| Trigger | Ratio over 4.0x |
-
-### ECON-007: S&M Efficiency Warning
-
-| Property | Value |
-|----------|-------|
-| Category | Risk |
-| Weight | 6 |
-| Description | Checks if Sales & Marketing spend exceeds 55% of revenue |
-| Scoring | ≤ 30% = 100, ≤ 40% = 80, ≤ 50% = 60, ≤ 55% = 40, ≤ 70% = 20, over 70% = 5 |
-| Trigger | S&M over 55% of revenue |
+### Sales & Marketing Efficiency
+Monitors S&M spend as a percentage of revenue, alerting when efficiency metrics fall outside healthy ranges.
 
 ## Economics Signals
 
-Each economics rule can generate a corresponding signal:
+Each economics rule can generate a corresponding signal when thresholds are exceeded:
 
-| Signal Type | Family | Severity Logic |
-|-------------|--------|---------------|
-| `budget_overrun` | ECONOMICS | CRITICAL over 25%, WARNING over 10% |
-| `territory_below_breakeven` | ECONOMICS | CRITICAL over 0.50, WARNING over 0.30 |
-| `headcount_plan_risk` | ECONOMICS | CRITICAL if P&L below -$100K, WARNING if below $0 |
-| `unit_economics_degradation` | ECONOMICS | CRITICAL if LTV:CAC below 2, WARNING if below 3 |
-| `retention_vs_acquisition` | ECONOMICS | CRITICAL if ratio over 6, WARNING if over 4 |
-| `sm_efficiency_warning` | ECONOMICS | CRITICAL if S&M over 70%, WARNING if over 55% |
+| Signal | Description |
+|--------|-------------|
+| Budget Overrun | Actual spend exceeds planned budget |
+| Territory Below Breakeven | Territory cost-to-yield ratio is too high |
+| Headcount Plan Risk | Headcount scenario yields negative P&L |
+| Unit Economics Degradation | LTV:CAC or payback period outside healthy range |
+| Retention vs. Acquisition Imbalance | Over-investing in acquisition relative to retention |
+| S&M Efficiency Warning | Sales & Marketing spend is too high relative to revenue |
+
+All economics thresholds and signal severity levels are configurable per organization.
+
+> Detailed scoring methodology, including exact thresholds, scoring curves, and trigger conditions, is available in the PILLAR Implementation Guide provided to active customers.

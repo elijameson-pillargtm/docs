@@ -1,0 +1,102 @@
+---
+title: 'Renewal Forecast API'
+description: 'Per-renewal probability computation, GRR/NRR projections, and org-level forecast snapshots'
+icon: 'chart-mixed'
+---
+
+# Renewal Forecast API
+
+The Renewal Forecast API computes per-renewal probabilities and org-level GRR/NRR projections. GET returns cached or on-the-fly computed forecasts; POST triggers a fresh computation and persists results.
+
+## GET `/api/forecasting/renewals`
+
+Returns the org-level forecast and per-renewal probabilities for a given period.
+
+**Auth:** Requires authenticated session. Scoped to organization.
+
+### Query Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `period` | string | Next quarter | Period to forecast. Formats: `2026-Q2`, `2026-H2`, `2026` |
+| `model_version` | string | `v1` | Model version identifier |
+
+### Response
+
+The response includes:
+
+- **forecast** -- Org-level metrics: total renewable ARR, weighted renewal ARR, projected GRR, projected NRR, high confidence ARR, at-risk ARR, renewal count, average probability
+- **probabilities** -- Per-renewal array with account details, probability, confidence tier, risk factors, positive signals, ARR, renewal date, health score, risk score
+- **cached** -- Boolean indicating whether results were served from cache
+
+### Response Fields: `forecast`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `org_id` | string | Organization ID |
+| `forecast_period` | string | Period identifier |
+| `forecast_date` | string | ISO timestamp of computation |
+| `total_renewable_arr` | number | Total ARR up for renewal |
+| `weighted_renewal_arr` | number | Probability-weighted ARR |
+| `projected_grr` | number | Projected Gross Revenue Retention (0-1) |
+| `projected_nrr` | number | Projected Net Revenue Retention (0-1) |
+| `high_confidence_arr` | number | ARR from high-confidence renewals |
+| `at_risk_arr` | number | ARR from at-risk renewals |
+| `renewal_count` | number | Number of renewals in period |
+| `avg_probability` | number | Average renewal probability |
+| `forecast_model_version` | string | Model version used |
+
+### Response Fields: `probabilities[]`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `renewal_id` | string | Renewal record ID |
+| `account_id` | string | Account ID |
+| `account_name` | string | Account display name |
+| `probability` | number | Renewal probability (0.01-0.99) |
+| `confidence_tier` | string | `high`, `medium`, or `at_risk` |
+| `risk_factors` | array | `[{factor, impact, description}]` |
+| `positive_signals` | array | `[{signal, impact, description}]` |
+| `arr_amount` | number | Renewal ARR |
+| `renewal_date` | string | Renewal due date |
+| `health_score` | number | Account health score |
+| `risk_score` | number | Account risk score |
+
+### Caching Behavior
+
+GET first checks for a cached forecast matching the org, period, and model version. If found, it returns cached data with `cached: true`. If not, it computes on-the-fly without persisting.
+
+---
+
+## POST `/api/forecasting/renewals`
+
+Triggers a fresh forecast computation and persists results.
+
+**Auth:** Requires authenticated session. Scoped to organization.
+
+### Request Body
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `period` | string | Next quarter | Period to forecast |
+| `model_version` | string | `v1` | Model version identifier |
+
+### Response
+
+Same structure as GET, with `cached: false`.
+
+### Side Effects
+
+- Persists org-level forecast data (keyed on organization + period + model version)
+- Persists per-renewal probability data (keyed on renewal + model version)
+
+### Computation Flow
+
+1. Load all renewals in the period with associated account data
+2. Load active signals to detect critical signal accounts
+3. Load active plays to detect accounts with open playbooks
+4. Compute probability for each renewal using the scoring model
+5. Aggregate into org-level GRR/NRR projections
+6. Persist forecast and probability records
+
+> See the [Renewal Forecasting](/data/renewal-forecasting) data model page for full details on the probability model inputs and weights.

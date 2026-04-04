@@ -1,0 +1,94 @@
+---
+title: 'Narratives API'
+description: 'AI-generated board-ready narratives with structured sections and pre-computed KPIs'
+icon: 'file-lines'
+---
+
+# Narratives API
+
+The Narratives API generates board-ready narrative documents using Claude. It assembles data from across the PILLAR platform, constructs a structured prompt with pre-computed KPIs, and returns a multi-section narrative with prose content, data points, and severity indicators.
+
+## POST `/api/narratives/generate`
+
+Generates a new board narrative and persists it to the database.
+
+**Auth:** Requires authenticated session. Scoped to organization.
+
+### Request Body
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `narrativeType` | string | Yes | -- | Type of narrative to generate |
+| `period` | string | Yes | -- | Period identifier (e.g. `2026-Q1`) |
+| `includeRecommendations` | boolean | No | `true` | Include strategic recommendations section |
+| `tone` | string | No | `board_formal` | Writing tone |
+
+### Valid `narrativeType` Values
+
+| Value | Generated Title |
+|-------|----------------|
+| `executive_summary` | Executive Summary |
+| `quarterly_review` | Quarterly Business Review |
+| `renewal_forecast` | Renewal Forecast & Retention Analysis |
+| `territory_health` | Territory Health & Coverage Report |
+| `pipeline_update` | Pipeline & Growth Update |
+
+### Valid `tone` Values
+
+| Value | Style |
+|-------|-------|
+| `board_formal` | Authoritative third person, precise language |
+| `exec_concise` | Punchy, direct, action-oriented |
+| `detailed_analytical` | Thorough, data-rich, clear reasoning chains |
+
+### Response
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `narrative` | object | Generated narrative |
+
+### Response Fields: `narrative`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Narrative UUID |
+| `title` | string | Generated title (e.g. "Executive Summary -- 2026-Q1") |
+| `narrativeType` | string | Narrative type |
+| `period` | string | Period |
+| `sections` | array | Narrative sections |
+| `generatedAt` | string | ISO timestamp |
+| `modelVersion` | string | Claude model version used |
+| `tone` | string | Tone used |
+
+### Response Fields: `sections[]`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `heading` | string | Section title |
+| `content` | string | Markdown prose content (2-4 paragraphs) |
+| `dataPoints` | array | Key metrics: `[{label, value, trend}]` |
+| `severity` | string | `positive`, `neutral`, `caution`, `critical` |
+
+### Data Point Trends
+
+| Trend | Meaning |
+|-------|---------|
+| `up` | Metric increasing |
+| `down` | Metric decreasing |
+| `flat` | No significant change |
+
+### Side Effects
+
+- Assembles a complete data bundle from accounts, renewals, signals, plays, territories, org metrics, and blueprint assessments
+- Calls the Anthropic Claude API to generate narrative content
+- Saves the narrative with the full data snapshot for auditability
+
+### Error Handling
+
+| Status | Condition |
+|--------|-----------|
+| 400 | Invalid `narrativeType`, missing `period`, or invalid `tone` |
+| 401 | Not authenticated |
+| 500 | Generation failure or API error (returns error message in body) |
+
+> See the [Board Narratives](/data/board-narratives) data model page for full details on narrative types, data assembly, and the pre-computed KPI system.

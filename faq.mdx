@@ -10,7 +10,7 @@ icon: 'circle-question'
 
 <AccordionGroup>
   <Accordion title="How long does the initial CRM sync take?">
-    The initial sync typically completes in 5-15 minutes depending on the number of records in your CRM. Salesforce orgs with 50,000+ accounts may take up to 30 minutes. You can monitor sync progress in **Settings > Integrations**. After the initial sync, PILLAR pulls data from your CRM every 15 minutes and can push computed scores (health, risk, priority) back to custom fields in your CRM.
+    The initial sync typically completes in 5-15 minutes depending on the number of records in your CRM. Larger CRM instances may take up to 30 minutes. You can monitor sync progress in **Settings > Integrations**. After the initial sync, PILLAR pulls data from your CRM every 15 minutes and pushes computed scores (health, risk, priority) back to custom fields in your CRM.
   </Accordion>
 
   <Accordion title="Which CRMs does PILLAR support?">
@@ -18,11 +18,11 @@ icon: 'circle-question'
   </Accordion>
 
   <Accordion title="What email/calendar integrations are available?">
-    PILLAR integrates with **Google Workspace** for email metadata and calendar event ingestion. Microsoft 365 support is coming soon. PILLAR never reads email body content — only metadata (sender, recipient, timestamp, subject line) is used for activity-based scoring.
+    PILLAR integrates with **Google Workspace** for email metadata and calendar event ingestion. Microsoft 365 support is coming soon. PILLAR never reads email body content -- only metadata (sender, recipient, timestamp, subject line) is used for activity-based scoring.
   </Accordion>
 
   <Accordion title="How do I invite team members?">
-    Navigate to **Settings > Team** to invite users by email. Each user is assigned a role (Admin, Manager, or Rep) that controls their access level. All users within your organization share the same data, isolated by Row-Level Security from other tenants.
+    Navigate to **Settings > Team** to invite users by email. Each user is assigned a role (Admin, Leader, Manager, or Rep/CSM) that controls their access level. All users within your organization share the same data, isolated by Row-Level Security from other tenants.
   </Accordion>
 </AccordionGroup>
 
@@ -30,19 +30,19 @@ icon: 'circle-question'
 
 <AccordionGroup>
   <Accordion title="Can I customize scoring weights?">
-    Yes. Every scoring category and individual rule weight is configurable per organization. Navigate to **Settings > Scoring** to adjust weights. Changes take effect on the next scoring cycle (within 5 minutes). PILLAR ships with defaults tuned for EdTech GTM teams, but you can tailor them to your specific business.
+    Yes. Every scoring category and individual rule weight is configurable per organization. Navigate to **Settings > Scoring** to adjust weights. PILLAR ships with defaults tuned for EdTech GTM teams, but you can tailor them to your specific business.
   </Accordion>
 
   <Accordion title="How often are scores recalculated?">
-    Scores are recomputed every 5-6 hours for scoring-based evaluations, and in real-time for webhook-triggered events (like Starbridge district intelligence updates). The scoring engine evaluates all 93+ rules against the full `ScoringContext` for each account.
+    Scores are recomputed on a regular cadence for scoring-based evaluations, and in real-time for webhook-triggered events (like Starbridge district intelligence updates). The scoring engine evaluates all rules against the full context for each account.
   </Accordion>
 
   <Accordion title="What's the difference between a score and a signal?">
-    A **score** is a continuous numeric value (0-100) computed by the scoring engine — for example, an account health score of 72. A **signal** is a discrete event generated when a score crosses a threshold or an external event is detected — for example, "Account Health dropped below 50." Scores measure state; signals drive action.
+    A **score** is a continuous numeric value (0-100) computed by the scoring engine -- for example, an account health score of 72. A **signal** is a discrete event generated when a score crosses a threshold or an external event is detected -- for example, "Account Health dropped below warning level." Scores measure state; signals drive action.
   </Accordion>
 
   <Accordion title="How does the ICP Fit score work?">
-    ICP Fit evaluates how closely an account matches your ideal customer profile across firmographic, technographic, and behavioral dimensions. The model considers district size, budget allocation, technology adoption patterns, and historical win rates for similar accounts. See the [ICP Fit documentation](/scoring/icp-fit) for the full rule set.
+    ICP Fit evaluates how closely an account matches your ideal customer profile across firmographic, technographic, and behavioral dimensions. The model considers organization size, budget allocation, technology adoption patterns, and decision-maker presence. All ICP parameters are configurable per organization. See the [ICP Fit documentation](/scoring/icp-fit) for details.
   </Accordion>
 </AccordionGroup>
 
@@ -54,7 +54,7 @@ icon: 'circle-question'
   </Accordion>
 
   <Accordion title="What are the signal severity levels?">
-    PILLAR uses four severity levels: **Critical** (immediate action required), **High** (action needed within 24 hours), **Medium** (review this week), and **Low** (informational). Severity is determined by the magnitude of the score change or the nature of the triggering event.
+    PILLAR uses three severity levels: **Critical** (immediate action required), **Warning** (attention needed within 24-48 hours), and **Info** (informational, no immediate action required). Severity is determined by the magnitude of the score change or the nature of the triggering event.
   </Accordion>
 
   <Accordion title="Can I suppress or snooze a signal?">
@@ -66,7 +66,7 @@ icon: 'circle-question'
 
 <AccordionGroup>
   <Accordion title="How is my data secured?">
-    PILLAR uses **Supabase** with Row-Level Security (RLS) enforcing strict multi-tenant data isolation. Every database query is filtered by `org_id`, ensuring your data is never accessible to other organizations. Authentication uses JWT tokens issued by Supabase Auth, and all data is encrypted in transit (TLS 1.3) and at rest.
+    PILLAR uses Row-Level Security (RLS) enforcing strict multi-tenant data isolation. Every query is filtered by organization, ensuring your data is never accessible to other organizations. Authentication uses industry-standard session tokens, and all data is encrypted in transit and at rest.
   </Accordion>
 
   <Accordion title="What is Starbridge district intelligence?">
@@ -74,11 +74,11 @@ icon: 'circle-question'
   </Accordion>
 
   <Accordion title="Does PILLAR read my email content?">
-    No. PILLAR only ingests email **metadata** — sender, recipient, timestamp, and subject line. Email body content is never read, stored, or processed. This metadata powers activity-based scoring and engagement signals.
+    No. PILLAR only ingests email **metadata** -- sender, recipient, timestamp, and subject line. Email body content is never read, stored, or processed. This metadata powers activity-based scoring and engagement signals.
   </Accordion>
 
   <Accordion title="Can I export my data?">
-    Yes. PILLAR provides full data export via the API. You can also export dashboards and reports as PDF. All data remains yours — PILLAR operates as a processing layer on top of your existing CRM data.
+    Yes. PILLAR provides full data export via the API. You can also export dashboards and reports as PDF. All data remains yours -- PILLAR operates as a processing layer on top of your existing CRM data.
   </Accordion>
 </AccordionGroup>
 

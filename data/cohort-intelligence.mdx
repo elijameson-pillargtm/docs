@@ -1,0 +1,108 @@
+---
+title: 'Cohort Intelligence'
+description: 'Cohort definitions, revenue snapshots, vintage retention curves, and anomaly detection across account segments'
+icon: 'chart-scatter-bubble'
+---
+
+# Cohort Intelligence
+
+The Cohort Intelligence engine groups accounts into cohorts by vintage (sign-up quarter), segment, territory, or rep, then computes per-cohort revenue metrics (NRR, GRR, churn, expansion), generates vintage retention curves, and detects anomalies like accelerating churn or health score decline.
+
+<Note>
+Cohort Intelligence consumes data from the [Accounts](/data/accounts) and [Renewals](/data/renewals) tables. It does not modify entity-level scores -- it produces **aggregate cohort metrics** for trend analysis and board reporting.
+</Note>
+
+## How It Works
+
+```
+Accounts + Renewals data
+  → Cohort definitions (vintage, segment, territory, rep)
+  → Cohort snapshots (NRR, GRR, churn, expansion per period)
+  → Vintage curves (month-by-month retention from cohort start)
+  → Cohort comparison (ranked by NRR with best/worst flags)
+  → Anomaly detection (low NRR, accelerating churn, health decline)
+```
+
+## Cohort Types
+
+| Type | Grouping Field | Example |
+|------|---------------|---------|
+| **Vintage** | `created_at` quarter | Vintage 2025-Q3 |
+| **Segment** | `segment` | Segment: Enterprise |
+| **Territory** | `territory` | Territory: Northeast |
+| **Rep** | `owner_id` | Rep: sarah-jones |
+| **Custom** | User-defined filter | Custom criteria |
+
+## Cohort Snapshots
+
+Each cohort receives a periodic snapshot with the following metrics:
+
+| Metric | Description |
+|--------|-------------|
+| **Total ARR** | Sum of ARR across all cohort members |
+| **Starting ARR** | ARR at the beginning of the snapshot period |
+| **NRR** | (Starting + Expansion - Contraction - Churn) / Starting x 100 |
+| **GRR** | (Starting - Contraction - Churn) / Starting x 100 (capped at 100%) |
+| **Churn Count** | Number of accounts with CHURNED disposition in the period |
+| **Churn ARR** | ARR lost to churn |
+| **Expansion ARR** | ARR gained from expansion |
+| **Contraction ARR** | ARR lost to downsell |
+| **Avg Health Score** | Average health score across cohort members |
+| **Avg Risk Score** | Average risk score across cohort members |
+| **Avg Products per Account** | Average product count |
+| **Avg Adoption %** | Average product adoption percentage |
+
+## Vintage Curves
+
+Vintage curves track month-by-month retention from the cohort's start date for up to 36 months. Each data point includes:
+
+| Field | Description |
+|-------|-------------|
+| **Months Since Start** | 0, 1, 2, ... up to 36 |
+| **Retention %** | (Starting ARR - Cumulative Churn + Cumulative Expansion) / Starting ARR x 100 |
+| **Accounts Remaining** | Starting account count minus cumulative churned accounts |
+| **Cumulative Churn ARR** | Running total of ARR lost to churn |
+| **Cumulative Expansion ARR** | Running total of ARR gained from expansion |
+
+Vintage curves can exceed 100% retention when expansion ARR outpaces churn -- this is a sign of strong net revenue retention.
+
+## Anomaly Detection
+
+The engine flags three anomaly types:
+
+| Anomaly | Description |
+|---------|-------------|
+| **Low NRR** | Net revenue retention below healthy thresholds, with escalating severity |
+| **Accelerating Churn** | Churn count increasing period-over-period, with severity based on acceleration rate |
+| **Health Decline** | Average health score declining significantly from prior period |
+
+> Exact anomaly thresholds and severity classifications are configurable per organization and available in the PILLAR Implementation Guide provided to active customers.
+
+## Cohort Comparison
+
+Cohorts are ranked by NRR with explicit best/worst indicators:
+
+| Indicator | Meaning |
+|-----------|---------|
+| `best` | Highest NRR cohort |
+| `worst` | Lowest NRR cohort |
+| `normal` | All others |
+
+## Data Model
+
+PILLAR stores cohort definitions (grouping criteria and member counts), periodic cohort snapshots (revenue metrics, health scores, churn/expansion data per period), and vintage retention curves (month-by-month retention tracking for up to 36 months).
+
+> Detailed data model schemas are available in the PILLAR Implementation Guide provided to active customers.
+
+## API Endpoints
+
+```
+GET  /api/cohorts/definitions
+POST /api/cohorts/definitions
+```
+
+See the [Cohorts API](/api/cohorts) reference for full endpoint documentation.
+
+## Access
+
+Available to: CRO/CEO, VP Sales, VP CS, RevOps

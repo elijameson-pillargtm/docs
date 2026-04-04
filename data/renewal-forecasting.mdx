@@ -1,0 +1,99 @@
+---
+title: 'Renewal Forecasting'
+description: 'Probabilistic renewal modeling with per-account risk/signal decomposition, GRR/NRR projections, and org-level forecast snapshots'
+icon: 'chart-mixed'
+---
+
+# Renewal Forecasting
+
+The Renewal Forecasting engine computes a probability of renewal for every upcoming renewal in your portfolio, then aggregates those probabilities into org-level GRR and NRR projections. Each probability is decomposed into explicit risk factors and positive signals so teams can see exactly why a renewal is confident or at risk.
+
+<Note>
+Renewal Forecasting builds on data from the [Scoring Engine](/scoring/overview) (health scores, risk scores) and the [Signals](/signals/overview) taxonomy (critical signal detection). It does not replace those systems -- it consumes their outputs to produce forward-looking retention projections.
+</Note>
+
+## How It Works
+
+```
+Scoring Engine (entity-level)
+  → Health score, risk score, engagement score
+
+Renewal Forecasting Engine
+  → Per-renewal probability (0.01–0.99)
+  → Risk factor decomposition (what's dragging probability down)
+  → Positive signal decomposition (what's boosting probability)
+  → Org-level GRR / NRR projection (ARR-weighted)
+  → Forecast snapshot (persisted for trend analysis)
+```
+
+## Probability Model
+
+Each renewal receives a probability score between 0.01 and 0.99 computed from multiple input signals including:
+
+- **Health Score** -- Current account health level
+- **Risk Score** -- Renewal risk assessment
+- **Engagement Score** -- Activity and usage patterns
+- **Disposition** -- Current renewal lifecycle state
+- **Days to Renewal** -- Proximity to renewal date and urgency
+- **Active Playbooks** -- Whether intervention plays are in progress
+- **Critical Signals** -- Recent critical signals on the account
+- **NPS Score** -- Customer satisfaction level
+- **Contract Tenure** -- Length of customer relationship
+- **Deal Size** -- ARR-based scrutiny adjustment
+
+Each factor adjusts the probability up or down from a calibrated baseline. The final value is clamped to a valid probability range.
+
+> Exact model weights, base probability, adjustment formulas, and clamp values are available in the PILLAR Implementation Guide provided to active customers.
+
+## Confidence Tiers
+
+Each renewal is classified into a confidence tier based on its computed probability:
+
+| Tier | Meaning |
+|------|---------|
+| **high** | Renewal is highly likely |
+| **medium** | Some risk factors present |
+| **at_risk** | Significant risk -- intervention recommended |
+
+## Org-Level Projections
+
+The engine aggregates per-renewal probabilities into portfolio-level metrics:
+
+| Metric | Description |
+|--------|-------------|
+| **Projected GRR** | ARR-weighted average of renewal probabilities |
+| **Projected NRR** | GRR adjusted for expansion rate |
+| **Weighted Renewal ARR** | Probability-weighted sum across all renewals |
+| **High Confidence ARR** | ARR from high-confidence renewals |
+| **At-Risk ARR** | ARR from at-risk renewals |
+
+## Data Model
+
+PILLAR stores org-level forecast snapshots for trend tracking and per-renewal probability computations with full risk/signal decomposition. Each forecast is versioned and keyed by organization and period.
+
+> Detailed data model schemas are available in the PILLAR Implementation Guide provided to active customers.
+
+## Period Formats
+
+The forecast engine accepts multiple period formats:
+
+| Format | Example | Range |
+|--------|---------|-------|
+| Quarter | `2026-Q2` | Apr 1 - Jun 30 |
+| Half | `2026-H2` | Jul 1 - Dec 31 |
+| Year | `2026` | Jan 1 - Dec 31 |
+
+If no period is specified, the engine defaults to the next quarter.
+
+## API Endpoint
+
+```
+GET  /api/forecasting/renewals
+POST /api/forecasting/renewals
+```
+
+See the [Renewal Forecast API](/api/renewal-forecast) reference for full endpoint documentation.
+
+## Access
+
+Available to: CRO/CEO, VP Sales, VP CS, RevOps

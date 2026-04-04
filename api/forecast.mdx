@@ -24,27 +24,24 @@ Returns the current forecast view including:
 ### POST
 Creates or updates forecast overrides for specific opportunities in a period.
 
-## Forecast Override Object
+## Forecast Override
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `opportunity_id` | UUID | Target deal |
-| `period` | string | Forecast period (e.g., "2025-Q2") |
-| `pillar_category` | enum | Won, Commit, Probable, Upside, Projection |
-| `amount` | decimal | Forecast amount |
-| `weighted_amount` | decimal | Auto-calculated probability-weighted amount |
-| `probability_pct` | integer | Category probability (100/100/50/25/15) |
-| `next_step` | string | Dated deal narrative |
-| `exec_sponsor_engaged` | boolean | Executive engagement status |
-| `confidence_rationale` | string | Why this category was assigned |
-| `product_mix` | string[] | Products in the deal |
+Each forecast override captures:
+
+| Field | Description |
+|-------|-------------|
+| Opportunity | Target deal |
+| Period | Forecast period (e.g., "2025-Q2") |
+| Category | Won, Commit, Probable, Upside, or Projection |
+| Amount | Forecast amount |
+| Weighted Amount | Auto-calculated probability-weighted amount |
+| Next Step | Dated deal narrative |
+| Executive Engagement | Whether exec sponsor is engaged |
+| Confidence Rationale | Why this category was assigned |
+| Product Mix | Products included in the deal |
 
 ## Probability Weights
 
-| Category | Weight |
-|----------|--------|
-| Won | 100% |
-| Commit | 100% |
-| Probable | 50% |
-| Upside | 25% |
-| Projection | 15% |
+Each forecast category carries a configurable probability weight used for weighted pipeline calculations. Weights decrease from Won (highest certainty) through Projection (lowest certainty).
+
+> Default probability weights per forecast category are available in the PILLAR Implementation Guide provided to active customers.

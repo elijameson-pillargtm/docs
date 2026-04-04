@@ -1,0 +1,177 @@
+---
+title: 'Expansion Intelligence API'
+description: 'Product affinity matrix, expansion signals, and cross-sell opportunity management'
+icon: 'grid-2-plus'
+---
+
+# Expansion Intelligence API
+
+The Expansion Intelligence API manages the product affinity matrix and expansion signals. It includes endpoints for querying and recomputing co-adoption data, generating prioritized expansion signals, and updating signal status as opportunities progress.
+
+## GET `/api/expansion/affinity`
+
+Returns the product affinity matrix showing co-adoption patterns between products.
+
+**Auth:** Requires authenticated session. Scoped to organization.
+
+### Query Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `segment` | string | -- | Filter by segment (`all`, `Enterprise`, `Mid-Market`, `SMB`) |
+
+### Response
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `matrix` | array | Affinity entries enriched with product names and categories |
+| `products` | array | Full product catalog for the organization |
+
+### Response Fields: `matrix[]`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `product_a_id` | string | Source product ID |
+| `product_b_id` | string | Target product ID |
+| `product_a_name` | string | Source product name |
+| `product_b_name` | string | Target product name |
+| `co_adoption_count` | number | Accounts owning both products |
+| `co_adoption_rate` | number | Co-adoption percentage |
+| `avg_time_to_cross_sell_days` | number | Average days between product starts |
+| `avg_arr_uplift` | number | Average ARR of target product when co-adopted |
+| `segment` | string | Segment filter applied |
+| `sample_size` | number | Accounts with source product |
+| `confidence` | string | `high`, `medium`, or `low` |
+
+---
+
+## POST `/api/expansion/affinity`
+
+Recomputes the affinity matrix from current account product data. Deletes existing entries for the org and inserts fresh computations.
+
+**Auth:** Requires authenticated session. Scoped to organization.
+
+### Request Body
+
+No body required.
+
+### Response
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `success` | boolean | Operation result |
+| `entries_computed` | number | Total affinity entries generated |
+| `products` | number | Products analyzed |
+| `accounts` | number | Accounts analyzed |
+
+### Computation Flow
+
+1. Fetch active products, account_products, and accounts
+2. Compute overall affinity matrix (all segments combined)
+3. Compute per-segment affinity (Enterprise, Mid-Market, SMB)
+4. Delete existing matrix entries for the org
+5. Insert all new entries
+
+---
+
+## GET `/api/expansion/signals`
+
+Returns prioritized expansion signals with account and product enrichment.
+
+**Auth:** Requires authenticated session. Scoped to organization.
+
+### Query Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `account_id` | string | -- | Filter by account |
+| `status` | string | -- | Filter by status (`pending`, `pitched`, `won`, `dismissed`) |
+| `priority` | number | -- | Filter by priority (1-5) |
+| `product_id` | string | -- | Filter by target product |
+
+### Response
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `signals` | array | Enriched expansion signal records |
+| `kpi` | object | Summary KPIs |
+| `products` | array | Product catalog |
+
+### Response Fields: `kpi`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `total_opportunities` | number | Total expansion signals |
+| `estimated_expansion_arr` | number | Sum of estimated ARR across all signals |
+| `high_priority_count` | number | Signals with priority 1 or 2 |
+| `avg_affinity_score` | number | Average affinity score |
+
+### Response Fields: `signals[]`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `account_id` | string | Account ID |
+| `account_name` | string | Account name |
+| `account_segment` | string | Account segment |
+| `account_arr` | number | Current account ARR |
+| `target_product_id` | string | Recommended product ID |
+| `target_product_name` | string | Recommended product name |
+| `source_product_id` | string | Strongest affinity source (nullable) |
+| `source_product_name` | string | Source product name (nullable) |
+| `affinity_score` | number | Composite expansion score (0-1) |
+| `adoption_readiness` | number | Adoption readiness component (0-1) |
+| `estimated_arr` | number | Estimated expansion ARR |
+| `priority` | number | 1 (highest) to 5 (lowest) |
+| `reason` | string | Human-readable explanation |
+| `status` | string | Signal status |
+| `current_products` | array | Account's current active products |
+
+---
+
+## POST `/api/expansion/signals`
+
+Generates expansion signals for all active accounts using affinity data.
+
+**Auth:** Requires authenticated session. Scoped to organization.
+
+### Request Body
+
+No body required.
+
+### Response
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `success` | boolean | Operation result |
+| `signals_generated` | number | Total signals created |
+| `accounts_analyzed` | number | Accounts evaluated |
+| `products_evaluated` | number | Products in catalog |
+
+### Side Effects
+
+- Deletes existing `pending` signals for the org (preserves `pitched`, `won`, `dismissed`)
+- Inserts freshly computed signals
+
+---
+
+## PATCH `/api/expansion/signals`
+
+Updates the status of an expansion signal as it progresses through the sales process.
+
+**Auth:** Requires authenticated session. Scoped to organization.
+
+### Request Body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `signal_id` | string | Yes | Signal ID to update |
+| `status` | string | Yes | New status: `pending`, `pitched`, `won`, `dismissed` |
+
+### Response
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `success` | boolean | Operation result |
+| `signal` | object | Updated signal record |
+
+> See the [Product Affinity](/data/product-affinity) data model page for full details on the affinity matrix computation and expansion scoring methodology.

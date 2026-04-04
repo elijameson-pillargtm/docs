@@ -6,25 +6,37 @@ icon: 'clock-rotate-left'
 
 # Changelog
 
-All notable changes to the PILLAR platform are documented here. Releases follow semantic versioning.
+All notable changes to the PILLAR platform are documented here.
 
 ---
 
-## v3.2.0 — March 31, 2026
+## v3.3.0 -- April 4, 2026
+
+**Renewal Forecasting, Procurement Intelligence, Product Affinity, Cohort Intelligence, Playbook Evolution, Board Narratives**
+
+- **Renewal Forecasting Engine** -- Per-renewal probability model with risk factor and positive signal decomposition. Computes org-level GRR/NRR projections weighted by ARR. Inputs include health score, risk score, engagement, disposition, days to renewal, active playbooks, critical signals, NPS, contract tenure, and deal size.
+- **Procurement Intelligence** -- Maps each account's fiscal year into a complete procurement calendar with budget planning, approval, and allocation windows. Assesses renewal-to-budget alignment, generates milestone-based engagement timelines, forecasts budget cycle status per quarter, and identifies procurement risks including misalignment, late engagement, budget freeze, election cycle, and complex procurement.
+- **Product Affinity Matrix** -- Computes co-adoption rates, cross-sell timelines, and ARR uplift for every product pair, both overall and per segment. Generates prioritized expansion signals scored by multiple weighted components. Four-state signal lifecycle (pending/pitched/won/dismissed). Extends the Expansion Pipeline with product-pair intelligence.
+- **Cohort Intelligence** -- Auto-generates cohorts by vintage quarter, segment, territory, and rep. Computes per-cohort NRR, GRR, churn, expansion, and contraction. Generates 36-month vintage retention curves. Detects anomalies including low NRR, accelerating churn, and health score decline.
+- **Playbook Evolution** -- Closed-loop play effectiveness tracking. Groups completed plays by template, segment, and tier, then computes win rates, average time to completion, ARR impact, and health delta. Generates play recommendations using segment affinity scoring and signal severity. Flags underperforming templates.
+- **Board Narrative Generation** -- AI-powered board-ready narratives using Claude. Five narrative types (executive summary, QBR, renewal forecast, territory health, pipeline update) with three tone options (board formal, exec concise, detailed analytical). Pre-computed KPI injection ensures generated numbers match verified PILLAR data. Full data snapshot saved for auditability.
+
+---
+
+## v3.2.0 -- March 31, 2026
 
 **Revenue Impact, Expansion Pipeline, Governance Enforcement**
 
-- **Revenue Impact Dashboard** — new `/impact` page with signal-to-outcome attribution. Traces every dollar PILLAR touched: signal generated → play triggered → outcome logged. KPIs: ARR Protected, Save Rate, Avg Days Early, Pipeline Influenced. Expandable attribution chain rows with account detail, signal context, and play task completion status.
-- **Expansion Pipeline Dashboard** — new `/expansion` page with product heatmap (accounts x products), whitespace ARR calculation, expansion propensity scoring, recommended next product, and active expansion signals.
-- **Mandatory Play Outcomes** — when all play tasks are completed, an outcome modal requires RENEWED/CHURNED/EXPANDED/LOST before the play can close. Auto-updates linked renewal disposition and logs governance entry.
-- **SLA Enforcement** — signal acknowledgment SLAs (CRITICAL: 4h, WARNING: 24h) and play SLA breach detection. Generates WORKFLOW escalation signals and governance log entries for non-compliance. Runs in the hourly cron scoring job.
-- **Starbridge API Key Self-Service** — customers can now enter their Starbridge API key directly in Settings > Integrations. Key encrypted with AES-256-GCM, stored per-org.
-- **`complete_play` MCP Tool** — new MCP tool for AI agents to close plays with mandatory outcomes via Claude Desktop, Cursor, or any MCP-compatible client.
-- **16 MCP Tools** — total tool count increased from 15 to 16 with the addition of `complete_play`.
+- **Revenue Impact Dashboard** -- New `/impact` page with signal-to-outcome attribution. Traces every dollar PILLAR touched: signal generated, play triggered, outcome logged. KPIs: ARR Protected, Save Rate, Avg Days Early, Pipeline Influenced. Expandable attribution chain rows with account detail, signal context, and play task completion status.
+- **Expansion Pipeline Dashboard** -- New `/expansion` page with product heatmap (accounts x products), whitespace ARR calculation, expansion propensity scoring, recommended next product, and active expansion signals.
+- **Mandatory Play Outcomes** -- When all play tasks are completed, an outcome modal requires an outcome (Renewed, Churned, Expanded, Lost) before the play can close. Auto-updates linked renewal disposition and logs governance entry.
+- **SLA Enforcement** -- Signal acknowledgment SLAs and play SLA breach detection. Generates escalation signals and governance log entries for non-compliance.
+- **Starbridge API Key Self-Service** -- Customers can now enter their Starbridge API key directly in Settings > Integrations. Key encrypted and stored per-org.
+- **`complete_play` MCP Tool** -- New MCP tool for AI agents to close plays with mandatory outcomes via Claude Desktop, Cursor, or any MCP-compatible client.
 
 ---
 
-## v3.1.0 — March 2026
+## v3.1.0 -- March 2026
 
 **Blueprint Assessment MVP**
 
@@ -32,18 +44,18 @@ All notable changes to the PILLAR platform are documented here. Releases follow 
 - 142-question assessment across 5 pillars and 27 categories
 - AI-generated strengths and gaps analysis with consultant-grade depth
 - PDF report generation with full pillar breakdown
-- Lead capture gate with automatic email notifications
-- Admin dashboard for managing submissions at [app.pillargtm.com/admin/blueprint](https://app.pillargtm.com/admin/blueprint)
-- Maturity tier classification: Foundational, Emerging, Scaling, Optimized
+- Lead capture with automatic email notifications
+- Admin dashboard for managing submissions
+- Maturity tier classification: Foundation, Emerging, Mature, Advanced
 
 ---
 
-## v3.0.0 — February 2026
+## v3.0.0 -- February 2026
 
 **Scoring Engine v3 and Signal Taxonomy**
 
-- Expanded scoring engine to 93+ rules across 8 categories
-- Added configurable weights per organization via `org_scoring_profiles`
+- Expanded scoring engine with comprehensive rule coverage across 8 categories
+- Added configurable weights per organization
 - New scoring categories: Expansion Readiness, Territory Equity, Economics Rules
 - Signal Taxonomy v3: 8 signal families, 30+ signal types
 - 7-state signal lifecycle with severity-based routing
@@ -52,50 +64,49 @@ All notable changes to the PILLAR platform are documented here. Releases follow 
 
 ---
 
-## v2.5.0 — January 2026
+## v2.5.0 -- January 2026
 
 **Revenue Economics and Territory Management**
 
 - Revenue Economics data model: CAC, LTV, magic number, payback period
 - Territory management with geographic and named-account assignments
-- Territory equity scoring to identify coverage imbalances
+- Territory equity monitoring to identify coverage imbalances
 - Economics-based signals for unit economics anomalies
 
 ---
 
-## v2.0.0 — December 2025
+## v2.0.0 -- December 2025
 
 **AI Intelligence Layer**
 
 - AI-powered recommended actions on every signal
 - Natural language signal summaries
 - Predictive churn modeling using renewal risk scores
-- AI Intelligence data model with prompt history and confidence scores
 - Plays engine: automated sequences triggered by signal combinations
 
 ---
 
-## v1.5.0 — November 2025
+## v1.5.0 -- November 2025
 
 **CRM Integrations and Real-Time Sync**
 
-- Salesforce bidirectional sync (every 5 minutes)
-- HubSpot bidirectional sync (every 5 minutes)
+- Salesforce integration with inbound sync and outbound score push
+- HubSpot integration with inbound sync and outbound score push
 - Google Workspace email metadata and calendar event ingestion
 - Activity tracking and engagement scoring
 - Pipeline hygiene scoring with stage-level analysis
 
 ---
 
-## v1.0.0 — October 2025
+## v1.0.0 -- October 2025
 
 **Initial Platform Launch**
 
 - Core data model: Accounts, Contacts, Opportunities, Leads
-- Account Health scoring (5 rules)
-- ICP Fit scoring (4 rules)
+- Account Health scoring
+- ICP Fit scoring
 - Lead Score computation
-- Renewal Risk 8-variable model
+- Renewal Risk multi-variable model
 - Dashboard with pipeline overview
-- Supabase Auth with Row-Level Security
+- Authentication with Row-Level Security
 - Multi-tenant data isolation

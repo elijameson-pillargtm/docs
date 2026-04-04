@@ -1,0 +1,91 @@
+---
+title: 'Cohorts API'
+description: 'Cohort definition management -- create, list, and auto-generate cohorts from account data'
+icon: 'chart-scatter-bubble'
+---
+
+# Cohorts API
+
+The Cohorts API manages cohort definitions. GET lists existing definitions with optional type filtering; POST auto-generates cohorts by grouping accounts into vintage, segment, territory, and rep cohorts.
+
+## GET `/api/cohorts/definitions`
+
+Returns cohort definitions for the organization, optionally filtered by cohort type.
+
+**Auth:** Requires authenticated session. Scoped to organization.
+
+### Query Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `cohort_type` | string | -- | Filter by type: `vintage`, `segment`, `territory`, `rep`, `custom` |
+
+### Response
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `definitions` | array | Cohort definition records |
+| `count` | number | Total definitions returned |
+
+### Response Fields: `definitions[]`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Cohort definition ID |
+| `org_id` | string | Organization ID |
+| `name` | string | Display name (e.g. "Vintage 2025-Q3") |
+| `cohort_type` | string | `vintage`, `segment`, `territory`, `rep`, `custom` |
+| `grouping_field` | string | Field used for grouping |
+| `grouping_value` | string | Value of the grouping field |
+| `filter_criteria` | object | Custom filter criteria (nullable) |
+| `member_count` | number | Number of accounts in the cohort |
+
+---
+
+## POST `/api/cohorts/definitions`
+
+Auto-generates cohort definitions from the organization's account data. Creates four cohort types:
+
+1. **Vintage cohorts** -- grouped by `created_at` quarter
+2. **Segment cohorts** -- grouped by `segment` (Enterprise, Mid-Market, SMB)
+3. **Territory cohorts** -- grouped by `territory`
+4. **Rep cohorts** -- grouped by `owner_id`
+
+**Auth:** Requires authenticated session. Scoped to organization.
+
+### Request Body
+
+No body required.
+
+### Response
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `success` | boolean | Operation result |
+| `total_cohorts` | number | Total cohorts generated |
+| `inserted` | number | New cohort definitions created |
+| `updated` | number | Existing definitions updated (member counts refreshed) |
+| `breakdown` | object | Per-type counts |
+
+### Response Fields: `breakdown`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `vintage` | number | Vintage cohorts generated |
+| `segment` | number | Segment cohorts generated |
+| `territory` | number | Territory cohorts generated |
+| `rep` | number | Rep cohorts generated |
+
+### Side Effects
+
+- Inserts new cohort definitions or updates existing ones (matched by org_id + cohort_type + grouping_field + grouping_value)
+- Updates `member_count` on existing definitions to reflect current account data
+
+### Computation Flow
+
+1. Load all accounts for the organization
+2. Group by quarter (vintage), segment, territory, and owner (rep)
+3. For each group, check if a matching definition already exists
+4. Insert new definitions or update member counts on existing ones
+
+> See the [Cohort Intelligence](/data/cohort-intelligence) data model page for full details on cohort snapshots, vintage curves, and anomaly detection.

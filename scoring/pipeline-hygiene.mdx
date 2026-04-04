@@ -1,48 +1,51 @@
 ---
 title: 'Pipeline Hygiene'
-description: 'Deal hygiene rules and handoff compliance enforcement'
+description: 'Deal hygiene scoring and handoff compliance enforcement'
 icon: 'broom'
 ---
 
 # Pipeline Hygiene Score
 
-The pipeline hygiene score (`opportunities.hygiene_score`) measures deal health. Higher score = more problems (dirtier pipeline). Uses 6 weighted variables plus 16 pipeline health rules.
+The pipeline hygiene score measures deal health and data quality across your pipeline. Higher scores indicate more problems (dirtier pipeline). This score helps managers and reps identify deals that need attention.
 
-## 6-Variable Hygiene Model
+## What It Measures
 
-| Variable | Default Weight | Input | Scoring Logic |
-|----------|---------------|-------|--------------|
-| Stage Velocity | 20% | `days_in_stage / stage_median_days` | ≥ 2x median = 100, ≥ 1.5x = 70 |
-| Close Date Slips | 20% | `push_count` | 3+ pushes = 100, 2 = 60, 1 = 30 |
-| Next Step | 20% | `has_next_step` | Missing = 100, defined = 0 |
-| Contact Coverage | 15% | `contact_count` | 3+ contacts = 0, 2 = 40, 1 or fewer = 100 |
-| Economic Buyer | 15% | `has_economic_buyer` | Missing = 100, identified = 0 |
-| Meeting Recency | 10% | `meeting_recency_days` | 21+ days = 100, 14+ = 70, 7+ = 30 |
+PILLAR evaluates pipeline hygiene across multiple dimensions:
 
-## Pipeline Health Rules (PH-001 to PH-016)
+- **Stage Velocity** -- How long a deal has been in its current stage relative to historical norms
+- **Close Date Integrity** -- Whether close dates have been pushed multiple times
+- **Next Step Clarity** -- Whether deals have defined, actionable next steps
+- **Contact Coverage** -- Whether enough stakeholders are mapped to the deal
+- **Economic Buyer Identification** -- Whether the budget holder has been identified
+- **Meeting Recency** -- How recently the team has met with the prospect
 
-| Rule | Name | Weight | Description |
-|------|------|--------|-------------|
-| PH-001 | Economic buyer identified | 8 | EB coverage across open deals |
-| PH-002 | Deal contact coverage | 7 | Average contacts per deal |
-| PH-003 | Forecast category consistency | 8 | Category/stage/probability alignment |
-| PH-004 | Stale deal detection | 7 | Deals 30+ days in same stage |
-| PH-005 | Deal meeting recency | 6 | Days since last meeting on primary deal |
-| PH-006 | Deal amount data quality | 7 | Deals with $0 or missing amounts |
-| PH-007 | Close date integrity | 6 | Past-due or >12 months out close dates |
-| PH-008 | Stage skip compliance | 5 | Deals that skipped pipeline stages |
-| PH-009 | Deal owner assignment | 6 | Unowned pipeline orphans |
-| PH-010 | Pipeline coverage ratio | 7 | Total pipeline vs ARR (target: 2-3x) |
-| PH-011 | Governance compliance | 6 | Commit without EB, missing next steps, stale meetings |
-| PH-012 | Renewal data integrity | 5 | Duplicate active renewals, missing dates |
+## Pipeline Health Rules
 
-## Handoff Compliance (PH-013 to PH-016)
+Beyond the deal-level hygiene score, PILLAR evaluates broader pipeline health including:
 
-These rules enforce Sales-to-CS handoff readiness on late-stage deals (Negotiation, Closed Won, Proposal):
+- Economic buyer coverage across open deals
+- Forecast category consistency (does the stage match the forecast category?)
+- Stale deal detection
+- Deal amount data quality
+- Close date integrity
+- Stage skip compliance
+- Deal owner assignment
+- Pipeline coverage ratios
+- Governance compliance
 
-| Rule | Name | Weight | Description |
-|------|------|--------|-------------|
-| PH-013 | Handoff stakeholder map | 7 | Late-stage deals need ≥ 3 contacts mapped |
-| PH-014 | Handoff success criteria | 7 | Late-stage deals must have defined next steps |
-| PH-015 | Handoff economic buyer | 6 | Late-stage deals must have identified EB |
-| PH-016 | Handoff composite compliance | 8 | Combined: stakeholder map + success criteria + EB (33/33/34 weighted) |
+## Handoff Compliance
+
+PILLAR enforces Sales-to-CS handoff readiness on late-stage deals. When a deal reaches Negotiation, Proposal, or Closed Won stages, the system checks for:
+
+- **Stakeholder map completeness** -- Are enough contacts mapped for a smooth transition?
+- **Success criteria defined** -- Are next steps documented for the CS team?
+- **Economic buyer identified** -- Is the budget holder known for renewal conversations?
+- **Composite handoff readiness** -- An overall handoff compliance score combining all factors
+
+Deals that fail handoff compliance checks generate signals so managers can ensure clean transitions.
+
+## Customization
+
+All hygiene thresholds, rule weights, and handoff requirements are configurable per organization.
+
+> Detailed scoring methodology, including exact variable weights, rule definitions, and threshold values, is available in the PILLAR Implementation Guide provided to active customers.

@@ -6,56 +6,44 @@ icon: 'scale-balanced'
 
 # Territory Equity
 
-Territory equity monitoring ensures balanced distribution of opportunity across AE/CSM territories. Imbalances generate coverage signals.
+Territory equity monitoring ensures balanced distribution of opportunity across AE/CSM territories. When imbalances are detected, PILLAR generates coverage signals to alert leadership.
 
 ## Territory Equity Signals
 
-The signal engine monitors territory balance and fires signals when deviation exceeds thresholds:
+PILLAR monitors territory balance and fires signals when deviation from the average exceeds configurable thresholds:
 
-| Signal | Threshold | Severity |
-|--------|-----------|----------|
-| `territory_imbalance` (WARNING) | Territory deviation over 20% from average | WARNING |
-| `territory_imbalance` (CRITICAL) | Territory deviation over 40% from average | CRITICAL |
+| Signal | Description |
+|--------|-------------|
+| Territory Imbalance (WARNING) | Territory deviates significantly from average load |
+| Territory Imbalance (CRITICAL) | Territory deviation is severe and requires immediate action |
 
 ## Metrics Tracked per Territory
 
-From `sam_territories`:
+PILLAR tracks key metrics for each territory:
 
 | Metric | Description |
 |--------|-------------|
-| `total_institutions` | Total institutions in territory |
-| `icp_accounts` | ICP-qualified accounts |
-| `sam_arr` | Serviceable ARR potential |
-| `customer_count` | Active customers |
-| `customer_arr` | Customer ARR |
-| `penetration_pct` | ACV achieved / SAM ARR |
-| `accounts_sold_pct` | Customers / ICP accounts |
-| `yoy_growth_pct` | Year-over-year growth |
+| Total Institutions | Total institutions in territory |
+| ICP Accounts | ICP-qualified accounts |
+| SAM ARR | Serviceable ARR potential |
+| Customer Count | Active customers |
+| Customer ARR | Customer ARR |
+| Penetration | ACV achieved relative to SAM ARR |
+| Accounts Sold | Customers relative to ICP accounts |
+| YoY Growth | Year-over-year growth rate |
 
 ## Equity Dimensions
 
 Territory equity is evaluated across multiple dimensions:
 
-1. **Account Load**: Number of ICP accounts per territory
-2. **ARR Distribution**: Revenue spread across territories
-3. **Penetration Parity**: Whether territories have similar penetration rates
-4. **Risk Concentration**: Whether at-risk ARR clusters in specific territories
-5. **Pipeline Balance**: Whether pipeline value is evenly distributed
+1. **Account Load** -- Number of ICP accounts per territory
+2. **ARR Distribution** -- Revenue spread across territories
+3. **Penetration Parity** -- Whether territories have similar penetration rates
+4. **Risk Concentration** -- Whether at-risk ARR clusters in specific territories
+5. **Pipeline Balance** -- Whether pipeline value is evenly distributed
 
-## Coverage Rules
+## Customization
 
-From the Pipeline Health category:
+Territory imbalance thresholds (warning and critical levels) are configurable per organization.
 
-| Rule | Description |
-|------|-------------|
-| PH-010 | Pipeline coverage ratio -- pipeline value vs ARR (target: 2-3x) |
-| ECON-004 | Pipeline coverage gap -- coverage below 1.5x quota |
-
-## Signal Configuration
-
-Configurable via `SignalThresholds`:
-
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `territory_imbalance_warning_pct` | 20 | Deviation % for WARNING |
-| `territory_imbalance_critical_pct` | 40 | Deviation % for CRITICAL |
+> Detailed scoring methodology, including exact threshold values and equity calculations, is available in the PILLAR Implementation Guide provided to active customers.

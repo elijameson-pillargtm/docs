@@ -12,20 +12,20 @@ The Command Center compiles a weekly brief including:
 
 | Component | Description |
 |-----------|-------------|
-| `period_start` / `period_end` | Brief period boundaries |
-| `headline_metrics` | Key KPIs (ARR, pipeline, win rate, etc.) |
-| `top_priorities` | Ranked account priorities |
-| `renewals_next_30d` | Upcoming renewals |
-| `pipeline_summary` | Total, weighted, commit, best case pipeline |
-| `starbridge_highlights` | Notable district intelligence signals |
+| Period | Brief period boundaries |
+| Headline Metrics | Key KPIs (ARR, pipeline, win rate, etc.) |
+| Top Priorities | Ranked account priorities |
+| Upcoming Renewals | Renewals in the next 30 days |
+| Pipeline Summary | Total, weighted, commit, best case pipeline |
+| Starbridge Highlights | Notable district intelligence signals |
 
-## Org Metrics Compute
+## Org Metrics
 
 ```
 POST /api/org-metrics/compute
 ```
 
-Triggers computation of org-level metrics (ARR waterfall, efficiency ratios, headcount metrics) and stores results in `org_metrics`.
+Triggers computation of org-level metrics (ARR waterfall, efficiency ratios, headcount metrics).
 
 ## Budget Variance
 

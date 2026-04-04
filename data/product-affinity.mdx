@@ -1,0 +1,101 @@
+---
+title: 'Product Affinity'
+description: 'Co-adoption analysis, product affinity scoring, whitespace identification, and prioritized expansion signals'
+icon: 'grid-2-plus'
+---
+
+# Product Affinity
+
+The Product Affinity engine analyzes co-adoption patterns across your account base to identify which products are most commonly purchased together, how long cross-sell cycles typically take, and which accounts have the highest-value expansion opportunities. It generates prioritized expansion signals that feed into the [Expansion Pipeline](/data/expansion-pipeline).
+
+<Note>
+Product Affinity is a companion to the Expansion Pipeline dashboard. The Expansion Pipeline shows account-level whitespace and propensity; Product Affinity adds the **product-pair intelligence** layer -- which products lead to which, at what rate, and with what ARR uplift.
+</Note>
+
+## How It Works
+
+```
+Account product ownership data
+  → Co-adoption matrix (product A → product B frequency)
+  → Segment-level affinity (Enterprise vs Mid-Market vs SMB patterns)
+  → Whitespace identification (missing products per account)
+  → Expansion scoring (affinity + readiness + health + propensity)
+  → Prioritized expansion signals (ranked by score and estimated ARR)
+```
+
+## Affinity Matrix
+
+For every ordered product pair (A, B), the engine computes:
+
+| Metric | Description |
+|--------|-------------|
+| **Co-Adoption Count** | Number of accounts that own both product A and product B |
+| **Co-Adoption Rate** | Co-adoption count / total accounts owning product A (percentage) |
+| **Avg Time to Cross-Sell** | Average days between start_date of product A and product B |
+| **Avg ARR Uplift** | Average contracted ARR of product B for accounts that also own A |
+
+The matrix is computed both at the portfolio level (`segment: "all"`) and per segment (Enterprise, Mid-Market, SMB) to surface segment-specific patterns.
+
+## Confidence Levels
+
+Affinity data quality is scored by sample size:
+
+| Level | Interpretation |
+|-------|----------------|
+| **high** | Reliable pattern based on sufficient data |
+| **medium** | Directional signal with moderate data |
+| **low** | Insufficient data -- treat as hypothesis |
+
+## Expansion Scoring
+
+Each whitespace opportunity (account + missing product) receives a composite score from 0 to 1, computed from multiple weighted components:
+
+- **Affinity** -- Co-adoption rate from owned products to the target product
+- **Adoption Readiness** -- How well the account uses its current products
+- **Account Health** -- Overall account health score
+- **Expansion Propensity** -- Account-level expansion propensity from the scoring engine
+
+> Exact component weights are configurable per organization. Default weights are available in the PILLAR Implementation Guide provided to active customers.
+
+## Priority Levels
+
+Expansion signals are assigned a priority from 1 (highest) to 5 (lowest) based on the composite score. Higher scores indicate stronger expansion opportunities deserving immediate attention, while lower scores are monitored over time.
+
+## ARR Estimation
+
+Expansion ARR is estimated using available pricing data, adjusted for account size and segment characteristics.
+
+## Signal Lifecycle
+
+Expansion signals follow a four-state lifecycle:
+
+| Status | Description |
+|--------|-------------|
+| `pending` | Signal generated, not yet acted on |
+| `pitched` | Expansion opportunity has been presented to the account |
+| `won` | Cross-sell completed |
+| `dismissed` | Signal dismissed (not applicable) |
+
+Pending signals are regenerated on each computation cycle. Signals in `pitched`, `won`, or `dismissed` status are preserved across recomputations.
+
+## Data Model
+
+PILLAR stores product affinity matrices (co-adoption metrics per product pair) and prioritized expansion signals (per-account expansion opportunities with scoring, priority, and lifecycle status). Both are scoped by organization and recomputed on each computation cycle.
+
+> Detailed data model schemas are available in the PILLAR Implementation Guide provided to active customers.
+
+## API Endpoints
+
+```
+GET  /api/expansion/affinity
+POST /api/expansion/affinity
+GET  /api/expansion/signals
+POST /api/expansion/signals
+PATCH /api/expansion/signals
+```
+
+See the [Expansion Intelligence API](/api/expansion-intelligence) reference for full endpoint documentation.
+
+## Access
+
+Available to: CRO/CEO, VP Sales, VP CS, RevOps

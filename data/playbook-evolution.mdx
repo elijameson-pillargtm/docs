@@ -1,0 +1,100 @@
+---
+title: 'Playbook Evolution'
+description: 'Play effectiveness tracking, segment affinity analysis, and AI-driven play recommendations based on historical performance'
+icon: 'arrows-rotate'
+---
+
+# Playbook Evolution
+
+The Playbook Evolution engine analyzes historical play execution data to measure which play templates work best for which account profiles, then generates data-driven recommendations for future plays. It extends the [Plays](/data/plays) system with a closed-loop feedback mechanism: plays are executed, outcomes are recorded, effectiveness is computed, and better plays are recommended.
+
+<Note>
+Playbook Evolution requires [Mandatory Play Outcomes](/changelog) to be enabled. Without outcome data, the engine cannot compute effectiveness metrics.
+</Note>
+
+## How It Works
+
+```
+Plays + Outcomes + Account Context
+  → Effectiveness analysis (win rate by template x segment x tier)
+  → Segment affinity scoring (which plays work best for which profiles)
+  → Recommendation generation (best play for this account + signal)
+  → Ranked recommendations (confidence x expected win rate)
+```
+
+## Play Effectiveness
+
+The engine groups completed plays by template, segment, and tier, then computes:
+
+| Metric | Description |
+|--------|-------------|
+| **Total Runs** | Number of times this play template was executed for this segment/tier |
+| **Successful Runs** | Runs with positive outcomes (Renewed, Won, Expanded, Saved, Upsold) |
+| **Win Rate** | Successful runs / total runs |
+| **Avg Time to Complete** | Average days from play start to completion |
+| **Avg ARR Impact** | Average ARR of accounts where this play was executed |
+| **Avg Health Delta** | Estimated health score change from play execution |
+| **Confidence Level** | Based on sample size: high, medium, or low |
+
+### Positive Outcomes
+
+The following play outcomes are classified as positive:
+
+- RENEWED
+- WON
+- EXPANDED
+- SAVED
+- UPSOLD
+
+All other outcomes (CHURNED, LOST, etc.) are classified as negative.
+
+## Segment Affinity
+
+For each play template and segment combination, the engine computes an affinity score (0-1) using a weighted average of win rates, giving more influence to larger sample sizes and penalizing low-confidence data.
+
+## Play Recommendations
+
+For each account with active signals, the engine recommends play templates based on three weighted components:
+
+- **Sample Confidence** -- How much data exists for this play template
+- **Win Rate** -- Historical success rate for matching segment and tier
+- **Segment Affinity** -- How well this play performs for the account's profile
+
+Low-performing templates are excluded from recommendations. Each recommendation includes the most relevant triggering signal, a human-readable reason, and a priority level (1-5).
+
+## Priority Computation
+
+Priority (1 = highest, 5 = lowest) is computed based on historical win rate, confidence level, and triggering signal severity. High win rates and high confidence increase priority; low confidence and informational signals decrease it.
+
+> Exact recommendation weights, priority computation parameters, and exclusion thresholds are available in the PILLAR Implementation Guide provided to active customers.
+
+## Data Model
+
+PILLAR stores play effectiveness metrics (win rates, time to complete, ARR impact, and health deltas per play template and account profile) and generated play recommendations (per-account recommendations with confidence scores, expected outcomes, and priority levels).
+
+> Detailed data model schemas are available in the PILLAR Implementation Guide provided to active customers.
+
+## KPIs
+
+The API returns summary KPIs alongside effectiveness data:
+
+| KPI | Description |
+|-----|-------------|
+| **Total Templates** | Distinct play templates with effectiveness data |
+| **Avg Win Rate** | Overall win rate across all templates |
+| **Top Performing Play** | Template with the highest win rate |
+| **Top Win Rate** | Win rate of the top performing template |
+| **Plays Needing Review** | Templates flagged as underperforming based on configurable thresholds |
+
+## API Endpoints
+
+```
+GET  /api/plays/effectiveness
+POST /api/plays/effectiveness
+```
+
+See the [Playbook API](/api/playbook) reference for full endpoint documentation.
+
+## Access
+
+Available to: CRO/CEO, VP Sales, VP CS, RevOps

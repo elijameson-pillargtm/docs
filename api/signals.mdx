@@ -35,15 +35,17 @@ Signals follow the 7-state lifecycle. Valid transitions:
 
 ## Signal Object
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | UUID | Signal identifier |
-| `signal_type` | string | Type code |
-| `family` | SignalFamily | One of 8 families |
-| `severity` | SignalSeverity | CRITICAL, WARNING, INFO |
-| `state` | SignalState | Current lifecycle state |
-| `title` | string | Human-readable title |
-| `explanation_text` | string | Plain-language explanation |
-| `recommended_action` | string | AI-generated recommendation |
-| `evidence_refs` | object | Supporting data |
-| `confidence` | number | 0-100 confidence |
+Each signal includes:
+
+| Field | Description |
+|-------|-------------|
+| ID | Signal identifier |
+| Signal Type | Type code |
+| Family | One of 8 families |
+| Severity | CRITICAL, WARNING, or INFO |
+| State | Current lifecycle state |
+| Title | Human-readable title |
+| Explanation | Plain-language explanation |
+| Recommended Action | AI-generated recommendation |
+| Evidence | Supporting data references |
+| Confidence | 0-100 confidence level |

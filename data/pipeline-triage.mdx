@@ -25,23 +25,14 @@ Deals are classified into four health buckets based on risk flag count:
 
 | Column | Criteria | Typical Actions |
 |--------|----------|----------------|
-| **Critical** | 3+ risk flags | Immediate coaching intervention, potential stage regression |
-| **At Risk** | 2 risk flags | Coaching review, deal strategy adjustment |
-| **Watch** | 1 risk flag | Monitor, address specific flag |
+| **Critical** | Multiple risk flags | Immediate coaching intervention, potential stage regression |
+| **At Risk** | Some risk flags | Coaching review, deal strategy adjustment |
+| **Watch** | Minor flag | Monitor, address specific issue |
 | **On Track** | No risk flags | Standard progression |
 
 ## Risk Flags
 
-Each deal is evaluated against the following health indicators:
-
-| Flag | Trigger | Severity |
-|------|---------|----------|
-| Pushed Nx | Close date moved 2+ times | High (red) |
-| No economic buyer | Economic buyer not identified | High (red) |
-| Days in stage | 30+ days in current stage | Medium (amber) |
-| Low confidence | Confidence score below 40% | Medium (amber) |
-| Low hygiene | Deal hygiene score below 50% | Medium (amber) |
-| Competitor active | Competitor identified on deal | Informational (amber) |
+Each deal is evaluated against key health indicators including close date pushes, economic buyer identification, stage duration, forecast confidence, deal hygiene, and competitive activity.
 
 ## Deal Card Detail
 
@@ -51,31 +42,18 @@ Each deal card shows:
 - **Forecast category** (Commit, Best Case, Upside, Pipeline)
 - **Owner name**
 - **Risk flags** as colored pills
-- **Expandable detail**: close date, days in stage, confidence %, hygiene %, push count, economic buyer status
+- **Expandable detail**: close date, days in stage, confidence, hygiene, push count, economic buyer status
 
 ## Summary Bar
 
 The top summary bar provides at-a-glance pipeline health:
-- **Total Pipeline** — sum of all open deal amounts
-- **At-Risk Pipeline** — sum of Critical + At Risk column amounts
-- **Deal Count** — total open deals
-
-## CRO/CEO Toggle
-
-For CRO/CEO and RevOps roles, a segmented toggle appears at the top of the triage page:
-
-- **Renewal Triage** — Post-sale: Renewals, saves, churn prevention
-- **Pipeline Triage** — Pre-sale: New business, deal health, pipeline risk
-
-The toggle state persists within the browser session via `sessionStorage`.
-
-## Data Source
-
-Pipeline Triage pulls deal data from the `/api/dashboard` endpoint's `pipeline_by_stage` object, which includes all open opportunities with full health metrics. The classification logic runs client-side using the `classifyDealHealth()` function.
+- **Total Pipeline** -- Sum of all open deal amounts
+- **At-Risk Pipeline** -- Sum of Critical + At Risk column amounts
+- **Deal Count** -- Total open deals
 
 ## Related
 
-- [Signals](/data/signals) — Pipeline signals that trigger coaching actions
-- [Plays](/data/plays) — Automated play execution for at-risk deals
-- [Governance](/data/governance) — SLA enforcement and signal resolution tracking
-- [AI Intelligence](/data/ai-intelligence) — AI coaching reports for per-rep analysis
+- [Signals](/data/signals) -- Pipeline signals that trigger coaching actions
+- [Plays](/data/plays) -- Automated play execution for at-risk deals
+- [Governance](/data/governance) -- SLA enforcement and signal resolution tracking
+- [AI Intelligence](/data/ai-intelligence) -- AI coaching reports for per-rep analysis

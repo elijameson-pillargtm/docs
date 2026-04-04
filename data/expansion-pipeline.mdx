@@ -18,16 +18,16 @@ The core view is a grid of **accounts (rows) x products (columns)**:
 
 | Cell State | Color | Meaning |
 |------------|-------|---------|
-| Owned, high adoption (60%+) | Green | Healthy product relationship |
-| Owned, low adoption (<60%) | Amber | Adoption risk — may not renew this product |
-| Not owned | Grey | Whitespace opportunity — estimated ARR shown |
+| Owned, high adoption | Green | Healthy product relationship |
+| Owned, low adoption | Amber | Adoption risk -- may not renew this product |
+| Not owned | Grey | Whitespace opportunity -- estimated ARR shown |
 
 ## KPI Metrics
 
 | Metric | Description |
 |--------|-------------|
 | **Whitespace ARR** | Total estimated ARR across all missing products for all accounts |
-| **High Propensity** | Count of accounts with expansion propensity >= 60 |
+| **High Propensity** | Count of accounts with high expansion propensity |
 | **Avg Adoption** | Average product adoption percentage across owned products |
 | **Expansion Signals** | Active signals in the EXPANSION and STARBRIDGE families |
 
@@ -35,17 +35,13 @@ The core view is a grid of **accounts (rows) x products (columns)**:
 
 Each account receives an expansion propensity score (0-100) based on:
 
-- **Health score** — healthy accounts are more likely to expand
-- **Whitespace percentage** — more missing products = more opportunity
-- **Champion engagement** — is there an active champion who can advocate?
-- **Adoption rate** — high adoption on existing products signals readiness
-- **Budget context** — is the district in growth, stable, or cutting?
+- **Health score** -- healthy accounts are more likely to expand
+- **Whitespace percentage** -- more missing products = more opportunity
+- **Champion engagement** -- is there an active champion who can advocate?
+- **Adoption rate** -- high adoption on existing products signals readiness
+- **Budget context** -- is the district in growth, stable, or cutting?
 
-| Score Range | Label | Meaning |
-|-------------|-------|---------|
-| 70-100 | High | Account is ready for expansion conversation |
-| 40-69 | Medium | Potential exists but needs nurturing |
-| 0-39 | Low | Focus on retention before expansion |
+Accounts are classified as High, Medium, or Low expansion readiness based on configurable thresholds.
 
 ## Recommended Next Product
 
@@ -75,3 +71,7 @@ Returns `kpi`, `products` (full product catalog), and `pipeline` (all accounts w
 Available to: CRO/CEO, VP Sales, VP CS, RevOps
 
 Navigate to: `/expansion` or click "Expansion" in the Command Center nav pills.
+
+## Related: Product Affinity
+
+The [Product Affinity](/data/product-affinity) engine extends the Expansion Pipeline with product-pair intelligence. While this page covers account-level whitespace and propensity, Product Affinity adds co-adoption analysis showing which products are most commonly purchased together, typical cross-sell timelines, and ARR uplift per product pair. It also generates prioritized [expansion signals](/api/expansion-intelligence) scored by affinity, adoption readiness, health, and propensity.

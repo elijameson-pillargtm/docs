@@ -1,6 +1,6 @@
 ---
 title: 'Scoring API'
-description: 'Scoring engine configuration, calibration, and profile management'
+description: 'Scoring engine configuration and profile management'
 icon: 'calculator'
 ---
 
@@ -13,7 +13,7 @@ GET /api/settings/scoring-profile
 PUT /api/settings/scoring-profile
 ```
 
-Manages the per-org scoring profile (`org_scoring_profiles`) including:
+Manages the per-organization scoring profile including:
 - ICP company fit tiers and segment weights
 - ICP persona rules and title tiers
 - Behavioral, demographic, and engagement scoring weights
@@ -30,7 +30,7 @@ POST /api/calibration
 
 The calibration endpoint allows admins to:
 - View current scoring weights and thresholds
-- Adjust category weights (engagement, fit, intent, velocity, pipeline_health, relationship, risk, opportunity_quality)
+- Adjust category weights across all 8 scoring categories
 - Override individual rule weights
 - Test score impact with sample accounts
 
@@ -40,11 +40,13 @@ Scores returned by the engine include full decomposition:
 
 | Field | Description |
 |-------|-------------|
-| `compositeScore` | Overall 0-100 score |
-| `categoryScores` | Array of per-category scores with weights |
-| `ruleResults` | Array of individual rule results |
-| `metadata.totalRulesEvaluated` | Rules run |
-| `metadata.totalRulesTriggered` | Rules that fired |
-| `metadata.durationMs` | Computation time |
-| `modelVersion` | Engine version |
-| `computedAt` | ISO timestamp |
+| Composite Score | Overall 0-100 score |
+| Category Scores | Per-category scores with weights |
+| Rule Results | Individual rule results with scores |
+| Rules Evaluated | Total rules run |
+| Rules Triggered | Rules that fired threshold conditions |
+| Computation Time | Processing duration |
+| Model Version | Engine version |
+| Computed At | ISO timestamp |
+
+> Detailed API response schemas and calibration parameters are available in the PILLAR Implementation Guide provided to active customers.

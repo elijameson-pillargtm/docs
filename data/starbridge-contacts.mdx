@@ -6,50 +6,33 @@ icon: 'address-card'
 
 # Starbridge Contact Intelligence
 
-Starbridge tracks job changes (departures, new hires, promotions) at buyer organizations. These events are stored in the `starbridge_job_changes` table and generate signals when key stakeholders are affected.
+Starbridge tracks job changes (departures, new hires, promotions) at buyer organizations. These events generate signals when key stakeholders are affected.
 
-## Job Changes (`starbridge_job_changes`)
+## Job Change Tracking
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | UUID | Unique identifier |
-| `org_id` | UUID | Organization tenant |
-| `account_id` | UUID | Affected account (FK to `accounts`) |
-| `contact_id` | UUID | Matched PILLAR contact (FK to `contacts`), nullable |
-| `change_type` | VARCHAR(50) | Type of change: `departure`, `new_hire`, `promotion`, `retirement` |
-| `subtype` | VARCHAR(50) | Additional classification |
-| `summary` | TEXT | AI-generated change summary |
-| `effective_date` | DATE | When the change takes effect |
-| `announcement_date` | DATE | When publicly announced |
-| `job_title` | VARCHAR(200) | New or current job title |
-| `previous_job_title` | VARCHAR(200) | Prior job title |
-| `sources` | JSONB (string[]) | Source URLs for verification |
-| `starbridge_id` | VARCHAR(50) | Starbridge record identifier |
-| `created_at` | TIMESTAMP | Record creation time |
+Starbridge monitors and reports:
 
-## Contact Enrichment on Accounts
+| Change Type | Description |
+|-------------|-------------|
+| Departure | Key contact leaving the organization |
+| New Hire | New hire in a relevant role |
+| Promotion | Contact promoted to new position |
+| Retirement | Contact retiring from the organization |
 
-Contacts synced from CRM are linked to Starbridge via:
+Each job change includes the effective date, announcement date, current and previous titles, AI-generated summary, and source URLs for verification.
 
-| Field | Table | Description |
-|-------|-------|-------------|
-| `starbridge_contact_id` | `contacts` | Starbridge contact identifier |
-| `starbridge_buyer_id` | `accounts` | Buyer-level Starbridge ID |
+## Contact Enrichment
+
+Contacts synced from your CRM are linked to Starbridge records, enabling automatic detection of job changes for people already in your stakeholder map.
 
 ## Signal Generation
 
-Job changes trigger the `stakeholder_departure_starbridge` signal:
+Job changes trigger stakeholder departure signals:
 
-- **CRITICAL** severity when the departed person is a champion (`is_champion = true`)
-- **WARNING** severity for all other departures
-- Signal family: ACCOUNT
+- **Higher severity** when the departed person is a champion
+- **Standard severity** for all other departures
 - Recommended action: Identify replacement contact, schedule introductory meeting
 
 ## Scoring Impact
 
-Contact intelligence feeds into:
-
-- **REL-005**: Champion departure risk -- scores 0 if champion departed with no replacement
-- **REL-006**: Exec sponsor departure risk -- scores 0 if exec departed with no replacement
-- **REL-004**: Stakeholder stability -- ratio of active to total contacts
-- **Renewal Risk**: Stakeholder turnover variable (5% weight)
+Contact intelligence feeds into Relationship scoring (champion and exec sponsor departure risk, stakeholder stability) and Renewal Risk (stakeholder turnover).

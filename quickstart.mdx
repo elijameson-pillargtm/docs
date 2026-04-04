@@ -10,7 +10,7 @@ PILLAR connects to your CRM, enriches every account with district intelligence, 
 
 ## Step 1: Accept Your Invitation
 
-Your organization admin will send you an invite via email. Click the link to create your account. PILLAR uses Supabase Auth with Row-Level Security, so your data is isolated to your organization from the moment you sign in.
+Your organization admin will send you an invite via email. Click the link to create your account. PILLAR uses Row-Level Security, so your data is isolated to your organization from the moment you sign in.
 
 <Card title="Authentication Details" icon="lock" href="/api/authentication">
   Learn more about auth flows, user roles, and RLS policies
@@ -32,9 +32,9 @@ The initial sync typically completes in 5-15 minutes depending on the size of yo
 After connecting, PILLAR auto-discovers your CRM schema and maps fields to PILLAR columns. You can review and customize mappings via the **Field Mapping** button on each connector card.
 
 - **Auto-Discovery**: PILLAR reads your CRM's actual field schema and fuzzy-matches known fields automatically
-- **Custom Mappings**: Add mappings for custom fields (e.g., `Contract_End_Date__c` → `accounts.contract_end`)
+- **Custom Mappings**: Add mappings for custom fields (e.g., map your CRM's contract end date field to PILLAR's contract end date)
 - **Transform Types**: Direct (copy), Picklist Map (enum translation), Formula (computed), Lookup (ID resolution)
-- **Required Fields**: PILLAR flags which fields must be mapped for scoring to work (name, ARR, segment, stage, close_date)
+- **Required Fields**: PILLAR flags which fields must be mapped for scoring to work (e.g., name, ARR, segment, stage, close date)
 
 ### Score Write-Back
 
@@ -113,7 +113,7 @@ After initial setup, PILLAR continuously:
 
 1. **Syncs** CRM data every 15 minutes
 2. **Enriches** accounts with Starbridge district intelligence
-3. **Scores** every account against 93+ rules
+3. **Scores** every account across 8 categories
 4. **Generates signals** when thresholds are crossed
 5. **Routes notifications** to Slack and email
 6. **Pushes scores** back to your CRM custom fields

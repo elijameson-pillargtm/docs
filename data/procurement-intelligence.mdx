@@ -1,0 +1,116 @@
+---
+title: 'Procurement Intelligence'
+description: 'Fiscal year calendars, budget cycle forecasts, renewal alignment analysis, and procurement risk identification for K-12 accounts'
+icon: 'calendar-clock'
+---
+
+# Procurement Intelligence
+
+The Procurement Intelligence engine maps each account's fiscal year and budget cycle into actionable procurement windows. It computes optimal outreach timing, assesses whether renewal dates align with budget approval windows, and identifies procurement-related risks that could delay or block deals.
+
+<Note>
+Most K-12 districts operate on a July 1 fiscal year with budget approval in March-May. The engine uses this as the default but supports custom fiscal year configurations per account via the `fiscal_year_end` field.
+</Note>
+
+## How It Works
+
+```
+Account fiscal_year_end + procurement_complexity
+  → Procurement window (budget planning, approval, allocation dates)
+  → Renewal alignment assessment (aligned / partial / misaligned)
+  → Engagement timeline (milestones with optimal outreach windows)
+  → Budget cycle forecast (status, confidence, risk factors)
+  → Procurement risk identification (misalignment, late engagement, freeze)
+```
+
+## Procurement Windows
+
+Each account receives a computed procurement calendar based on its fiscal year end date:
+
+| Window | Default Timing (July 1 FY) | Description |
+|--------|---------------------------|-------------|
+| **Budget Planning** | October - January | District begins assembling budget requests |
+| **Budget Approval** | March - May | School board reviews and approves budget |
+| **Allocation** | June - July | Funds are allocated to line items |
+| **RFP Typical Month** | February | Most RFPs issued during this window |
+
+## Procurement Lead Times
+
+Lead times vary by procurement complexity. Accounts with higher procurement complexity require longer lead times for engagement. PILLAR classifies accounts into Simple, Moderate, and Complex procurement tiers, each with calibrated lead time recommendations.
+
+> Exact complexity score ranges and lead time values are configurable per organization and available in the PILLAR Implementation Guide provided to active customers.
+
+## Renewal Alignment
+
+The engine assesses whether a renewal date aligns with the account's budget cycle:
+
+| Alignment | Criteria | Implication |
+|-----------|----------|-------------|
+| **Aligned** | Renewal falls within allocation window or 0-60 days after budget approval | Funding is available -- proceed normally |
+| **Partial** | Renewal overlaps budget approval period | Funding may not be finalized -- stay in close contact |
+| **Misaligned** | Renewal falls outside budget cycle | May require budget amendment or bridge contract |
+
+## Engagement Timeline
+
+For each account with an upcoming renewal, the engine generates a milestone-based engagement timeline with key steps:
+
+- **Begin Outreach** -- Timed relative to budget planning start or procurement lead time
+- **Executive Alignment** -- Early-stage executive engagement
+- **Submit Proposal** -- Aligned to budget approval window
+- **Budget Approval Window** -- When the board reviews and approves budget
+- **Negotiate & Finalize** -- Post-approval negotiation window
+- **Close Target** -- Pre-renewal close deadline
+- **Renewal Date** -- Contract renewal date
+
+Each milestone includes an urgency level (low, medium, high, critical) that escalates as deadlines approach.
+
+> Exact milestone timing offsets are available in the PILLAR Implementation Guide provided to active customers.
+
+## Budget Cycle Forecasts
+
+The engine predicts the budget status for a target quarter:
+
+| Status | Description |
+|--------|-------------|
+| `planning` | Budget still being assembled -- pricing not locked |
+| `submitted` | Budget submitted for approval |
+| `approved` | Budget approved by board |
+| `allocated` | Funds allocated to specific line items |
+| `frozen` | No new allocations possible |
+
+Forecast confidence is based on how far out the projection is: high (< 4 months), medium (4-9 months), low (> 9 months).
+
+## Procurement Risks
+
+The engine identifies multiple categories of procurement risk including:
+
+- **Misaligned Renewal** -- Renewal date falls outside budget approval window
+- **Partial Alignment** -- Renewal overlaps budget approval period
+- **Late Engagement** -- Insufficient time before renewal given procurement complexity
+- **Budget Freeze** -- Renewal falls near fiscal year boundaries
+- **Election Cycle** -- School board election timing creates procurement uncertainty
+- **Complex Procurement** -- High-complexity procurement with tight timeline
+- **Health Risk** -- Low account health combined with approaching renewal
+
+Each risk includes a severity level, description, and specific mitigation recommendation.
+
+> Exact risk thresholds and severity classifications are configurable per organization and available in the PILLAR Implementation Guide provided to active customers.
+
+## Data Model
+
+PILLAR stores computed procurement calendars per account (fiscal year windows, budget approval timing, RFP windows, lead times, and renewal alignment assessments) and per-account budget cycle forecasts with status predictions and optimal engagement windows.
+
+> Detailed data model schemas are available in the PILLAR Implementation Guide provided to active customers.
+
+## API Endpoints
+
+```
+GET  /api/procurement/calendar
+POST /api/procurement/calendar
+```
+
+See the [Procurement API](/api/procurement) reference for full endpoint documentation.
+
+## Access
+
+Available to: CRO/CEO, VP Sales, VP CS, RevOps, AEs

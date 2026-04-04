@@ -1,70 +1,51 @@
 ---
 title: 'Account Health'
-description: 'Composite health score formula and the Account Priority scoring model'
+description: 'Composite health score and account prioritization model'
 icon: 'heart-pulse'
 ---
 
 # Account Health Score
 
-The account health score is the composite output of evaluating all 93+ rules across 8 categories. It is stored in `accounts.health_score` (0-100) and updated every 5 minutes.
+The account health score is the composite output of evaluating all scoring rules across 8 categories. It provides a single 0-100 measure of overall account health, updated continuously.
 
-## Composite Formula
+## How It's Calculated
 
-```
-health_score = SUM(category_score[i] * category_weight[i])
-```
+The health score combines weighted category scores, where each category score is itself a weighted average of the individual rules within that category. This layered approach ensures that no single metric can dominate the overall assessment while still allowing important signals to surface.
 
-Where each `category_score` is:
+## What Drives Health
 
-```
-category_score = SUM(rule_score[j] * rule_weight[j]) / SUM(rule_weight[j])
-```
+The 8 scoring categories each contribute to the composite health score:
 
-## Default Category Weights
-
-| Category | Weight | Contribution |
-|----------|--------|-------------|
-| Engagement | 0.15 | 15% |
-| Fit | 0.10 | 10% |
-| Intent | 0.15 | 15% |
-| Velocity | 0.10 | 10% |
-| Pipeline Health | 0.15 | 15% |
-| Relationship | 0.10 | 10% |
-| Risk | 0.15 | 15% |
-| Opportunity Quality | 0.10 | 10% |
+| Category | What It Captures |
+|----------|-----------------|
+| Engagement | Are users active? Is usage growing or declining? |
+| Fit | Does this account match your ideal customer profile? |
+| Intent | Are there buying signals or expansion indicators? |
+| Velocity | How fast are deals progressing through the pipeline? |
+| Pipeline Health | Is the pipeline clean, well-documented, and forecast-ready? |
+| Relationship | Do you have champions, exec sponsors, and multi-threaded coverage? |
+| Risk | Are there churn indicators, budget issues, or competitive threats? |
+| Opportunity Quality | Are deals well-qualified with strong win probability? |
 
 ## Account Priority Score
 
-A separate computed score (`accounts.priority_score`) that determines which accounts deserve immediate attention. Uses 8 variables:
+A separate computed score determines which accounts deserve immediate attention. Priority considers multiple factors including:
 
-| Variable | Weight | Input | Scoring Logic |
-|----------|--------|-------|--------------|
-| ARR Value | 20% | `account.arr` | $500K+ = 100, $200K = 85, scaled down |
-| Risk Urgency | 15% | `account.risk_score` | Direct pass-through of risk score |
-| Expansion Potential | 15% | `whitespace_pct` | Higher whitespace = higher priority |
-| Engagement Trend | 10% | Engagement delta (-100 to +100) | Mapped to 0-100 scale |
-| Territory Impact | 10% | `territory_quota_impact` | Quota contribution percentage |
-| Market Context | 10% | `budget_trend_yoy` (Starbridge) | Growing budget = 80, shrinking = 10 |
-| Strategic Alignment | 10% | Strategic theme match (Starbridge) | Match = 100, no match = 0 |
-| Tech Spend Propensity | 10% | `tech_spend_propensity` (Starbridge) | Direct pass-through, 50 if no data |
+- **Revenue at stake** -- Higher ARR accounts receive higher priority
+- **Risk urgency** -- Accounts with elevated risk scores are prioritized
+- **Expansion potential** -- Accounts with significant whitespace and growth signals
+- **Engagement trajectory** -- Accounts with declining engagement trends
+- **Territory impact** -- How much the account contributes to territory quota
+- **Market context** -- Budget trends and institutional health (Starbridge-enhanced)
+- **Strategic alignment** -- Whether the account aligns with strategic priorities
+- **Technology spending propensity** -- Likelihood of continued/increased tech investment
 
 ## Health Trend
 
-The `accounts.health_trend` field stores the last 6 health score data points as a JSON array, enabling sparkline visualization in dashboards.
+PILLAR tracks health score over time, enabling sparkline visualizations in dashboards so you can quickly see whether an account is improving, stable, or declining.
 
-## Engagement Rules (ENG-001 to ENG-012)
+## Customization
 
-| Rule | Name | Weight | What It Measures |
-|------|------|--------|-----------------|
-| ENG-001 | Usage trend decline | 8 | Quarter-over-quarter usage trend |
-| ENG-002 | Activity recency | 7 | Days since last recorded activity |
-| ENG-003 | Activity volume (30d) | 6 | Count of activities in last 30 days |
-| ENG-004 | Email and meeting engagement | 5 | Ratio of meetings/emails to total activities |
-| ENG-005 | Average contact engagement | 6 | Average engagement_score across active contacts |
-| ENG-006 | Product adoption depth | 7 | Average adoption % across purchased products |
-| ENG-007 | Activity trend acceleration | 5 | 30-day activity count vs prior 60-day rate |
-| ENG-008 | Login frequency | 6 | Account usage_depth metric |
-| ENG-009 | NPS survey engagement | 4 | Whether account responded to NPS surveys |
-| ENG-010 | Stakeholder breadth | 5 | Number of unique active contacts |
-| ENG-011 | Support interaction frequency | 3 | Support ticket volume and escalation rate |
-| ENG-012 | Feature breadth utilization | 5 | Products actively used vs products purchased |
+All category weights, rule weights, and priority scoring parameters are configurable per organization.
+
+> Detailed scoring methodology, including exact weights, formulas, and rule definitions, is available in the PILLAR Implementation Guide provided to active customers.

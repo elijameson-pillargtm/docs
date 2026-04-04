@@ -1,0 +1,95 @@
+---
+title: 'Playbook API'
+description: 'Play effectiveness tracking and recommendation engine based on historical play outcomes'
+icon: 'arrows-rotate'
+---
+
+# Playbook API
+
+The Playbook API manages play effectiveness computation and retrieval. GET queries effectiveness data with optional filters; POST recomputes effectiveness metrics from play outcome data.
+
+## GET `/api/plays/effectiveness`
+
+Returns play effectiveness metrics with optional segment, tier, and territory filters.
+
+**Auth:** Requires authenticated session. Scoped to organization.
+
+### Query Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `segment` | string | -- | Filter by account segment |
+| `tier` | string | -- | Filter by account tier |
+| `territory` | string | -- | Filter by territory |
+
+### Response
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `effectiveness` | array | Effectiveness records sorted by win rate (descending) |
+| `kpi` | object | Summary KPIs |
+
+### Response Fields: `kpi`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `total_templates` | number | Distinct play templates with data |
+| `avg_win_rate` | number | Overall win rate across all templates |
+| `top_performing_play` | string | Template name with highest win rate |
+| `top_win_rate` | number | Win rate of the top template |
+| `plays_needing_review` | number | Templates flagged as underperforming based on configurable thresholds |
+
+### Response Fields: `effectiveness[]`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `play_template` | string | Play template name |
+| `segment` | string | Account segment (nullable) |
+| `tier` | string | Account tier (nullable) |
+| `territory` | string | Territory (nullable) |
+| `total_runs` | number | Total executions |
+| `successful_runs` | number | Positive outcome count |
+| `win_rate` | number | Success rate (0-1) |
+| `avg_time_to_complete` | number | Average days to completion (nullable) |
+| `avg_arr_impact` | number | Average ARR of targeted accounts |
+| `avg_health_delta` | number | Estimated health score change |
+| `sample_period_start` | string | Earliest play date in sample |
+| `sample_period_end` | string | Latest play date in sample |
+| `confidence_level` | string | `high`, `medium`, or `low` |
+
+---
+
+## POST `/api/plays/effectiveness`
+
+Recomputes effectiveness metrics from play outcome data and persists results.
+
+**Auth:** Requires authenticated session. Scoped to organization.
+
+### Request Body
+
+No body required.
+
+### Response
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `success` | boolean | Operation result |
+| `computed` | number | Effectiveness rows computed |
+| `upserted` | number | Rows successfully upserted |
+| `plays_analyzed` | number | Total plays processed |
+| `outcomes_processed` | number | Outcome feedback records processed |
+
+### Computation Flow
+
+1. Load all plays with outcomes
+2. Load outcome feedback data
+3. Load account context (segment, tier, territory, ARR, health score) for play accounts
+4. Group plays by template x segment x tier
+5. Compute win rate, avg time to complete, ARR impact, health delta per group
+6. Persist results (keyed on organization + play template + segment + tier)
+
+### Positive Outcomes
+
+The following outcomes are classified as successful: RENEWED, WON, EXPANDED, SAVED, UPSOLD.
+
+> See the [Playbook Evolution](/data/playbook-evolution) data model page for full details on the effectiveness computation, segment affinity analysis, and recommendation generation.

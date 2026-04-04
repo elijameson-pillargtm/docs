@@ -33,35 +33,23 @@ The Blueprint is PILLAR's 142-item GTM maturity diagnostic across 5 pillars and 
 ## Assessment Items
 
 ```
-GET /api/blueprint/items (via blueprint_items table)
+GET /api/blueprint/items
 ```
 
-Returns the 142-item framework. Each item belongs to a pillar, category, and module. Items are scored 0/1/2.
+Returns the 142-item framework. Each item belongs to a pillar, category, and module. Items are scored on a 3-point scale.
 
 ## Assessment Management
 
-Assessments are stored in `blueprint_assessments` with individual responses in `blueprint_responses`. Each org can have multiple assessments; only one is marked `is_current`.
+Organizations can have multiple assessments, with one marked as current. Each assessment produces:
 
-### Assessment Output
-
-| Field | Description |
-|-------|-------------|
-| `total_score` | Sum of all item scores |
-| `total_items` | Number of items assessed |
-| `overall_pct` | Score as percentage of maximum |
-| `tier` | Computed maturity tier |
-| `pillar_scores` | Per-pillar score breakdown (JSONB) |
-| `module_readiness` | Per-module readiness percentages (JSONB) |
+| Output | Description |
+|--------|-------------|
+| Total Score | Sum of all item scores |
+| Overall Percentage | Score as percentage of maximum |
+| Maturity Tier | Computed from overall score |
+| Pillar Scores | Per-pillar score breakdown |
+| Module Readiness | Per-module readiness percentages |
 
 ## Module Activation
 
-Managed via `blueprint_module_activations`:
-
-| Status | Description |
-|--------|-------------|
-| `inactive` | Module not yet activated |
-| `activating` | Module being onboarded |
-| `active` | Module live and operational |
-| `suspended` | Module temporarily paused |
-
-All state changes are logged in `blueprint_activation_log` for full audit trail.
+Modules follow a lifecycle: Inactive, Activating, Active, Suspended. All state changes are logged for a full audit trail.

@@ -6,22 +6,22 @@ icon: 'coins'
 
 # Economics Signals
 
-Economics signals alert to financial health issues at the organizational level. These signals fire when ECON rules detect threshold violations.
+Economics signals alert to financial health issues at the organizational level. These signals fire when financial metrics cross configurable thresholds.
 
 ## Signal Types
 
-| Signal Type | Severity Logic | Description |
-|-------------|---------------|-------------|
-| `budget_overrun` | CRITICAL over 25%, WARNING over 10% | Actual spend exceeds planned budget |
-| `territory_below_breakeven` | CRITICAL over 0.50, WARNING over 0.30 | Territory cost-to-yield ratio too high |
-| `headcount_plan_risk` | CRITICAL if P&L below -$100K, WARNING if below $0 | Headcount scenario yields negative P&L |
-| `unit_economics_degradation` | CRITICAL if LTV:CAC below 2, WARNING if below 3 | Unit economics degrading |
-| `retention_vs_acquisition` | CRITICAL if ratio over 6, WARNING if over 4 | Over-investing in acquisition vs retention |
-| `sm_efficiency_warning` | CRITICAL if S&M over 70%, WARNING if over 55% | Sales & Marketing spend too high |
+| Signal Type | Description |
+|-------------|-------------|
+| Budget Overrun | Actual spend exceeds planned budget |
+| Territory Below Breakeven | Territory cost-to-yield ratio is too high |
+| Headcount Plan Risk | Headcount scenario yields negative P&L |
+| Unit Economics Degradation | LTV:CAC ratio or payback period outside healthy range |
+| Retention vs. Acquisition Imbalance | Over-investing in acquisition relative to retention |
+| S&M Efficiency Warning | Sales & Marketing spend too high relative to revenue |
 
 ## Recomputation
 
-Economics signals are recomputed every 24 hours as part of the `economics_refresh` schedule.
+Economics signals are recomputed daily.
 
 ## Recommended Actions
 
@@ -31,5 +31,7 @@ Economics signals are recomputed every 24 hours as part of the `economics_refres
 | Territory below breakeven | Rebalance territories, evaluate rep productivity, adjust coverage model |
 | Headcount plan risk | Revise hiring timeline, adjust quota assumptions, model alternatives |
 | Unit economics degradation | Review pricing, reduce CAC, improve retention programs |
-| Retention vs acquisition | Rebalance investment, increase CS resources, reduce new logo spend |
+| Retention vs. acquisition | Rebalance investment, increase CS resources, reduce new logo spend |
 | S&M efficiency warning | Audit marketing spend ROI, consolidate channels, improve conversion rates |
+
+> Detailed threshold configurations and severity logic are available in the PILLAR Implementation Guide provided to active customers.

@@ -1,40 +1,39 @@
 ---
 title: 'Authentication'
-description: 'Supabase Auth, session management, and role-based access control'
+description: 'Authentication, session management, and role-based access control'
 icon: 'lock'
 ---
 
 # Authentication
 
-PILLAR uses Supabase Auth for authentication with Row-Level Security (RLS) enforcing multi-tenant data isolation.
+PILLAR uses industry-standard authentication with Row-Level Security (RLS) enforcing multi-tenant data isolation.
 
 ## Auth Flow
 
-1. User authenticates via Supabase Auth (email/password or SSO)
-2. Supabase issues a JWT token linked to `auth.users`
-3. The `users` table links `auth_user_id` to the PILLAR user record
-4. RLS policies filter all queries by `org_id`
+1. User authenticates via email/password or SSO
+2. A session token is issued and linked to the user record
+3. RLS policies filter all queries by organization, ensuring complete data isolation
 
 ## User Roles
 
 | Role | Access Level |
 |------|-------------|
-| `Leader` | Full org access, all dashboards and settings |
-| `Manager` | Team-level access, pipeline and forecast views |
-| `Rep_CSM` | Own accounts, opportunities, and renewals |
-| `Admin` | Full access plus configuration and user management |
-| `Executive_RO` | Read-only access to all dashboards |
+| Leader | Full org access, all dashboards and settings |
+| Manager | Team-level access, pipeline and forecast views |
+| Rep/CSM | Own accounts, opportunities, and renewals |
+| Admin | Full access plus configuration and user management |
+| Executive (Read-Only) | Read-only access to all dashboards |
 
 ## API Authentication
 
-All API routes require a valid Supabase session. The session is validated via:
+All API routes require a valid authenticated session.
 
 ```
 GET /api/auth/me
 ```
 
-Returns the current user profile including `org_id`, `role`, and `user_id`.
+Returns the current user profile including organization, role, and user identity.
 
-## Row-Level Security
+## Data Isolation
 
-All database tables enforce RLS policies scoped to `org_id`. Users can only access data belonging to their organization. Rep_CSM users are further scoped to their owned accounts.
+All data is isolated by organization. Users can only access data belonging to their organization. Rep/CSM users are further scoped to their owned accounts and deals.

@@ -1,0 +1,97 @@
+---
+title: 'Procurement API'
+description: 'Procurement calendars, budget cycle windows, renewal alignment, and engagement timing'
+icon: 'calendar-clock'
+---
+
+# Procurement API
+
+The Procurement API manages procurement calendar computation and retrieval. GET fetches existing calendars with filters and KPIs; POST computes procurement windows for all active accounts based on their fiscal year data.
+
+## GET `/api/procurement/calendar`
+
+Returns procurement calendars with account details, filterable by territory, segment, or upcoming budget windows.
+
+**Auth:** Requires authenticated session. Scoped to organization.
+
+### Query Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `territory` | string | -- | Filter by territory name |
+| `segment` | string | -- | Filter by account segment |
+| `upcoming` | string | -- | Set to `true` to show only accounts with budget approval windows in the next 90 days |
+| `limit` | number | 200 | Max rows returned (capped at 500) |
+
+### Response
+
+The response includes:
+
+- **calendars** -- Array of procurement calendar records joined with account data
+- **kpis** -- Summary metrics for the filtered result set
+- **total** -- Total number of calendars returned
+
+### Response Fields: `kpis`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `accounts_in_budget_window` | number | Accounts currently in their budget approval window |
+| `aligned_renewals_pct` | number | Percentage of renewals aligned with budget cycles |
+| `upcoming_rfp_windows` | number | Accounts with RFP windows in the next 90 days |
+| `avg_procurement_lead_time` | number | Average procurement lead time in days |
+
+### Response Fields: `calendars[]`
+
+Each calendar record includes:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Calendar record ID |
+| `account_id` | string | Account ID |
+| `fiscal_year_start` | string | Fiscal year start date |
+| `fiscal_year_end` | string | Fiscal year end date |
+| `budget_approval_window_start` | string | Budget approval opens |
+| `budget_approval_window_end` | string | Budget approval closes |
+| `rfp_typical_month` | number | Typical RFP month (1-12) |
+| `procurement_lead_time_days` | number | Estimated lead time |
+| `renewal_alignment` | string | `aligned`, `partial`, `misaligned`, or null |
+| `budget_cycle_type` | string | Budget cycle type |
+| `accounts` | object | Joined account data (name, segment, tier, territory, ARR, health_score, etc.) |
+
+---
+
+## POST `/api/procurement/calendar`
+
+Computes and upserts procurement calendars for all active accounts in the organization.
+
+**Auth:** Requires authenticated session. Scoped to organization.
+
+### Request Body
+
+No body required.
+
+### Response
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `success` | boolean | Operation result |
+| `message` | string | Summary message |
+| `created` | number | New calendars created |
+| `updated` | number | Existing calendars updated |
+
+### Computation Flow
+
+1. Fetch all active accounts with fiscal year data
+2. Fetch existing calendars for upsert logic
+3. Fetch open renewal opportunities for alignment assessment
+4. For each account:
+   - Compute procurement window from fiscal year end
+   - Assess renewal alignment if a renewal date exists
+   - Upsert calendar record
+
+### Side Effects
+
+- Creates or updates procurement calendar records for every active account
+- Alignment is assessed against open renewal-type opportunities
+
+> See the [Procurement Intelligence](/data/procurement-intelligence) data model page for full details on procurement windows, alignment logic, and risk identification.

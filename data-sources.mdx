@@ -6,16 +6,16 @@ icon: 'database'
 
 # Data Sources
 
-PILLAR ingests data from CRM systems, email/calendar platforms, district intelligence providers, and internal computation engines.
+PILLAR ingests data from CRM systems, email/calendar platforms, district intelligence providers, and internal computation engines. PILLAR integrates with 20+ tools.
 
 ## CRM Connectors
 
-Managed via the `crm_connections` table. Each org can connect one CRM provider.
+Each org can connect one CRM provider.
 
 | Provider | Auth | Objects | Sync Cadence | Direction |
 |----------|------|---------|--------------|-----------|
-| Salesforce | OAuth 2.0 | Account, Contact, Opportunity, Lead, Task | Every 15 min (incremental) | Inbound + outbound scores |
-| HubSpot | OAuth 2.0 | Company, Contact, Deal, Ticket | Every 15 min (incremental) | Inbound + outbound scores |
+| Salesforce | OAuth 2.0 | Account, Contact, Opportunity, Lead, Task | Every 15 min (incremental) | Inbound + outbound score push |
+| HubSpot | OAuth 2.0 | Company, Contact, Deal, Ticket | Every 15 min (incremental) | Inbound + outbound score push |
 | Dynamics 365 | OAuth 2.0 | Account, Contact, Opportunity, Lead | Coming soon | Coming soon |
 
 <Note>
@@ -24,18 +24,11 @@ Salesforce and HubSpot sync accounts, contacts, and opportunities into PILLAR ev
 
 ### Field Mapping
 
-CRM field mappings are stored in `crm_field_mappings` and are customizable per org. Each mapping specifies:
-
-- `pillar_table` / `pillar_field` -- Target PILLAR column
-- `crm_object` / `crm_field` -- Source CRM field
-- `transform` -- direct, lookup, formula, or picklist_map
-- `direction` -- inbound, outbound, or bidirectional
-
-Picklist value translations (e.g., PILLAR segment "Enterprise" to Salesforce "Enterprise Account") are stored in `crm_picklist_mappings`.
+CRM field mappings are customizable per org. Each mapping specifies the PILLAR field, CRM field, transform type (direct, lookup, formula, or picklist map), and sync direction (inbound, outbound, or bidirectional). Picklist value translations are also supported.
 
 ## Email and Calendar
 
-Managed via the `integrations` table. Per-user authorization.
+Per-user authorization required.
 
 | Provider | Auth | Data | Sync Cadence |
 |----------|------|------|--------------|
@@ -58,8 +51,6 @@ Starbridge.ai provides 120+ buyer attributes for school districts, higher educat
 | RFPs | Active bids and solicitations | Webhook (real-time) |
 | Documents | Board minutes, strategic plans | On-demand |
 
-Starbridge data is stored in both enrichment fields on the `accounts` table (120+ columns) and dedicated Starbridge entity tables (`starbridge_contracts`, `starbridge_rfps`, etc.).
-
 ## Notifications
 
 | Provider | Type | Usage |
@@ -70,24 +61,11 @@ Starbridge data is stored in both enrichment fields on the `accounts` table (120
 
 ## Computed Sources (PILLAR Engine)
 
-| Computation | Refresh | Output Tables |
-|-------------|---------|---------------|
-| Scoring Engine (93 rules) | Every 5 min | `accounts` (score columns), `scoring_audit` |
-| Signal Generation | Every 5-6 hours | `signals` |
-| Forecast Snapshots | Daily | `forecast_snapshots` |
-| Pipeline Cohorts | Daily | `pipeline_cohorts` |
-| Org Metrics | On-demand | `org_metrics` |
-| TAM/SAM Calculations | On settings change | `tam_definitions`, `sam_territories` |
-
-## Sync Tracking
-
-All sync operations are logged in `connector_sync_log`:
-
-| Field | Description |
-|-------|-------------|
-| `connector_name` | Which connector ran |
-| `sync_type` | "full" or "incremental" |
-| `status` | "success", "error", or "partial" |
-| `records_synced` | Count of records processed |
-| `errors` | JSON array of error details |
-| `started_at` / `completed_at` | Timing |
+| Computation | Refresh |
+|-------------|---------|
+| Scoring Engine | Continuous |
+| Signal Generation | Periodic |
+| Forecast Snapshots | Daily |
+| Pipeline Cohorts | Daily |
+| Org Metrics | On-demand |
+| TAM/SAM Calculations | On settings change |

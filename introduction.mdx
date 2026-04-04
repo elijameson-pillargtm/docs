@@ -1,19 +1,19 @@
 ---
 title: 'PILLAR Data Reference'
-description: 'Complete field-level documentation for the PILLAR GTM Operating System'
+description: 'Complete documentation for the PILLAR GTM Operating System'
 ---
 
 # PILLAR Data Reference
 
 PILLAR is an AI-native Go-To-Market Operating System that connects CRM data, district intelligence, and revenue economics into a unified scoring and signal engine.
 
-This reference documents every field, table, scoring rule, and signal type in the PILLAR platform.
+This reference documents the key concepts, features, and integrations in the PILLAR platform.
 
 ## Data Categories
 
 <CardGroup cols={3}>
   <Card title="Accounts" icon="building" href="/data/accounts">
-    100+ fields including CRM data, health scores, and Starbridge district intelligence
+    Customer and prospect records with health scores and Starbridge district intelligence
   </Card>
   <Card title="Contacts" icon="users" href="/data/contacts">
     CRM contacts with engagement tracking and stakeholder mapping
@@ -27,21 +27,39 @@ This reference documents every field, table, scoring rule, and signal type in th
   <Card title="Signals" icon="bolt" href="/signals/overview">
     8 signal families, 30+ types, AI-powered recommended actions
   </Card>
-  <Card title="Scoring Rules" icon="calculator" href="/scoring/overview">
-    93+ rules across 8 categories computing health, risk, and opportunity
+  <Card title="Scoring Engine" icon="calculator" href="/scoring/overview">
+    Multi-rule scoring across 8 categories for health, risk, and opportunity
   </Card>
   <Card title="Decision Engine" icon="brain" href="/data/decision-engine">
-    Strategic intelligence — territory health, financial cascades, board scenarios
+    Strategic intelligence -- territory health, financial cascades, board scenarios
+  </Card>
+  <Card title="Renewal Forecasting" icon="chart-mixed" href="/data/renewal-forecasting">
+    Per-renewal probability model with GRR/NRR projections and risk decomposition
+  </Card>
+  <Card title="Procurement Intelligence" icon="calendar-clock" href="/data/procurement-intelligence">
+    Fiscal year calendars, budget cycle forecasts, and procurement risk identification
+  </Card>
+  <Card title="Product Affinity" icon="grid-2-plus" href="/data/product-affinity">
+    Co-adoption analysis, cross-sell scoring, and prioritized expansion signals
+  </Card>
+  <Card title="Cohort Intelligence" icon="chart-scatter-bubble" href="/data/cohort-intelligence">
+    Vintage curves, NRR/GRR by cohort, and anomaly detection
+  </Card>
+  <Card title="Playbook Evolution" icon="arrows-rotate" href="/data/playbook-evolution">
+    Play effectiveness tracking and data-driven play recommendations
+  </Card>
+  <Card title="Board Narratives" icon="file-lines" href="/data/board-narratives">
+    AI-generated board-ready narratives powered by Claude
   </Card>
 </CardGroup>
 
 ## Data Sources
 
-| Source | Type | Sync | Fields |
-|--------|------|------|--------|
-| Salesforce | CRM | Every 5 min | Accounts, Contacts, Opportunities, Leads |
-| HubSpot | CRM | Every 5 min | Accounts, Contacts, Deals, Tickets |
-| Google Workspace | Email/Calendar | Per-user, every 5 min | Activities (email metadata, calendar events) |
+| Source | Type | Sync | Data |
+|--------|------|------|------|
+| Salesforce | CRM | Every 15 min | Accounts, Contacts, Opportunities, Leads |
+| HubSpot | CRM | Every 15 min | Accounts, Contacts, Deals, Tickets |
+| Google Workspace | Email/Calendar | Per-user | Activities (email metadata, calendar events) |
 | Slack | Notifications | Real-time | Signal routing, weekly digest |
 | Starbridge.ai | District Intelligence | On-demand + webhook | 120+ buyer attributes, RFPs, contracts, job changes |
-| PILLAR Engine | Computed | Every 5 min | Health scores, risk scores, signals, plays |
+| PILLAR Engine | Computed | Continuous | Health scores, risk scores, signals, plays |
