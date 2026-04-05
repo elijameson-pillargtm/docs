@@ -1,24 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
-  <style>
-    @keyframes b1 { 0%,100% { y:119; height:65; } 50% { y:107; height:77; } }
-    @keyframes b2 { 0%,100% { y:95; height:89; } 50% { y:80; height:104; } }
-    @keyframes b3 { 0%,100% { y:71; height:113; } 50% { y:53; height:131; } }
-    @keyframes b4 { 0%,100% { y:46; height:138; } 50% { y:25; height:159; } }
-    @keyframes b5 { 0%,100% { y:22; height:162; } 50% { y:4; height:180; } }
-    .b1 { animation: b1 3s ease-in-out infinite; }
-    .b2 { animation: b2 3s ease-in-out infinite 0.25s; }
-    .b3 { animation: b3 3s ease-in-out infinite 0.5s; }
-    .b4 { animation: b4 3s ease-in-out infinite 0.75s; }
-    .b5 { animation: b5 3s ease-in-out infinite 1s; }
-    @media (prefers-reduced-motion: reduce) {
-      .b1,.b2,.b3,.b4,.b5 { animation: none; }
-    }
-  </style>
+  <!-- PILLAR Wave Logo — Dark (inverted) variant, SMIL Animation -->
   <rect x="0" y="0" width="200" height="16" rx="2.4" fill="#FFFFFF"/>
-  <rect class="b1" x="10"  y="119" width="28" height="65"  fill="#4A75F0"/>
-  <rect class="b2" x="48"  y="95"  width="28" height="89"  fill="#4A75F0"/>
-  <rect class="b3" x="86"  y="71"  width="28" height="113" fill="#4A75F0"/>
-  <rect class="b4" x="124" y="46"  width="28" height="138" fill="#4A75F0"/>
-  <rect class="b5" x="162" y="22"  width="28" height="162" fill="#4A75F0"/>
+  <rect x="10" width="28" y="124" height="60" fill="#4A75F0">
+    <animate attributeName="y" values="124;36;124" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" dur="2.5s" begin="0s" repeatCount="indefinite"/>
+    <animate attributeName="height" values="60;148;60" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" dur="2.5s" begin="0s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="48" width="28" y="142" height="42" fill="#4A75F0">
+    <animate attributeName="y" values="142;66;142" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" dur="2.5s" begin="0.3s" repeatCount="indefinite"/>
+    <animate attributeName="height" values="42;118;42" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" dur="2.5s" begin="0.3s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="86" width="28" y="150" height="34" fill="#4A75F0">
+    <animate attributeName="y" values="150;75;150" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" dur="2.5s" begin="0.6s" repeatCount="indefinite"/>
+    <animate attributeName="height" values="34;109;34" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" dur="2.5s" begin="0.6s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="124" width="28" y="134" height="50" fill="#4A75F0">
+    <animate attributeName="y" values="134;41;134" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" dur="2.5s" begin="0.9s" repeatCount="indefinite"/>
+    <animate attributeName="height" values="50;143;50" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" dur="2.5s" begin="0.9s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="162" width="28" y="159" height="25" fill="#4A75F0">
+    <animate attributeName="y" values="159;92;159" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" dur="2.5s" begin="1.2s" repeatCount="indefinite"/>
+    <animate attributeName="height" values="25;92;25" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" dur="2.5s" begin="1.2s" repeatCount="indefinite"/>
+  </rect>
   <rect x="0" y="184" width="200" height="16" rx="2.4" fill="#FFFFFF"/>
 </svg>
