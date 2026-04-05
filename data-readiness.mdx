@@ -1,0 +1,133 @@
+---
+title: 'Data Readiness'
+description: 'Minimum data standards for CRM sync and scoring readiness'
+icon: 'shield-check'
+---
+
+# Data Readiness
+
+PILLAR enforces data quality standards before computing scores. When your CRM data doesn't meet the minimum standard, PILLAR will tell you exactly what's missing and which accounts are affected.
+
+## Readiness States
+
+| State | Threshold | Behavior |
+|-------|-----------|----------|
+| **Ready** | 85%+ readiness, no critical issues | All scoring and signals operate normally |
+| **Degraded** | 60-84% readiness, no critical issues | Scores compute but a warning banner displays. Some accounts may have incomplete scores. |
+| **Blocked** | Below 60%, or any critical issues, or fewer than 5 scoring-ready accounts | Scoring is paused. A red banner displays with a link to the Data Health dashboard. |
+
+## Minimum CRM Sync Standard
+
+### Required Fields (Blocking)
+
+These fields must be present for PILLAR to function. Missing these generates critical issues.
+
+**Accounts:**
+- `name` -- Account identifier
+- `status` -- Active/inactive lifecycle state
+- `arr` -- Must not be negative
+
+**Contacts:**
+- `name` -- Contact full name
+- `account_id` -- Must reference a valid account (referential integrity)
+
+**Opportunities:**
+- `name` -- Opportunity identifier
+- `account_id` -- Must reference a valid account
+- `stage` -- Pipeline stage
+- `amount` -- Deal value
+
+**Renewals:**
+- `account_id` -- Must reference a valid account
+- `renewal_date` -- When the renewal occurs
+- `arr` -- Renewal ARR value
+
+**Activities:**
+- `account_id` -- Must reference a valid account
+- `type` -- Activity type (call, email, meeting, etc.)
+
+### Scoring Readiness Fields (Warning)
+
+These fields aren't required for sync, but scores will be incomplete without them.
+
+| Table | Field | Impact if Missing |
+|-------|-------|-------------------|
+| Accounts | `segment` | No segment-based benchmarking |
+| Accounts | `health_score`, `risk_score` | No pre-existing health data |
+| Contacts | `buying_role` | Champion/sponsor detection unavailable |
+| Contacts | `is_champion`, `is_exec_sponsor` | Stakeholder coverage signals won't fire |
+| Opportunities | `probability` | Weighted pipeline can't compute |
+| Opportunities | `forecast_category` | Forecast bands can't compute |
+
+### What Makes an Account "Scoring Ready"
+
+An account needs **both** of the following to be scored:
+
+1. At least **1 contact** linked to it
+2. At least **1 activity** in the last **180 days**
+
+The org-level readiness percentage is: `scoring_ready_accounts / total_active_accounts`.
+
+## Record-Level Detail
+
+PILLAR doesn't just tell you "37 accounts have issues." It tells you exactly which accounts are affected and what's wrong with each one.
+
+The **Data Health** dashboard (`/data-health`) shows:
+- Overall readiness percentage with progress bar
+- Critical issues and warnings count
+- Per-field completeness across all tables
+- Scoring-ready vs needs-attention account counts
+
+The **Affected Records** API (`GET /api/data-readiness/affected-records`) returns per-account detail:
+
+```json
+{
+  "total_accounts": 155,
+  "scoring_ready": 118,
+  "not_ready": 37,
+  "accounts": [
+    {
+      "account_id": "abc-123",
+      "account_name": "Houston ISD",
+      "scoring_ready": false,
+      "issues": [
+        {
+          "code": "no_contacts",
+          "severity": "critical",
+          "description": "No contacts linked to this account"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "no_contacts": 12,
+    "no_recent_activity": 8,
+    "missing_segment": 15
+  }
+}
+```
+
+Filter by specific issue: `GET /api/data-readiness/affected-records?issue=no_contacts`
+
+## Issue Codes
+
+| Code | Severity | Description |
+|------|----------|-------------|
+| `no_contacts` | Critical | No contacts linked to the account |
+| `negative_arr` | Critical | Account has negative ARR (data error) |
+| `no_recent_activity` | Warning | No activity recorded in the last 180 days |
+| `missing_segment` | Warning | Segment field is empty |
+| `zero_arr` | Warning | Active account with zero or missing ARR |
+| `score_imbalance` | Warning | health_score + risk_score deviates from 100 |
+
+## Post-Sync Validation
+
+Every CRM sync automatically triggers a validation pass across 5 tables:
+
+1. **Accounts** -- Required fields, ARR positivity, score balance
+2. **Contacts** -- Required fields, referential integrity, champion coverage
+3. **Opportunities** -- Required fields, referential integrity, amount > 0, deal freshness
+4. **Renewals** -- Required fields, referential integrity, ARR within 50-150% of account ARR
+5. **Activities** -- Required fields, referential integrity
+
+Results are stored in `connector_sync_log` and surfaced on the Data Health dashboard. A daily cron job at 6:00 AM UTC re-validates all data to detect drift.

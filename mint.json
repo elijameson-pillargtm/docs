@@ -69,6 +69,7 @@
       "group": "Resources",
       "pages": [
         "blueprint",
+        "data-readiness",
         "faq",
         "changelog",
         "support"

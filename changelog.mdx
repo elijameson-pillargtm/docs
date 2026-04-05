@@ -10,6 +10,23 @@ All notable changes to the PILLAR platform are documented here.
 
 ---
 
+## v3.4.0 -- April 4, 2026
+
+**Mathematical Integrity Architecture, Data Readiness Gate, Formula Audit**
+
+- **1,874 Automated Tests with CI Gate** -- Every deployment to production must pass the full test suite (1,874 tests across 43 files) before Vercel allows the build to complete. Zero chance of deploying broken math.
+- **Formula Correctness Audit** -- Audited 45+ formulas against industry standards. Fixed 5 material errors: win rate denominator (bowtie), LTV/CAC missing gross margin (scoring), CAC payback missing gross margin (dashboard), NRR conflation with total growth (decision-engine), Rule of 40 linear vs compounding annualization (org-metrics). Resolved 3 cross-file inconsistencies in burn multiple, magic number, and forecast commit weights.
+- **Data Readiness Gate** -- New enforcement layer that checks CRM data quality before scoring runs. Three states: ready (85%+), degraded (60-84%), blocked (<60% or critical issues). Banner displays on all authenticated pages when data quality is insufficient.
+- **Record-Level Data Quality Drill-Down** -- New `/api/data-readiness/affected-records` endpoint identifies every specific account with data issues, what's wrong, and severity. No more "150 accounts have problems" without knowing which 150.
+- **Stale Contact Signal Cascade** -- Detects contacts with no engagement for 4+ months (120 days). Generates cascading signals: stale contact data, no active champion, no active executive buyer, no active stakeholder (CRITICAL). A contact that exists but hasn't engaged is functionally no contact.
+- **Scoring-to-Source Consistency Tests** -- New test class that verifies scoring audit decomposition matches actual contact, renewal, and activity data. Catches the class of bug where displayed scores don't reflect reality.
+- **Seed Data Integrity Fix** -- `seed-scores.ts` now queries actual contacts, renewals, and activities to derive scoring inputs instead of generating random values. Account 360 score decomposition now reflects real data.
+- **Cross-Endpoint Consistency: Full Coverage** -- Expanded from 11 to 32 cross-endpoint tests covering all endpoint pairs that display overlapping metrics (expansion, territory economics, decision engine, TAM/SAM, budget variance, NRR impact, leads, plays, all scoring models).
+- **Module Tier Gating** -- 18 pages enforce module-based access control. Shows "Module Not Activated" UI instead of silent redirect when a module isn't unlocked.
+- **MCP Server: 22 Tools** -- Added `get_data_readiness` and `get_affected_records` tools for AI-assisted data quality monitoring.
+
+---
+
 ## v3.3.0 -- April 4, 2026
 
 **Renewal Forecasting, Procurement Intelligence, Product Affinity, Cohort Intelligence, Playbook Evolution, Board Narratives**

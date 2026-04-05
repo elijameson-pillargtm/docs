@@ -19,6 +19,23 @@ Account signals capture important changes at the account level: stakeholder move
 | Contact Disengagement | Multiple contacts showing declining engagement |
 | Competitor Engaged | Competitor actively engaged on the account |
 | Competitor Contract Expiring | Tracked competitor contract approaching renewal |
+| Stale Contact Data | One or more contacts have had no engagement for 4+ months |
+| No Active Champion | Champion contact exists but is stale (120+ days no engagement) |
+| No Active Executive Buyer | Executive sponsor exists but is stale (120+ days no engagement) |
+| No Active Stakeholder | ALL contacts on the account are stale (CRITICAL severity) |
+
+## Stale Contact Cascade
+
+PILLAR detects contacts with no engagement for 4 months (120 days) and generates cascading signals:
+
+1. **`stale_contact_data`** (WARNING) -- Fires when any contact on the account has had no engagement for 120+ days. Escalates to CRITICAL if all contacts are stale.
+2. **`no_active_champion`** (WARNING) -- Fires when the champion contact is stale. A contact that exists in the CRM but hasn't engaged in 4 months is functionally equivalent to having no champion.
+3. **`no_active_executive_buyer`** (WARNING) -- Same logic for executive sponsors.
+4. **`no_active_stakeholder`** (CRITICAL) -- Fires when every contact on the account is stale. This indicates zero active stakeholder coverage and puts the full account ARR at risk.
+
+A contact is considered "stale" if:
+- Their `last_activity_date` is more than 120 days ago, OR
+- They have no recorded activity date and zero engagement score
 
 ## Recommended Actions
 
@@ -31,6 +48,10 @@ Account signals capture important changes at the account level: stakeholder move
 | Contact disengagement | Multi-thread outreach, engage different stakeholders |
 | Competitor engaged | Develop competitive strategy, reinforce value proposition |
 | Competitor contract expiring | Prepare displacement proposal, engage procurement |
+| Stale contact data | Refresh contact records, schedule outreach, verify contact info |
+| No active champion | Identify new champion, re-engage existing, escalate internally |
+| No active executive buyer | Schedule exec-to-exec meeting, find alternate sponsor |
+| No active stakeholder | Emergency account review, full stakeholder mapping sprint |
 
 All account signal thresholds are configurable per organization.
 

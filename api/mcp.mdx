@@ -49,7 +49,7 @@ GET  https://app.pillargtm.com/api/mcp  (server discovery)
 
 Authentication: Bearer API key in the `Authorization` header.
 
-## Available Tools (20)
+## Available Tools (22)
 
 ### Core Intelligence
 
@@ -62,6 +62,13 @@ Authentication: Bearer API key in the `Authorization` header.
 | `get_active_signals` | Active signals filtered by severity (CRITICAL/WARNING/INFO) or family (RENEWAL/PIPELINE/EXPANSION) |
 | `get_account_health` | Health, risk, and priority scores with scoring decomposition |
 | `get_renewal_risk` | Upcoming renewals with risk scores, filtered by days out (30/60/90) |
+
+### Data Readiness
+
+| Tool | Description |
+|------|-------------|
+| `get_data_readiness` | Check if CRM data is ready for scoring: readiness level (ready/degraded/blocked), scoring-ready account count, blocking issues |
+| `get_affected_records` | Identify specific accounts with data quality issues. Filter by issue code (no_contacts, no_recent_activity, missing_segment, zero_arr) |
 
 ### Operational
 
