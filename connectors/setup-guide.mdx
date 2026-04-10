@@ -1,0 +1,611 @@
+---
+title: 'Connector Setup Guide'
+description: 'Step-by-step guide to connecting your CRM, product analytics, support ticketing, and NPS tools to PILLAR'
+icon: 'plug'
+---
+
+# Connector Setup Guide
+
+PILLAR connects to your revenue stack to build a unified scoring and intelligence layer. This guide walks you through connecting every supported data source.
+
+## How Data Gets Into PILLAR
+
+PILLAR ingests data through three mechanisms:
+
+1. **OAuth Connectors** -- For CRMs, email/calendar, and select tools. You authorize PILLAR once, and data flows automatically on a recurring schedule.
+2. **API Key Connectors** -- For product analytics, support ticketing, and NPS tools. You provide an API key or token, and PILLAR pulls data on a schedule.
+3. **CSV Import** -- For data not available via API (e.g., seat counts, utilization metrics). Upload a file and PILLAR maps columns to fields.
+
+### Sync Cadence
+
+| Connector Type | Default Cadence | Configurable |
+|---|---|---|
+| CRM (Salesforce, HubSpot) | Every 15 minutes (incremental) | Yes -- can be set to 5, 15, 30, or 60 minutes |
+| Email & Calendar | Every 5 minutes | No |
+| Product Usage Tools | Every 60 minutes | Yes -- can be set to 15, 30, or 60 minutes |
+| Support Ticketing | Every 30 minutes | Yes |
+| NPS / Sentiment | Every 60 minutes | Yes |
+| CSV Import | Manual upload | N/A |
+
+### The Field Mapping UI
+
+After connecting any data source, PILLAR auto-discovers the available fields and maps them to PILLAR's canonical data model. You can review and customize mappings via **Settings > Integrations > Field Mapping** on any connector card.
+
+<Card title="Field Mapping Reference" icon="table-columns" href="/data/field-mapping-reference">
+  See all 126+ fields PILLAR can ingest, with default CRM field names for Salesforce and HubSpot
+</Card>
+
+---
+
+## CRM Connectors
+
+CRM connectors are the foundation of PILLAR. They provide the core data for accounts, contacts, opportunities, leads, and contracts.
+
+<Tabs>
+<Tab title="Salesforce">
+
+### What You'll Need
+
+- A Salesforce org with API access enabled
+- A Salesforce user with at least **Read** access to Account, Contact, Opportunity, Lead, and (optionally) Contract and Case objects
+- Admin permissions in PILLAR to configure connectors
+
+<Note>
+PILLAR uses OAuth 2.0 with the Salesforce Connected App flow. No passwords or security tokens are stored -- only the OAuth refresh token. Your Salesforce admin may need to pre-authorize the PILLAR Connected App in Setup > App Manager.
+</Note>
+
+### Steps to Connect
+
+1. In PILLAR, navigate to **Settings > Integrations**.
+2. Click **Connect** on the Salesforce card.
+3. You will be redirected to Salesforce's OAuth consent screen. Log in with your Salesforce credentials and click **Allow**.
+4. PILLAR auto-discovers your org's schema and maps fields. The initial sync begins immediately.
+5. Review the auto-mapped fields by clicking **Field Mapping** on the connector card. Fix any unmapped required fields.
+
+### What Syncs
+
+| CRM Object | PILLAR Table | Key Fields |
+|---|---|---|
+| Account | `accounts` | Name, ARR, Segment, Industry, State, Owner |
+| Contact | `contacts` | Name, Email, Title, Account ID, Buying Role |
+| Opportunity | `opportunities` | Name, Amount, Stage, Close Date, Account ID |
+| Lead | `leads` | Name, Email, Company, Status, Lead Score |
+| Contract | `contracts` | Account ID, Start Date, End Date, Value, Status |
+| Case | `support_ticket_snapshots` | Account ID, Subject, Status, Priority, Severity |
+
+### Score Write-Back
+
+PILLAR pushes computed scores back to Salesforce as custom fields on the Account object:
+
+| PILLAR Score | Salesforce Field | Type |
+|---|---|---|
+| Health Score (0-100) | `PILLAR_Health_Score__c` | Number |
+| Risk Score (0-100) | `PILLAR_Risk_Score__c` | Number |
+| Priority Score (0-100) | `PILLAR_Priority_Score__c` | Number |
+
+<Warning>
+You must create these three custom Number fields on the Account object in Salesforce before enabling write-back. Go to Setup > Object Manager > Account > Fields & Relationships > New to create each field.
+</Warning>
+
+### How It Feeds Scoring
+
+- **Account Health Score** -- Uses ARR, engagement signals, support burden, product usage, and NPS data from the account
+- **Pipeline Hygiene** -- Evaluates opportunities for missing next steps, stale deals, close date pushes, and unidentified economic buyers
+- **Renewal Risk** -- Uses contract end dates, support ticket severity, NPS trends, and engagement decay
+- **ICP Fit** -- Scores accounts against your ideal customer profile using segment, industry, student count, budget, and other firmographic data
+- **Lead Score** -- Combines fit signals (title, segment, enrollment) with engagement signals (email opens, content downloads, website visits, demo requests)
+
+</Tab>
+<Tab title="HubSpot">
+
+### What You'll Need
+
+- A HubSpot account with API access (Professional or Enterprise tier)
+- Admin permissions in both HubSpot and PILLAR
+
+<Note>
+PILLAR uses HubSpot's OAuth 2.0 flow. The integration requests scopes for CRM objects (companies, contacts, deals, tickets) and optionally the beta Leads object if your portal has it enabled.
+</Note>
+
+### Steps to Connect
+
+1. In PILLAR, navigate to **Settings > Integrations**.
+2. Click **Connect** on the HubSpot card.
+3. You will be redirected to HubSpot's OAuth consent screen. Select your HubSpot account and click **Connect app**.
+4. PILLAR auto-discovers your portal's schema and maps properties. The initial sync begins immediately.
+5. Review the auto-mapped fields by clicking **Field Mapping** on the connector card.
+
+### What Syncs
+
+| CRM Object | PILLAR Table | Key Fields |
+|---|---|---|
+| Company | `accounts` | Name, ARR, Segment, Industry, Domain, Owner |
+| Contact | `contacts` | Name (firstname + lastname), Email, Job Title, Associated Company |
+| Deal | `opportunities` | Deal Name, Amount, Stage, Close Date, Associated Company |
+| Contact (legacy lead path) | `leads` | Name, Email, Company, Lifecycle Stage, Lead Score |
+| Leads (beta 0-136 object) | `leads` | Name, Email, Company, Status (if portal has beta enabled) |
+| Ticket | `support_ticket_snapshots` | Account, Subject, Pipeline Stage, Priority |
+
+<Info>
+HubSpot does not have a native Contract object yet (it is in private beta as of early 2026). Once it goes GA, PILLAR will auto-discover and map contract properties. In the meantime, contract data can be imported via CSV.
+</Info>
+
+### Score Write-Back
+
+PILLAR pushes computed scores back to HubSpot as custom properties on the Company object:
+
+| PILLAR Score | HubSpot Property | Type |
+|---|---|---|
+| Health Score (0-100) | `pillar_health_score` | Number |
+| Risk Score (0-100) | `pillar_risk_score` | Number |
+| Priority Score (0-100) | `pillar_priority_score` | Number |
+
+Create these three custom Number properties on the Company object in HubSpot before enabling write-back (Settings > Properties > Company properties > Create property).
+
+### How It Feeds Scoring
+
+Same scoring pipeline as Salesforce -- all CRM data flows into the same canonical PILLAR tables regardless of source CRM. See the Salesforce tab above for details on which scores use which data.
+
+</Tab>
+</Tabs>
+
+---
+
+## Email & Calendar
+
+Email and calendar connectors provide activity-level engagement data that powers the engagement component of Account Health scoring and contact-level engagement scores.
+
+<Tabs>
+<Tab title="Google Workspace">
+
+### What You'll Need
+
+- A Google Workspace account (personal Gmail is not supported)
+- Each user must authorize individually -- this is a per-user OAuth flow
+
+<Note>
+PILLAR never reads email body content. Only metadata is captured: sender, recipient, timestamp, and subject line. This data is stored as activities linked to contacts and accounts.
+</Note>
+
+### Steps to Connect
+
+1. Navigate to **Settings > Integrations > Email & Calendar**.
+2. Click **Connect Google Workspace**.
+3. Each team member will see a prompt to authorize their individual Google account.
+4. After authorization, email metadata and calendar events begin syncing every 5 minutes.
+
+### What Syncs
+
+| Data Type | Fields Captured | Used For |
+|---|---|---|
+| Email metadata | Sender, recipient, timestamp, subject line | Contact engagement scoring, activity tracking |
+| Calendar events | Attendees, time, duration | Meeting activity signals, last-meeting-date on opportunities |
+
+### How It Feeds Scoring
+
+- **Account Health** -- Email and meeting frequency contribute to the engagement component. Accounts with declining email/meeting activity trigger engagement decay signals.
+- **Contact Engagement Score** -- Individual contact engagement scores factor in email response rates and meeting attendance.
+- **Pipeline Hygiene** -- The `last_meeting_date` field on opportunities is updated from calendar data, and deals without recent meetings are flagged.
+
+</Tab>
+</Tabs>
+
+---
+
+## Product Usage Tools
+
+Product usage data feeds the adoption and utilization components of Account Health scoring. PILLAR ingests feature usage, session data, and user activity metrics.
+
+<Tabs>
+<Tab title="Pendo">
+
+### What You'll Need
+
+- Pendo API key (found in Pendo > Settings > Subscriptions > App Details)
+- The Pendo account ID field that maps to your CRM account identifier
+
+### Steps to Connect
+
+1. Navigate to **Settings > Integrations > Product Usage**.
+2. Click **Connect** on the Pendo card.
+3. Enter your Pendo API key.
+4. Map the Pendo account identifier to PILLAR's account lookup field.
+5. Click **Save & Test**. PILLAR will validate the connection and begin the initial sync.
+
+### What Syncs
+
+| Data Point | Cadence | PILLAR Field |
+|---|---|---|
+| Feature adoption counts | Every 60 min | `accounts.product_usage_score` |
+| Active user counts | Every 60 min | `accounts.active_users` |
+| Session frequency | Every 60 min | Engagement signals |
+| Feature usage trends | Every 60 min | Expansion readiness scoring |
+
+</Tab>
+<Tab title="Mixpanel">
+
+### What You'll Need
+
+- Mixpanel API key (Project Settings > Access Keys > API Secret)
+- Mixpanel API secret
+- The Mixpanel group key that maps to your CRM account identifier
+
+### Steps to Connect
+
+1. Navigate to **Settings > Integrations > Product Usage**.
+2. Click **Connect** on the Mixpanel card.
+3. Enter your API key and API secret.
+4. Map the Mixpanel group key (account-level identifier) to PILLAR's account lookup field.
+5. Click **Save & Test**.
+
+### What Syncs
+
+| Data Point | Cadence | Used For |
+|---|---|---|
+| Event counts by account | Every 60 min | Product usage scoring |
+| Active user counts | Every 60 min | Adoption signals |
+| Feature usage breakdown | Every 60 min | Expansion readiness |
+
+</Tab>
+<Tab title="Amplitude">
+
+### What You'll Need
+
+- Amplitude API key (Settings > Projects > your project > API Key)
+- Amplitude API secret
+- Region: US or EU (determines the API endpoint)
+
+### Steps to Connect
+
+1. Navigate to **Settings > Integrations > Product Usage**.
+2. Click **Connect** on the Amplitude card.
+3. Enter your API key, API secret, and select your region (US or EU).
+4. Map the Amplitude account group to PILLAR's account lookup field.
+5. Click **Save & Test**.
+
+### What Syncs
+
+| Data Point | Cadence | Used For |
+|---|---|---|
+| Active users per account | Every 60 min | Adoption scoring |
+| Event volume trends | Every 60 min | Usage health signals |
+| Feature flag usage | Every 60 min | Expansion readiness |
+
+</Tab>
+<Tab title="Segment">
+
+### What You'll Need
+
+- Segment API token (Settings > Workspace > Tokens > Create token)
+- Segment workspace slug
+
+### Steps to Connect
+
+1. Navigate to **Settings > Integrations > Product Usage**.
+2. Click **Connect** on the Segment card.
+3. Enter your API token and workspace slug.
+4. Configure which Segment sources PILLAR should read from.
+5. Click **Save & Test**.
+
+### What Syncs
+
+PILLAR reads group-level (account) traits and track events from Segment. Event data is aggregated into usage metrics per account.
+
+| Data Point | Cadence | Used For |
+|---|---|---|
+| Group traits (account properties) | Every 60 min | Account enrichment |
+| Track events (aggregated by account) | Every 60 min | Usage scoring |
+| Identify events (user properties) | Every 60 min | Contact enrichment |
+
+</Tab>
+<Tab title="Heap">
+
+### What You'll Need
+
+- Heap API key (Account > Manage > API Keys)
+
+### Steps to Connect
+
+1. Navigate to **Settings > Integrations > Product Usage**.
+2. Click **Connect** on the Heap card.
+3. Enter your Heap API key.
+4. Map the Heap account identifier to PILLAR's account lookup field.
+5. Click **Save & Test**.
+
+### What Syncs
+
+| Data Point | Cadence | Used For |
+|---|---|---|
+| Session counts by account | Every 60 min | Engagement scoring |
+| Event counts by account | Every 60 min | Usage health |
+| User activity metrics | Every 60 min | Adoption signals |
+
+</Tab>
+<Tab title="Mode Analytics">
+
+### What You'll Need
+
+- Mode API token (your Mode profile > API Tokens)
+- Mode API secret
+- Mode workspace name
+- Mode report token (the token from the URL of the report you want PILLAR to read)
+
+### Steps to Connect
+
+1. Navigate to **Settings > Integrations > Product Usage**.
+2. Click **Connect** on the Mode card.
+3. Enter your API token, API secret, workspace name, and report token.
+4. Click **Save & Test**. PILLAR will query the specified report and extract account-level metrics.
+
+### What Syncs
+
+Mode is used as a product analytics data warehouse connector. PILLAR runs the specified Mode report and extracts account-level usage metrics from the results.
+
+| Data Point | Cadence | Used For |
+|---|---|---|
+| Report query results (account-level) | Every 60 min | Custom usage metrics |
+
+<Info>
+Mode is best suited for teams that centralize product analytics in a SQL-based reporting layer rather than a dedicated product analytics tool.
+</Info>
+
+</Tab>
+</Tabs>
+
+---
+
+## Support Ticketing
+
+Support ticket data feeds the support burden component of Renewal Risk scoring. Accounts with high ticket volume, escalations, or low CSAT are flagged as at-risk.
+
+<Tabs>
+<Tab title="Intercom">
+
+### What You'll Need
+
+- Intercom admin access to authorize the OAuth flow
+
+### Steps to Connect
+
+1. Navigate to **Settings > Integrations > Support Ticketing**.
+2. Click **Connect** on the Intercom card.
+3. You will be redirected to Intercom's OAuth consent screen. Click **Authorize**.
+4. Map the Intercom company identifier to PILLAR's account lookup field.
+5. Click **Save & Test**.
+
+### What Syncs
+
+| Data Point | Cadence | PILLAR Field |
+|---|---|---|
+| Conversation count (per company) | Every 30 min | Support burden scoring |
+| Conversation state (open/closed) | Every 30 min | `support_ticket_snapshots.status` |
+| SLA breach status | Every 30 min | Escalation signals |
+| CSAT ratings | Every 30 min | `support_ticket_snapshots.csat_score` |
+| Tags and categories | Every 30 min | Ticket type classification |
+
+</Tab>
+<Tab title="Zendesk">
+
+### What You'll Need
+
+- Zendesk subdomain (e.g., `yourcompany` from `yourcompany.zendesk.com`)
+- Zendesk API token (Admin Center > Apps and integrations > APIs > Zendesk API > Add API token)
+- The email address associated with the API token
+
+### Steps to Connect
+
+1. Navigate to **Settings > Integrations > Support Ticketing**.
+2. Click **Connect** on the Zendesk card.
+3. Enter your subdomain, API token, and associated email.
+4. Map the Zendesk organization field to PILLAR's account lookup field.
+5. Click **Save & Test**.
+
+### What Syncs
+
+| Data Point | Cadence | PILLAR Field |
+|---|---|---|
+| Ticket count (per organization) | Every 30 min | Support burden scoring |
+| Ticket status and priority | Every 30 min | `support_ticket_snapshots.status`, `priority` |
+| Ticket satisfaction ratings | Every 30 min | `support_ticket_snapshots.csat_score` |
+| Escalation status | Every 30 min | `support_ticket_snapshots.is_escalated` |
+| First response time | Every 30 min | `support_ticket_snapshots.first_response_at` |
+
+</Tab>
+<Tab title="Freshdesk">
+
+### What You'll Need
+
+- Freshdesk subdomain (e.g., `yourcompany` from `yourcompany.freshdesk.com`)
+- Freshdesk API key (Profile > Your API Key)
+
+### Steps to Connect
+
+1. Navigate to **Settings > Integrations > Support Ticketing**.
+2. Click **Connect** on the Freshdesk card.
+3. Enter your subdomain and API key.
+4. Map the Freshdesk company field to PILLAR's account lookup field.
+5. Click **Save & Test**.
+
+### What Syncs
+
+| Data Point | Cadence | PILLAR Field |
+|---|---|---|
+| Ticket count (per company) | Every 30 min | Support burden scoring |
+| Ticket status and priority | Every 30 min | `support_ticket_snapshots.status`, `priority` |
+| CSAT survey responses | Every 30 min | `support_ticket_snapshots.csat_score` |
+| SLA policy breaches | Every 30 min | Escalation signals |
+| Resolution time | Every 30 min | `support_ticket_snapshots.resolved_at` |
+
+</Tab>
+</Tabs>
+
+<Note>
+If your support ticketing runs inside your CRM (HubSpot Service Hub or Salesforce Service Cloud), PILLAR ingests tickets directly through the CRM connector -- no separate support ticketing connector is needed. The CRM connector syncs Cases (Salesforce) or Tickets (HubSpot) into the same `support_ticket_snapshots` table.
+</Note>
+
+---
+
+## Customer Sentiment & NPS
+
+NPS and customer sentiment data feed the Satisfaction component of Account Health scoring. Accounts with declining NPS or negative survey responses are flagged for proactive outreach.
+
+<Tabs>
+<Tab title="Wootric">
+
+### What You'll Need
+
+- Wootric account with OAuth access
+
+### Steps to Connect
+
+1. Navigate to **Settings > Integrations > Customer Sentiment**.
+2. Click **Connect** on the Wootric card.
+3. You will be redirected to Wootric's OAuth consent screen. Authorize the connection.
+4. Map the Wootric account/end-user identifier to PILLAR's account or contact lookup field.
+5. Click **Save & Test**.
+
+### What Syncs
+
+| Data Point | Cadence | PILLAR Field |
+|---|---|---|
+| NPS score (per account) | Every 60 min | `accounts.nps_score` |
+| NPS survey responses | Every 60 min | Satisfaction scoring |
+| Response trends | Every 60 min | NPS trend signals |
+
+</Tab>
+<Tab title="Delighted">
+
+### What You'll Need
+
+- Delighted API key (Settings > API)
+
+### Steps to Connect
+
+1. Navigate to **Settings > Integrations > Customer Sentiment**.
+2. Click **Connect** on the Delighted card.
+3. Enter your Delighted API key.
+4. Map the Delighted person identifier to PILLAR's contact or account lookup field.
+5. Click **Save & Test**.
+
+### What Syncs
+
+| Data Point | Cadence | PILLAR Field |
+|---|---|---|
+| NPS / CSAT / CES scores | Every 60 min | `accounts.nps_score` |
+| Survey response text | Every 60 min | Sentiment analysis signals |
+| Score trends over time | Every 60 min | Satisfaction decay signals |
+
+</Tab>
+<Tab title="SurveyMonkey">
+
+### What You'll Need
+
+- SurveyMonkey account with OAuth access (Advantage plan or higher)
+
+### Steps to Connect
+
+1. Navigate to **Settings > Integrations > Customer Sentiment**.
+2. Click **Connect** on the SurveyMonkey card.
+3. You will be redirected to SurveyMonkey's OAuth consent screen. Authorize the connection.
+4. Select which surveys contain NPS or CSAT questions.
+5. Map the respondent identifier to PILLAR's contact or account lookup field.
+6. Click **Save & Test**.
+
+### What Syncs
+
+| Data Point | Cadence | PILLAR Field |
+|---|---|---|
+| Survey responses | Every 60 min | Satisfaction scoring |
+| NPS question responses | Every 60 min | `accounts.nps_score` |
+| Response completion rates | Every 60 min | Engagement signals |
+
+</Tab>
+</Tabs>
+
+<Info>
+**How NPS feeds scoring**: NPS scores from any connected sentiment tool flow into `accounts.nps_score`, which is a component of the Account Health Score's Satisfaction dimension. Declining NPS triggers the `nps_decline` signal, which in turn can fire save plays or risk alerts. See the [Account Health scoring rules](/scoring/account-health) for weight details.
+</Info>
+
+---
+
+## CSV Import
+
+For data that is not available through an API connector, PILLAR supports manual CSV upload. This is commonly used for:
+
+- **Seat counts** -- Licensed seats vs. active seats per account (feeds utilization scoring)
+- **Utilization metrics** -- Product usage percentages when no product analytics tool is connected
+- **Financial data** -- P&L metrics for the Board Report (has its own dedicated upload at Settings > Financial Data)
+- **Historical data** -- Backfilling account or contract data that predates your CRM
+
+### How to Upload
+
+1. Navigate to **Settings > Integrations > CSV Import**.
+2. Download the template CSV for the data type you want to import (Accounts, Contacts, Opportunities, Leads, or Contracts).
+3. Fill in the template with your data. Each row should include a matching identifier (account name, CRM ID, or email) so PILLAR can link records.
+4. Upload the completed CSV.
+5. PILLAR shows a preview of the mapped columns and any validation errors. Fix any issues and confirm the import.
+
+### CSV Template Columns
+
+<AccordionGroup>
+<Accordion title="Account Import Template">
+
+| Column | Required | Maps To |
+|---|---|---|
+| `account_name` or `crm_id` | Yes (one of) | Record matching key |
+| `arr` | No | `accounts.arr` |
+| `segment` | No | `accounts.segment` |
+| `status` | No | `accounts.status` |
+| `student_count` | No | `accounts.student_count` |
+| `licensed_seats` | No | Utilization scoring |
+| `active_seats` | No | Utilization scoring |
+| `nps_score` | No | `accounts.nps_score` |
+
+Any column that matches a PILLAR field name from the [Field Mapping Reference](/data/field-mapping-reference) will be auto-mapped.
+
+</Accordion>
+<Accordion title="Contract Import Template">
+
+| Column | Required | Maps To |
+|---|---|---|
+| `account_name` or `crm_id` | Yes (one of) | Account lookup |
+| `contract_number` | No | `contracts.contract_number` |
+| `start_date` | Yes | `contracts.start_date` |
+| `end_date` | Yes | `contracts.end_date` |
+| `contract_value` | Yes | `contracts.contract_value` |
+| `status` | No | `contracts.status` |
+| `auto_renew` | No | `contracts.auto_renew` |
+| `term_months` | No | `contracts.term_months` |
+
+</Accordion>
+</AccordionGroup>
+
+<Warning>
+CSV imports are additive by default -- they update existing records or create new ones but never delete data. If you need to correct previously imported data, re-upload the CSV with the corrected values and the same matching identifiers.
+</Warning>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+<Accordion title="My connector shows 'Disconnected' status">
+  OAuth tokens can expire if your CRM admin revokes access or if the token refresh fails. Navigate to **Settings > Integrations**, click the connector card, and click **Reconnect**. You will be prompted to re-authorize.
+</Accordion>
+
+<Accordion title="Fields are not mapping correctly">
+  Check the **Field Mapping** screen on the connector card. Look for fields marked as "Unmapped" in the Required section. If PILLAR's auto-discovery couldn't match a field, you may need to create a manual mapping. See the [Field Mapping Reference](/data/field-mapping-reference) for the expected CRM field names.
+</Accordion>
+
+<Accordion title="Scores are not updating after connecting a new data source">
+  Scores recalculate on every sync cycle (every 15 minutes for CRM data). If you just connected a new source, wait for at least one full sync cycle to complete. Check the connector card for "Last Synced" timestamp. If the sync completed but scores haven't updated, check that the required fields for the relevant scoring rule are mapped.
+</Accordion>
+
+<Accordion title="I see 'INVALID_FIELD' errors in the sync log">
+  This means PILLAR tried to fetch a field from your CRM that doesn't exist in your org's schema. This typically happens when a mapped field references a custom field that was deleted or renamed in your CRM. PILLAR's Salesforce connector has fail-soft retry logic that automatically drops the invalid field and retries the query. Review your field mappings to remove or update the stale mapping.
+</Accordion>
+
+<Accordion title="How do I check what data PILLAR has synced?">
+  Navigate to the **Data Health** dashboard (accessible from the main navigation). It shows coverage percentages for each data object, mapping coverage, picklist mapping warnings, and sync status across all connectors.
+</Accordion>
+</AccordionGroup>

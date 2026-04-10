@@ -1,0 +1,416 @@
+---
+title: 'Field Mapping Reference'
+description: 'Complete reference of all 126+ fields PILLAR ingests from Salesforce and HubSpot, organized by data object'
+icon: 'table-columns'
+---
+
+# Field Mapping Reference
+
+PILLAR's field mapping layer connects your CRM schema to PILLAR's canonical data model. When you connect Salesforce or HubSpot, PILLAR auto-discovers your CRM's fields and maps them to the 126+ internal fields listed below across 6 data objects.
+
+## How Field Mapping Works
+
+1. **Auto-Discovery** -- When you first connect your CRM, PILLAR reads your org's actual field schema (including custom fields) and fuzzy-matches them against the known CRM field names listed in this reference.
+2. **Auto-Mapping** -- Fields with high-confidence matches are mapped automatically. PILLAR shows you a mapping confidence score (0-100) based on how many required and optional fields were matched.
+3. **Manual Review** -- You can review, override, or add custom mappings via **Settings > Integrations > Field Mapping**.
+4. **Transform Layer** -- Each mapping includes a transform type that controls how the raw CRM value is converted to PILLAR's internal format (see [Field Transforms](#field-transforms) below).
+5. **Continuous Sync** -- Mapped fields are synced every 15 minutes via incremental pull. PILLAR also pushes computed scores (Health, Risk, Priority) back to your CRM.
+
+<Note>
+Fields marked **Required** must be mapped for PILLAR to generate meaningful scores, signals, and next-best-actions. Optional fields improve scoring accuracy and unlock additional intelligence modules.
+</Note>
+
+---
+
+## Accounts
+
+Accounts are the core entity in PILLAR, representing organizations (school districts, companies, institutions) that are customers or prospects.
+
+### Core Fields
+
+| PILLAR Field | Label | Type | Required | Salesforce Default | HubSpot Default | Description |
+|---|---|---|---|---|---|---|
+| `name` | Account Name | string | Yes | `Name` | `name`, `company` | The name of the school district, university, or organization |
+| `arr` | Annual Recurring Revenue | number | Yes | `AnnualRevenue`, `Annual_Recurring_Revenue__c`, `ARR__c`, `MRR__c`, `Total_Contract_Value__c`, `Annual_Contract_Value__c` | `annualrevenue`, `arr`, `annual_recurring_revenue`, `mrr`, `total_contract_value` | Total ARR for this account in dollars. Critical for scoring and forecasting. |
+| `segment` | Account Segment | enum | Yes | `Type`, `Account_Segment__c`, `Segment__c`, `AccountTier__c`, `Customer_Type__c` | `type`, `hs_company_size`, `company_size`, `segment`, `account_tier` | Enterprise, Mid-Market, or SMB classification |
+| `industry` | Industry | string | No | `Industry`, `Vertical__c` | `industry`, `hs_industry` | Industry vertical (e.g., K-12, Higher Ed, Government) |
+| `domain` | Website Domain | string | No | `Website`, `Domain__c` | `domain`, `website` | Primary website domain (e.g., miamidade.k12.fl.us) |
+| `state` | State | string | No | `BillingState`, `ShippingState`, `State__c` | `state`, `hs_state` | Two-letter state code for territory assignment |
+| `territory` | Territory | string | No | `Territory__c`, `Sales_Territory__c`, `Region__c` | `territory`, `region`, `sales_territory` | Sales territory assignment (e.g., Southeast, West Coast) |
+| `owner_id` | Account Owner | string | No | `OwnerId` | `hubspot_owner_id` | CRM user ID of the account owner/rep |
+| `tier` | Account Tier | enum | No | `Tier__c`, `Account_Tier__c`, `Strategic_Tier__c` | `tier`, `account_tier`, `strategic_tier` | Strategic tier for account prioritization (tier_1, tier_2, tier_3, tier_4) |
+
+### Scoring Fields
+
+| PILLAR Field | Label | Type | Required | Salesforce Default | HubSpot Default | Description |
+|---|---|---|---|---|---|---|
+| `student_count` | Student Count | number | No | `Student_Count__c`, `Enrollment__c`, `Students__c`, `NumberOfStudents__c`, `Total_Enrollment__c` | `student_count`, `enrollment`, `number_of_students` | Total students enrolled. Used for expansion scoring and ARR-per-student. |
+| `annual_budget` | Annual Budget | number | No | `Annual_Budget__c`, `Budget__c`, `Tech_Budget__c` | `annual_budget`, `budget` | Organization's annual operating or tech budget |
+| `health_score` | Health Score | number | No | `Health_Score__c`, `Customer_Health__c`, `Account_Health__c`, `HealthScore__c` | `health_score`, `customer_health_score` | 0-100 account health score. If your CRM tracks this, map it; otherwise PILLAR computes it. |
+| `ai_adoption_score` | AI Adoption Score | number | No | `AI_Adoption_Score__c`, `AI_Readiness__c` | `ai_adoption_score`, `ai_readiness_score` | 0-100 score indicating the account's propensity to adopt AI-powered tools |
+| `budget_trend_yoy` | Budget Trend YoY | number | No | `Budget_Trend_YoY__c`, `YoY_Budget_Change__c` | `budget_trend_yoy`, `yoy_budget_change` | Year-over-year budget change as a percentage (e.g., 5.2 means +5.2%) |
+| `expansion_propensity` | Expansion Propensity | number | No | `Expansion_Propensity__c`, `Expansion_Score__c` | `expansion_propensity`, `expansion_score` | 0-100 score indicating likelihood the account will expand usage or spend |
+| `historical_spend` | Historical Spend | number | No | `Historical_Spend__c`, `Lifetime_Value__c`, `Total_Spend__c` | `historical_spend`, `lifetime_value`, `total_spend` | Total historical spend with your company in dollars |
+| `priority_score` | Priority Score | number | No | `Priority_Score__c`, `Account_Priority__c` | `priority_score`, `account_priority` | Composite priority score (0-100) used for account ranking and territory planning |
+| `renewal_risk_score` | Risk Score | number | No | `Risk_Score__c`, `Churn_Risk__c`, `Account_Risk__c` | `renewal_risk_score`, `churn_risk_score` | 0-100 churn/risk score. Higher = more at risk. |
+| `startup_friendliness` | Startup Friendliness | number | No | `Startup_Friendliness__c`, `Vendor_Openness__c` | `startup_friendliness`, `vendor_openness` | 0-100 score indicating how open the account is to working with newer vendors |
+| `tech_budget` | Technology Budget | number | No | `Tech_Budget__c`, `Technology_Budget__c`, `IT_Budget__c` | `tech_budget`, `technology_budget`, `it_budget` | Annual technology budget in dollars |
+| `tech_spend_propensity` | Tech Spend Propensity | number | No | `Tech_Spend_Propensity__c`, `Tech_Propensity__c` | `tech_spend_propensity`, `tech_propensity` | 0-100 score indicating likelihood to invest in new technology |
+| `total_budget` | Total Budget | number | No | `Total_Budget__c`, `Operating_Budget__c` | `total_budget`, `operating_budget` | Total organizational budget in dollars (broader than tech budget) |
+| `whitespace_pct` | Whitespace Percentage | number | No | `Whitespace_Pct__c`, `Whitespace__c`, `Expansion_Opportunity__c` | `whitespace_pct`, `whitespace_percentage` | Percentage of potential product footprint not yet sold (0-100). Higher = more expansion room. |
+
+### Enrichment Fields
+
+| PILLAR Field | Label | Type | Required | Salesforce Default | HubSpot Default | Description |
+|---|---|---|---|---|---|---|
+| `coop_agreements` | Cooperative Agreements | string | No | `Coop_Agreements__c`, `Cooperative_Contracts__c` | `coop_agreements`, `cooperative_contracts` | Active cooperative purchasing agreements (e.g., TIPS, NASPO, E&I) |
+| `district_type` | District Type | enum | No | `District_Type__c`, `Institution_Type__c` | `district_type`, `institution_type` | Type of school district or institution (traditional, charter, independent, regional, consolidated) |
+| `grade_range` | Grade Range | string | No | `Grade_Range__c`, `Grades_Served__c` | `grade_range`, `grades_served` | Grade levels served (e.g., K-5, 6-8, 9-12, K-12) |
+| `nces_id` | NCES ID | string | No | `NCES_ID__c`, `NCES_District_ID__c` | `nces_id`, `nces_district_id` | National Center for Education Statistics identifier for the district |
+| `procurement_complexity` | Procurement Complexity | enum | No | `Procurement_Complexity__c`, `Buying_Complexity__c` | `procurement_complexity`, `buying_complexity` | How complex the procurement process is for this account (low, medium, high, very_high) |
+| `school_count` | School Count | number | No | `School_Count__c`, `Number_of_Schools__c` | `school_count`, `number_of_schools` | Number of schools in the district |
+| `staff_count` | Staff Count | number | No | `NumberOfEmployees`, `Staff_Count__c` | `numberofemployees`, `staff_count` | Total number of staff/employees at the organization |
+| `starbridge_buyer_id` | Starbridge Buyer ID | string | No | `Starbridge_Buyer_ID__c` | `starbridge_buyer_id` | External buyer ID from Starbridge data enrichment |
+| `starbridge_last_synced` | Starbridge Last Synced | date | No | `Starbridge_Last_Synced__c` | `starbridge_last_synced` | Timestamp of last data sync from Starbridge |
+| `strategic_themes` | Strategic Themes | string | No | `Strategic_Themes__c`, `Key_Initiatives__c` | `strategic_themes`, `key_initiatives` | Key strategic initiatives or themes relevant to this account (comma-separated) |
+
+### Lifecycle Fields
+
+| PILLAR Field | Label | Type | Required | Salesforce Default | HubSpot Default | Description |
+|---|---|---|---|---|---|---|
+| `fiscal_year_end` | Fiscal Year End | string | No | `Fiscal_Year_End__c`, `FYE__c`, `Budget_Cycle_End__c` | `fiscal_year_end` | MM-DD format. Drives budget cycle alerts and renewal timing. |
+| `status` | Account Status | enum | No | `Account_Status__c`, `Status__c`, `Customer_Status__c` | `hs_lead_status`, `account_status`, `customer_status` | Current lifecycle status of the account (prospect, active, churned, paused, onboarding) |
+
+---
+
+## Contacts
+
+Contacts represent individual people at accounts -- buyers, champions, evaluators, and end users.
+
+### Core Fields
+
+| PILLAR Field | Label | Type | Required | Salesforce Default | HubSpot Default | Description |
+|---|---|---|---|---|---|---|
+| `name` | Contact Name | string | Yes | `Name` | `firstname,lastname` (formula concat) | Full name of the contact |
+| `account_id` | Parent Account (CRM ID) | string | Yes | `AccountId` | `associatedcompanyid` | CRM ID of the associated account -- resolved to PILLAR UUID automatically via the lookup transform |
+| `email` | Email | string | No | `Email` | `email` | Primary email address |
+| `phone` | Phone | string | No | `Phone`, `MobilePhone` | `phone`, `mobilephone` | Primary phone number |
+| `department` | Department | string | No | `Department` | `department` | Department within the organization |
+
+### Engagement Fields
+
+| PILLAR Field | Label | Type | Required | Salesforce Default | HubSpot Default | Description |
+|---|---|---|---|---|---|---|
+| `title` | Job Title | string | No | `Title` | `jobtitle` | Job title -- used to infer buying role (Champion, Economic Buyer, etc.) |
+| `buying_role` | Buying Role | enum | No | `Buying_Role__c`, `Contact_Role__c`, `Role__c` | `buying_role`, `contact_role` | Role in the buying process (champion, economic_buyer, technical_evaluator, end_user, influencer, blocker) |
+| `engagement_score` | Engagement Score | number | No | `Engagement_Score__c`, `Activity_Score__c` | `engagement_score`, `hs_email_engagement`, `hs_analytics_num_visits` | 0-100 score reflecting how engaged this contact is with your outreach and content |
+| `is_champion` | Is Champion | boolean | No | `Is_Champion__c`, `Champion__c` | `is_champion` | Whether this contact is identified as an internal champion for your product |
+| `is_exec_sponsor` | Is Executive Sponsor | boolean | No | `Is_Exec_Sponsor__c`, `Executive_Sponsor__c` | `is_exec_sponsor`, `executive_sponsor` | Whether this contact serves as the executive sponsor for the relationship |
+| `last_activity_date` | Last Activity Date | date | No | `LastActivityDate`, `Last_Activity_Date__c` | `notes_last_updated`, `hs_last_sales_activity_date` | Date of the most recent activity (email, meeting, call) with this contact |
+
+### Lifecycle Fields
+
+| PILLAR Field | Label | Type | Required | Salesforce Default | HubSpot Default | Description |
+|---|---|---|---|---|---|---|
+| `status` | Contact Status | enum | No | `Contact_Status__c`, `Status__c` | `hs_lead_status`, `contact_status` | Current status of the contact (active, inactive, churned, do_not_contact) |
+
+---
+
+## Opportunities
+
+Opportunities represent active deals in the pipeline -- new business, renewals, expansions, and cross-sells.
+
+### Core Fields
+
+| PILLAR Field | Label | Type | Required | Salesforce Default | HubSpot Default | Description |
+|---|---|---|---|---|---|---|
+| `name` | Opportunity Name | string | Yes | `Name` | `dealname` | Name of the deal/opportunity |
+| `amount` | Deal Amount | number | Yes | `Amount`, `Total_Contract_Value__c`, `ACV__c` | `amount`, `hs_tcv`, `hs_acv` | Total deal value in dollars |
+| `stage` | Deal Stage | enum | Yes | `StageName` | `dealstage` | Current pipeline stage (Discovery, Evaluation, Proposal, Negotiation, Closed Won, Closed Lost) |
+| `close_date` | Expected Close Date | date | Yes | `CloseDate` | `closedate` | Forecasted close date -- critical for pipeline hygiene scoring |
+| `account_id` | Parent Account (CRM ID) | string | Yes | `AccountId` | `associations.companies` | CRM ID of the associated account -- resolved to PILLAR UUID automatically via the lookup transform |
+| `owner_id` | Opportunity Owner | string | No | `OwnerId` | `hubspot_owner_id` | CRM user ID of the opportunity owner/rep |
+
+### Scoring Fields
+
+| PILLAR Field | Label | Type | Required | Salesforce Default | HubSpot Default | Description |
+|---|---|---|---|---|---|---|
+| `probability` | Win Probability % | number | No | `Probability` | `hs_deal_stage_probability`, `deal_probability` | 0-100 win probability. Used for forecast confidence scoring. |
+| `forecast_category` | Forecast Category | enum | No | `ForecastCategory`, `ForecastCategoryName` | `hs_forecast_category` | Commit, Best Case, Upside, Pipeline, or Omitted |
+| `next_step` | Next Step | string | No | `NextStep`, `Next_Steps__c` | `hs_next_step`, `next_step` | Documented next step -- pipeline hygiene scoring checks for this |
+| `budget_status` | Budget Status | enum | No | `Budget_Status__c`, `Budget_Confirmed__c` | `budget_status`, `budget_confirmed` | Whether budget has been identified, approved, or is pending (unknown, identified, approved, allocated, no_budget) |
+| `competitor` | Competitor | string | No | `Competitor__c`, `Primary_Competitor__c`, `Competition__c` | `competitor`, `primary_competitor` | Primary competitor in this deal |
+| `confidence_score` | Confidence Score | number | No | `Confidence_Score__c`, `Deal_Confidence__c` | `confidence_score`, `deal_confidence` | 0-100 AI-generated or rep-assessed deal confidence score |
+| `days_in_stage` | Days in Stage | number | No | `Days_in_Stage__c`, `Stage_Duration__c` | `days_in_stage`, `hs_time_in_current_deal_stage` | Number of days the opportunity has been in its current stage -- used for pipeline hygiene |
+| `has_economic_buyer` | Has Economic Buyer | boolean | No | `Has_Economic_Buyer__c`, `Economic_Buyer_Identified__c` | `has_economic_buyer`, `economic_buyer_identified` | Whether an economic buyer has been identified and engaged |
+| `has_next_step` | Has Next Step | boolean | No | `Has_Next_Step__c` | `has_next_step` | Whether a concrete next step is documented -- critical for pipeline hygiene |
+| `hygiene_score` | Hygiene Score | number | No | `Hygiene_Score__c`, `Pipeline_Hygiene__c` | `hygiene_score`, `pipeline_hygiene_score` | 0-100 pipeline hygiene score based on data completeness and deal progression |
+| `push_count` | Push Count | number | No | `Push_Count__c`, `Close_Date_Pushes__c` | `push_count`, `close_date_pushes` | Number of times close date has been pushed -- used for pipeline hygiene scoring |
+| `strategic_fit` | Strategic Fit | number | No | `Strategic_Fit__c`, `Strategic_Alignment__c` | `strategic_fit`, `strategic_alignment` | 0-100 score indicating how well this opportunity aligns with strategic goals |
+
+### Engagement Fields
+
+| PILLAR Field | Label | Type | Required | Salesforce Default | HubSpot Default | Description |
+|---|---|---|---|---|---|---|
+| `contact_count` | Contact Count | number | No | `Contact_Count__c`, `Number_of_Contacts__c` | `num_associated_contacts` | Number of contacts associated with this opportunity |
+| `last_meeting_date` | Last Meeting Date | date | No | `Last_Meeting_Date__c`, `LastActivityDate` | `hs_last_meeting_booked_date`, `last_meeting_date` | Date of the most recent meeting or call on this opportunity |
+
+### Lifecycle Fields
+
+| PILLAR Field | Label | Type | Required | Salesforce Default | HubSpot Default | Description |
+|---|---|---|---|---|---|---|
+| `opportunity_type` | Opportunity Type | enum | No | `Type`, `Opportunity_Type__c`, `RecordType.Name` | `deal_type`, `hs_deal_type` | New business, renewal, expansion, or cross-sell (net_new_business, renewal, expansion, cross_sell) |
+| `created_date` | Created Date | date | No | `CreatedDate` | `createdate` | Date the opportunity was created in CRM |
+| `rfp_status` | RFP Status | enum | No | `RFP_Status__c`, `RFP__c` | `rfp_status` | Status of the RFP/RFI process (none, anticipated, released, submitted, awarded, lost) |
+
+### Enrichment Fields
+
+| PILLAR Field | Label | Type | Required | Salesforce Default | HubSpot Default | Description |
+|---|---|---|---|---|---|---|
+| `cooperative_pathway` | Cooperative Pathway | string | No | `Cooperative_Pathway__c`, `Coop_Vehicle__c` | `cooperative_pathway`, `coop_vehicle` | Cooperative purchasing vehicle being used (e.g., TIPS, NASPO, sole source) |
+| `grant_match` | Grant Match | boolean | No | `Grant_Match__c`, `Has_Grant_Funding__c` | `grant_match`, `has_grant_funding` | Whether this opportunity has a matching grant or funding source identified |
+| `procurement_complexity` | Procurement Complexity | enum | No | `Procurement_Complexity__c`, `Deal_Complexity__c` | `procurement_complexity`, `deal_complexity` | How complex the procurement process is for this specific deal (low, medium, high, very_high) |
+
+---
+
+## Leads
+
+Leads represent pre-opportunity contacts -- people who have shown interest but have not yet been qualified into the pipeline.
+
+### Core Fields
+
+| PILLAR Field | Label | Type | Required | Salesforce Default | HubSpot Default | Description |
+|---|---|---|---|---|---|---|
+| `name` | Lead Name | string | Yes | `Name` | `firstname,lastname` (formula concat) | Full name of the lead |
+| `email` | Lead Email | string | Yes | `Email` | `email` | Email address |
+| `company_name` | Company/Organization | string | No | `Company` | `company` | Organization name for the lead |
+| `assigned_to` | Assigned To | string | No | `OwnerId` | `hubspot_owner_id` | CRM user ID of the rep assigned to this lead |
+| `segment` | Lead Segment | enum | No | `Segment__c`, `Lead_Segment__c` | `segment`, `lead_segment` | Market segment classification (Enterprise, Mid-Market, SMB) |
+| `state` | Lead State | string | No | `State`, `StateCode` | `state`, `hs_state` | Two-letter state code for the lead's location |
+
+### Association Fields
+
+| PILLAR Field | Label | Type | Required | Salesforce Default | HubSpot Default | Description |
+|---|---|---|---|---|---|---|
+| `account_id` | Linked Account | string | No | `AccountId__c`, `Account__c`, `Linked_Account__c` | `associatedcompanyid` | FK to a PILLAR account row when known. Resolved automatically by the lead upsert pipeline either via the CRM's company-id reference or by fuzzy-matching company_name against accounts.name for the same org. |
+
+### Engagement Fields
+
+| PILLAR Field | Label | Type | Required | Salesforce Default | HubSpot Default | Description |
+|---|---|---|---|---|---|---|
+| `title` | Lead Job Title | string | No | `Title` | `jobtitle` | Job title of the lead -- used to infer buying role and seniority |
+| `content_downloads` | Content Downloads | number | No | `Content_Downloads__c`, `Downloads__c` | `content_downloads`, `num_content_downloads` | Number of content assets downloaded by this lead |
+| `demo_requested` | Demo Requested | boolean | No | `Demo_Requested__c`, `Requested_Demo__c` | `demo_requested` | Whether this lead has requested a product demo |
+| `email_clicks` | Email Clicks | number | No | `Email_Clicks__c` | `hs_email_click`, `email_clicks` | Total number of email link clicks by this lead |
+| `email_opens` | Email Opens | number | No | `Email_Opens__c` | `hs_email_open`, `email_opens` | Total number of email opens by this lead |
+| `website_visits` | Website Visits | number | No | `Website_Visits__c`, `Web_Visits__c` | `hs_analytics_num_visits`, `website_visits` | Total number of website visits tracked for this lead |
+
+### Scoring Fields
+
+| PILLAR Field | Label | Type | Required | Salesforce Default | HubSpot Default | Description |
+|---|---|---|---|---|---|---|
+| `lead_score` | Lead Score | number | No | `Lead_Score__c`, `Score__c`, `Rating` | `hubspotscore`, `hs_predictive_scoring_tier`, `lead_score` | Composite lead score (0-100) based on fit and engagement signals |
+
+### Lifecycle Fields
+
+| PILLAR Field | Label | Type | Required | Salesforce Default | HubSpot Default | Description |
+|---|---|---|---|---|---|---|
+| `status` | Lead Status | enum | No | `Status`, `Lead_Status__c` | `hs_lead_status`, `lifecyclestage` | Current lead status in the funnel (new, engaged, mql, sql, opportunity, disqualified, recycled) |
+| `mql_date` | MQL Date | date | No | `MQL_Date__c`, `Marketing_Qualified_Date__c` | `hs_lifecyclestage_marketingqualifiedlead_date`, `mql_date` | Date the lead became a Marketing Qualified Lead |
+| `sql_date` | SQL Date | date | No | `SQL_Date__c`, `Sales_Qualified_Date__c` | `hs_lifecyclestage_salesqualifiedlead_date`, `sql_date` | Date the lead became a Sales Qualified Lead |
+| `opportunity_date` | Opportunity Date | date | No | `ConvertedDate`, `Opportunity_Date__c` | `hs_lifecyclestage_opportunity_date`, `opportunity_date` | Date the lead converted to an opportunity |
+| `opportunity_id` | Converted Opportunity ID | string | No | `ConvertedOpportunityId` | `hs_converted_deal_id`, `opportunity_id` | CRM ID of the opportunity created when this lead converted |
+
+### Enrichment Fields
+
+| PILLAR Field | Label | Type | Required | Salesforce Default | HubSpot Default | Description |
+|---|---|---|---|---|---|---|
+| `enrollment` | Enrollment | number | No | `Enrollment__c`, `Student_Enrollment__c` | `enrollment`, `student_enrollment` | Student enrollment count at the lead's organization |
+| `source_detail` | Lead Source Detail | string | No | `LeadSource`, `Lead_Source_Detail__c`, `Source_Detail__c` | `hs_analytics_source_data_1`, `source_detail` | Detailed lead source information (e.g., specific campaign, webinar name) |
+| `source_id` | Lead Source ID | string | No | `Campaign_ID__c`, `Source_ID__c` | `hs_analytics_source`, `source_id` | Unique identifier for the lead source or campaign |
+
+---
+
+## Contracts
+
+Contracts represent formal agreements between your company and an account. Contract data is the canonical source for renewal dates, replacing heuristic derivations from opportunity stages.
+
+<Note>
+Contract ingestion is currently in rollout. The Drizzle schema and catalog entries exist but the CRM object enumeration has not yet been activated. Contact your PILLAR representative to enable contract sync for your org.
+</Note>
+
+### Core Fields
+
+| PILLAR Field | Label | Type | Required | Salesforce Default | HubSpot Default | Description |
+|---|---|---|---|---|---|---|
+| `account_id` | Parent Account (CRM ID) | string | Yes | `AccountId` | `associated_company_id`, `hs_associated_company` | The CRM ID of the account this contract belongs to. Resolved to a PILLAR account UUID by the upsert layer. |
+| `contract_number` | Contract Number | string | No | `ContractNumber` | `hs_contract_number`, `contract_number` | The human-readable contract identifier (e.g. CON-2024-0042) |
+| `start_date` | Contract Start Date | date | Yes | `StartDate`, `ContractStartDate` | `hs_contract_start_date`, `start_date` | When the contract becomes effective |
+| `end_date` | Contract End Date | date | Yes | `EndDate`, `ContractEndDate` | `hs_contract_end_date`, `end_date` | When the contract expires. This is the canonical renewal anchor. |
+| `contract_value` | Total Contract Value | number | Yes | `TotalAmount`, `Total_Contract_Value__c` | `hs_contract_value`, `contract_value` | Total value of the contract in dollars. For multi-year contracts this is TCV; ARR can be derived as contract_value / (term_months / 12). |
+| `term_months` | Term (months) | number | No | `ContractTerm` | `hs_term_length_months`, `term_months` | Length of the contract in months. Used to derive auto-renewal cadence. |
+| `currency` | Currency | string | No | `CurrencyIsoCode` | `hs_contract_currency`, `currency` | ISO 4217 currency code (USD, EUR, GBP, etc.) |
+| `billing_frequency` | Billing Frequency | enum | No | `BillingFrequency__c` | `hs_billing_frequency`, `billing_frequency` | How often the customer is billed (monthly, quarterly, annual, one_time) |
+| `status` | Contract Status | enum | Yes | `Status` | `hs_contract_status`, `status` | The lifecycle state of the contract (draft, in_approval, active, expired, terminated, renewed) |
+| `auto_renew` | Auto-Renew Enabled | boolean | No | `Auto_Renew__c` | `hs_auto_renewal_enabled`, `auto_renew` | Whether the contract auto-renews at end_date unless cancelled |
+| `opt_out_notice_days` | Opt-Out Notice (days) | number | No | `Opt_Out_Notice_Days__c` | `hs_opt_out_notice_days`, `opt_out_notice_days` | Days of notice the customer must give to opt out of auto-renewal. PILLAR uses this to compute the latest safe save-play window. |
+
+### Lifecycle Fields
+
+| PILLAR Field | Label | Type | Required | Salesforce Default | HubSpot Default | Description |
+|---|---|---|---|---|---|---|
+| `signed_date` | Signed Date | date | No | `LastApprovedDate` | `hs_signed_date`, `signed_date` | When all parties signed the contract |
+| `activated_date` | Activated Date | date | No | `ActivatedDate` | `hs_activated_date` | When the contract transitioned from Draft/InApproval to Activated |
+
+### Association Fields
+
+| PILLAR Field | Label | Type | Required | Salesforce Default | HubSpot Default | Description |
+|---|---|---|---|---|---|---|
+| `parent_quote_id` | Source Quote ID | string | No | `SBQQ__Quote__c`, `QuoteId__c` | `hs_quote_id`, `associated_quote_id` | The CRM ID of the quote this contract was generated from (Salesforce CPQ Quote, HubSpot Quote) |
+
+---
+
+## Support Tickets
+
+Support ticket snapshots capture per-ticket data from HubSpot Service Hub and Salesforce Service Cloud. These feed the support burden component of renewal risk scoring.
+
+<Note>
+Support ticket ingestion is currently in rollout. Contact your PILLAR representative to enable support ticket sync for your org.
+</Note>
+
+### Core Fields
+
+| PILLAR Field | Label | Type | Required | Salesforce Default | HubSpot Default | Description |
+|---|---|---|---|---|---|---|
+| `account_id` | Parent Account (CRM ID) | string | Yes | `AccountId` | `associated_company_id`, `hs_associated_company_id` | The CRM ID of the account this ticket belongs to. Resolved to a PILLAR account UUID by the upsert layer. |
+| `ticket_number` | Ticket Number | string | No | `CaseNumber` | `hs_ticket_id`, `ticket_number` | The human-readable ticket identifier (e.g. CASE-00042 or HS-12345) |
+| `subject` | Subject | string | No | `Subject` | `subject`, `hs_ticket_subject` | Short human-readable description of the ticket |
+| `type` | Ticket Type | string | No | `Type` | `hs_ticket_category` | The category of issue: question, problem, incident, feature_request |
+| `status` | Status | string | Yes | `Status` | `hs_pipeline_stage`, `status` | Ticket lifecycle state (new, open, pending, on_hold, solved, closed, archived). Anything other than solved/closed/archived counts as "open" for support_burden. |
+| `priority` | Priority | string | No | `Priority` | `hs_ticket_priority` | Customer-facing urgency label (low, normal, high, urgent) |
+| `severity` | Severity (1-4) | number | No | `Severity__c` | `hs_severity` | Numeric severity (1 = highest/business-down, 4 = cosmetic). Drives support_burden more than priority. |
+
+### Association Fields
+
+| PILLAR Field | Label | Type | Required | Salesforce Default | HubSpot Default | Description |
+|---|---|---|---|---|---|---|
+| `contact_id` | Reporter Contact (CRM ID) | string | No | `ContactId` | `associated_contact_id`, `hs_associated_contact_id` | The CRM ID of the contact who reported the ticket. Used to surface "the same person filed 5 tickets in a week" patterns. |
+
+### Lifecycle Fields
+
+| PILLAR Field | Label | Type | Required | Salesforce Default | HubSpot Default | Description |
+|---|---|---|---|---|---|---|
+| `opened_at` | Opened At | date | Yes | `CreatedDate` | `createdate`, `hs_createdate` | When the ticket was created. Used as the time anchor for all aggregation windows. |
+| `first_response_at` | First Response At | date | No | `FirstResponseDateTime__c`, `First_Response_DateTime__c` | `hs_first_response_time` | When the customer first received a response. Used to compute time-to-first-response. |
+| `resolved_at` | Resolved At | date | No | `ClosedDate` | `closed_date`, `hs_resolution_date` | When the ticket transitioned to a resolved state. Drives the time-to-resolution sub-signal. |
+| `last_activity_at` | Last Activity At | date | No | `LastModifiedDate`, `LastActivityDate` | `hs_lastmodifieddate`, `notes_last_updated` | When the ticket was last touched. Used to detect stagnant tickets. |
+
+### Engagement Fields
+
+| PILLAR Field | Label | Type | Required | Salesforce Default | HubSpot Default | Description |
+|---|---|---|---|---|---|---|
+| `interaction_count` | Interaction Count | number | No | `Interaction_Count__c` | `hs_num_associated_emails`, `hs_num_notes` | Number of public replies on the ticket. High counts indicate a complex problem or a frustrated customer. |
+| `reopen_count` | Reopen Count | number | No | `Number_Of_Reopens__c` | `hs_reopen_count` | Number of times the ticket was closed and re-opened. Reopens are a strong signal of incomplete resolution. |
+| `is_escalated` | Is Escalated | boolean | No | `IsEscalated` | `hs_escalated` | Whether the ticket has been escalated to a higher tier or manager. |
+| `has_exec_attention` | Has Exec Attention | boolean | No | `Exec_Sponsor_Engaged__c` | `hs_executive_sponsor_engaged` | True if a customer or PILLAR user with exec/CRO/CEO role has touched the ticket. The classic "CEO is involved" risk signal. |
+| `csat_score` | CSAT Score | number | No | `CSAT__c`, `Customer_Satisfaction__c` | `hs_csat`, `customer_satisfaction` | Customer satisfaction score on a 1-5 scale, collected at ticket close. Low CSAT (1-2) is a leading indicator of churn. |
+
+---
+
+## Field Transforms
+
+Every field mapping includes a transform type that controls how the raw CRM value is converted before storage in PILLAR.
+
+| Transform | Description | Example |
+|---|---|---|
+| **direct** | Copy the value as-is. Used for strings, numbers, dates, and booleans that need no conversion. | Salesforce `Name` to PILLAR `name` |
+| **lookup** | Resolve a CRM ID to a PILLAR UUID by matching `crm_external_id` on the target table. Used for foreign-key fields. | Salesforce `AccountId` on an Opportunity resolves to the PILLAR `accounts.id` UUID |
+| **formula** | Compute a value from one or more CRM fields. Used when the PILLAR field is a composite. | HubSpot `firstname` + `lastname` concatenated into PILLAR `name` |
+| **picklist_map** | Translate CRM picklist values to PILLAR's canonical enum values. Configured via the Picklist Mapping UI. | Salesforce stage "Closed Won - Paid" mapped to PILLAR `Closed Won` |
+
+### When to Use Each Transform
+
+<AccordionGroup>
+<Accordion title="Direct -- most fields">
+  The vast majority of fields use `direct` transforms. The raw CRM value is copied into PILLAR with only type coercion (e.g., string to number) applied automatically.
+</Accordion>
+
+<Accordion title="Lookup -- foreign key fields">
+  Fields like `account_id` on Contacts, Opportunities, Leads, Contracts, and Support Tickets use `lookup` transforms. When PILLAR sees a raw CRM ID (e.g., `001xxxxxxxxxxxx` for a Salesforce Account), it looks up the corresponding PILLAR UUID from the target table's `crm_external_id` column. This happens automatically -- you do not need to configure lookup mappings manually.
+</Accordion>
+
+<Accordion title="Formula -- computed fields">
+  Currently used for HubSpot contact and lead `name` fields, where PILLAR concatenates `firstname` and `lastname` into a single name string. Additional formula transforms can be configured by your PILLAR admin.
+</Accordion>
+
+<Accordion title="Picklist Map -- enum translations">
+  Used when your CRM's picklist values don't match PILLAR's canonical enums. For example, if your Salesforce org uses deal stages like "Verbal Commitment", "Contract Sent", and "Closed Won - Paid", you create picklist mappings to translate these to PILLAR's standard stages: Negotiation, Negotiation, and Closed Won.
+</Accordion>
+</AccordionGroup>
+
+---
+
+## Picklist Mapping
+
+Many CRM implementations use custom picklist values that differ from PILLAR's standard enum values. The Picklist Mapping feature lets you create translation rules so PILLAR can correctly interpret your CRM's terminology.
+
+### Common Picklist Mappings
+
+**Opportunity Stages** -- PILLAR uses: Discovery, Evaluation, Proposal, Negotiation, Closed Won, Closed Lost
+
+```
+Your CRM Stage                    →  PILLAR Stage
+─────────────────────────────────────────────────
+"Qualification"                   →  Discovery
+"Needs Analysis"                  →  Discovery
+"Value Proposition"               →  Evaluation
+"Perception Analysis"             →  Evaluation
+"Proposal/Price Quote"            →  Proposal
+"Negotiation/Review"              →  Negotiation
+"Verbal Commitment"               →  Negotiation
+"Contract Sent"                   →  Negotiation
+"Closed Won"                      →  Closed Won
+"Closed Won - Paid"               →  Closed Won
+"Closed Won - Renewal"            →  Closed Won
+"Closed Lost"                     →  Closed Lost
+"Closed Lost - Competitor"        →  Closed Lost
+```
+
+**Account Status** -- PILLAR uses: prospect, active, churned, paused, onboarding
+
+**Lead Status** -- PILLAR uses: new, engaged, mql, sql, opportunity, disqualified, recycled
+
+**Contract Status** -- PILLAR uses: draft, in_approval, active, expired, terminated, renewed
+
+### How to Configure Picklist Mappings
+
+1. Navigate to **Settings > Integrations** and click your CRM connector card.
+2. Click **Picklist Mappings** (or access via the Field Mapping screen).
+3. Select the PILLAR field with enum values (e.g., `stage` on Opportunities).
+4. For each of your CRM's picklist values, select the corresponding PILLAR value from the dropdown.
+5. Click **Save**. Mappings take effect on the next sync cycle (within 15 minutes).
+
+<Warning>
+Unmapped picklist values are stored as-is, which may cause scoring rules to skip the record. Always map all active picklist values to ensure accurate scoring.
+</Warning>
+
+---
+
+## Custom Field Mapping
+
+If your CRM uses non-standard field names or you have custom fields that don't match PILLAR's auto-discovery heuristics, you can create manual mappings.
+
+### How to Create a Custom Mapping
+
+1. Navigate to **Settings > Integrations** and click **Field Mapping** on your CRM connector card.
+2. Find the PILLAR field you want to map (use the search bar or browse by object).
+3. Click the **CRM Field** dropdown and select your CRM field from the discovered schema.
+4. Choose the appropriate **Transform** type (direct, lookup, formula, or picklist_map).
+5. Click **Save**. The mapping takes effect on the next sync cycle.
+
+### Tips for Custom Mappings
+
+- PILLAR discovers all fields in your CRM objects, including custom fields. If your field isn't showing in the dropdown, verify it exists on the correct CRM object (e.g., Account vs. Contact).
+- For fields that contain CRM IDs referencing another object (like a custom account lookup on Leads), use the `lookup` transform and specify the target PILLAR table.
+- For numeric fields stored as strings in your CRM, use the `direct` transform -- PILLAR applies automatic type coercion.
+- For formula fields that depend on multiple CRM fields (beyond simple concatenation), contact PILLAR support to configure a custom formula transform.

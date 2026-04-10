@@ -31,6 +31,10 @@
       "url": "data"
     },
     {
+      "name": "Connectors",
+      "url": "connectors"
+    },
+    {
       "name": "Scoring Rules",
       "url": "scoring"
     },
@@ -100,7 +104,14 @@
         "data/product-affinity",
         "data/cohort-intelligence",
         "data/playbook-evolution",
-        "data/board-narratives"
+        "data/board-narratives",
+        "data/field-mapping-reference"
+      ]
+    },
+    {
+      "group": "Connectors",
+      "pages": [
+        "connectors/setup-guide"
       ]
     },
     {
