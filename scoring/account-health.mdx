@@ -10,11 +10,92 @@ The account health score is the composite output of evaluating all scoring rules
 
 ## How It's Calculated
 
-The health score combines weighted category scores, where each category score is itself a weighted average of the individual rules within that category. This layered approach ensures that no single metric can dominate the overall assessment while still allowing important signals to surface.
+The health score is a weighted blend of 6 measurable components. When NPS/sentiment data is available (from Wootric, Delighted, or CRM), the model uses all 6 components. When NPS data is unavailable, the Engagement weight is increased to compensate, and Satisfaction is excluded.
 
-## What Drives Health
+### Components and Weights
 
-The 8 scoring categories each contribute to the composite health score:
+**With NPS data available (6-component model):**
+
+| Component | Weight | What It Measures |
+|-----------|--------|-----------------|
+| Engagement | 20% | Average engagement score across active contacts |
+| Stakeholder Coverage | 20% | Champion presence (35pts), exec sponsor (30pts), economic buyer (20pts), multi-threading depth (up to 15pts) |
+| Product Adoption | 20% | Average `adoption_pct` across all products on the account |
+| Activity Recency | 15% | Days since last logged activity (email, meeting, call) |
+| Financial Health | 20% | Inverse of renewal risk score (100 minus renewal_risk) |
+| Satisfaction / NPS | 5% | NPS score normalized to 0-100 scale |
+
+**Without NPS data (5-component model):**
+
+| Component | Weight | What It Measures |
+|-----------|--------|-----------------|
+| Engagement | 25% | Average engagement score across active contacts |
+| Stakeholder Coverage | 20% | Champion presence (35pts), exec sponsor (30pts), economic buyer (20pts), multi-threading depth (up to 15pts) |
+| Product Adoption | 20% | Average `adoption_pct` across all products on the account |
+| Activity Recency | 15% | Days since last logged activity (email, meeting, call) |
+| Financial Health | 20% | Inverse of renewal risk score (100 minus renewal_risk) |
+
+### What Feeds Each Component
+
+<Accordion title="Engagement">
+**Data source:** Contact records synced from your CRM (Salesforce contacts, HubSpot contacts).
+
+Each contact has an `engagement_score` field (0-100). The component averages the engagement scores of all active (non-INACTIVE) contacts on the account.
+
+**How to improve it:** Increase rep activity on the account -- log meetings, emails, and calls. Multi-thread across more contacts.
+</Accordion>
+
+<Accordion title="Stakeholder Coverage">
+**Data source:** Contact role flags synced from your CRM -- `is_champion`, `is_exec_sponsor`, and `buying_role` fields.
+
+Scoring breakdown:
+- Champion identified: +35 points
+- Executive sponsor active: +30 points
+- Economic buyer identified: +20 points
+- Multi-threading bonus: +5 points per active contact (max 15 points)
+- Maximum: 100 points
+
+**How to improve it:** Tag champions and executive sponsors in your CRM. Identify the economic buyer on each account. Build relationships with multiple contacts.
+</Accordion>
+
+<Accordion title="Product Adoption">
+**Data source:** `account_products.adoption_pct` -- populated by product usage connectors (Pendo, Mixpanel, Amplitude, Segment, Heap, Mode Analytics) or manually maintained.
+
+The component averages adoption percentages across all products on the account.
+
+**How to improve it:** Drive feature adoption through onboarding, training, and enablement. Connect a product usage tool to get real-time adoption tracking.
+</Accordion>
+
+<Accordion title="Activity Recency">
+**Data source:** Activities table -- emails, meetings, and calls synced from Google Workspace, Microsoft 365, and CRM task records.
+
+Scoring curve:
+- Within 7 days: 100
+- Within 14 days: 80
+- Within 30 days: 60
+- Within 60 days: 30
+- Over 60 days: 10
+
+**How to improve it:** Maintain regular touchpoints. Set up automated activity logging via email/calendar integration.
+</Accordion>
+
+<Accordion title="Financial Health">
+**Data source:** Computed from the Renewal Risk score (see [Renewal Risk](/scoring/renewal-risk)). This component is the inverse of renewal risk: healthy renewals contribute positively to the account health score.
+
+**How to improve it:** Address the factors driving renewal risk -- engagement decay, support burden, stakeholder turnover, and executive sponsor gaps.
+</Accordion>
+
+<Accordion title="Satisfaction / NPS">
+**Data source:** `accounts.nps_score` -- populated by NPS connectors (Wootric, Delighted) or synced from CRM fields.
+
+NPS is normalized to a 0-100 scale. When NPS data is unavailable, this component is excluded and the Engagement weight is increased from 20% to 25%.
+
+**How to improve it:** Connect an NPS tool (Wootric or Delighted) and proactively address detractor feedback.
+</Accordion>
+
+## Scoring Categories
+
+The health score also incorporates signals from the 8 scoring rule categories. Rules within each category can trigger signals and generate score adjustments:
 
 | Category | What It Captures |
 |----------|-----------------|
@@ -48,4 +129,4 @@ PILLAR tracks health score over time, enabling sparkline visualizations in dashb
 
 All category weights, rule weights, and priority scoring parameters are configurable per organization.
 
-> Detailed scoring methodology, including exact weights, formulas, and rule definitions, is available in the PILLAR Implementation Guide provided to active customers.
+All weights shown above are the defaults. Your organization can customize component weights, rule weights, and priority parameters through **Settings > Scoring > Weight Configuration**.

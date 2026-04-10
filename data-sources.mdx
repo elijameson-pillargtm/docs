@@ -6,7 +6,7 @@ icon: 'database'
 
 # Data Sources
 
-PILLAR ingests data from CRM systems, email/calendar platforms, district intelligence providers, and internal computation engines. PILLAR integrates with 20+ tools.
+PILLAR ingests data from CRM systems, email/calendar platforms, product analytics tools, support ticketing systems, NPS/sentiment platforms, district intelligence providers, and internal computation engines. PILLAR integrates with 20+ tools.
 
 ## CRM Connectors
 
@@ -59,6 +59,46 @@ Starbridge.ai provides 120+ buyer attributes for school districts, higher educat
 | Email | Digest | Weekly summary, critical signal alerts |
 | Microsoft Teams | Real-time | Signal routing (alternative to Slack) |
 
+## Product Usage Connectors
+
+PILLAR ingests product analytics data to power adoption scoring, usage trend analysis, and renewal risk detection.
+
+| Provider | Auth | Data | Sync Cadence |
+|----------|------|------|--------------|
+| Pendo | API Key | Feature adoption, visitor sessions | Every 15 min |
+| Mixpanel | API Key + Secret | Event volume, funnel conversion | Every 15 min |
+| Amplitude | API Key + Secret | Behavioral events (US/EU endpoints) | Every 15 min |
+| Segment | API Token + Workspace | CDP event forwarding | Every 15 min |
+| Heap | API Key | Auto-captured analytics | Every 15 min |
+| Mode Analytics | API Token + Secret + Workspace + Report Token | BI report data | Every 15 min |
+
+<Note>
+Product usage data feeds the **usage_trend** variable in the Renewal Risk model and the **Product Adoption** component of the Account Health score. When product usage snapshots are available, PILLAR computes adoption percentage deltas automatically.
+</Note>
+
+## Support Ticketing Connectors
+
+Support ticket data feeds the **support_burden** variable in the Renewal Risk model.
+
+| Provider | Auth | Data | Sync Cadence |
+|----------|------|------|--------------|
+| Intercom | OAuth 2.0 | Conversations, tickets, CSAT scores | Every 15 min |
+| Zendesk | API Token + Subdomain | Tickets, SLA metrics, CSAT scores | Every 15 min |
+| Freshdesk | API Key + Subdomain | Multichannel tickets | Every 15 min |
+
+<Note>
+HubSpot Service Hub and Salesforce Service Cloud ticket data is also ingested through the CRM connectors listed above. PILLAR normalizes all ticket sources into a unified support burden score.
+</Note>
+
+## Customer Sentiment / NPS Connectors
+
+NPS and satisfaction data flows into the **nps_health** component of the Renewal Risk model and the **Satisfaction** component of the Account Health score.
+
+| Provider | Auth | Data | Sync Cadence |
+|----------|------|------|--------------|
+| Wootric (InMoment) | OAuth 2.0 (Client ID + Secret) | NPS scores mapped to `accounts.nps_score`, feeds Health Score Satisfaction component | Every 15 min |
+| Delighted | API Key | NPS/CSAT mapped to `accounts.nps_score` | Every 15 min |
+
 ## Computed Sources (PILLAR Engine)
 
 | Computation | Refresh |
@@ -69,3 +109,5 @@ Starbridge.ai provides 120+ buyer attributes for school districts, higher educat
 | Pipeline Cohorts | Daily |
 | Org Metrics | On-demand |
 | TAM/SAM Calculations | On settings change |
+
+For step-by-step connection instructions, see the [Connector Setup Guide](/connectors/setup-guide). For field-level mapping details, see the [Field Mapping Reference](/data/field-mapping-reference).

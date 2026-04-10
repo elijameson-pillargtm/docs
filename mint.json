@@ -111,7 +111,8 @@
     {
       "group": "Connectors",
       "pages": [
-        "connectors/setup-guide"
+        "connectors/setup-guide",
+        "connectors/picklist-mapping"
       ]
     },
     {

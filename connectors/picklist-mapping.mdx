@@ -1,0 +1,137 @@
+---
+title: 'Picklist & Stage Mapping'
+description: 'Translate CRM-specific stage names and picklist values to PILLAR canonical stages for accurate scoring and forecasting'
+icon: 'list-check'
+---
+
+# Picklist & Stage Mapping
+
+Every CRM uses different names for the same pipeline stages. Salesforce might call it "Closed Won - Paid" while HubSpot uses "closedwon". PILLAR needs a single, standardized stage vocabulary to score pipeline hygiene, calculate forecasts, and build pipeline views. Picklist mapping is the translation layer that makes this work.
+
+## Why It Matters
+
+Without picklist mapping, PILLAR cannot accurately:
+
+- **Score pipeline hygiene** -- The Pipeline Hygiene model measures stage velocity (how long deals sit in each stage relative to the median). If stages are not mapped, PILLAR cannot group deals by stage for comparison.
+- **Forecast revenue** -- Forecast confidence uses stage probability. Unmapped stages receive no probability assignment.
+- **Calculate financial metrics** -- ARR, expansion revenue, and churn tracking all depend on recognizing `closed_won` and `closed_lost` stages.
+- **Build pipeline views** -- The pipeline board, funnel charts, and cohort analyses group deals by canonical stage.
+
+## Canonical PILLAR Stages
+
+PILLAR normalizes all opportunity/deal stages to these 6 canonical stages:
+
+| Canonical Stage | Description | Default Stage Probability |
+|----------------|-------------|--------------------------|
+| `discovery` | Initial qualification and needs assessment | 10% |
+| `evaluation` | Active evaluation, demos, and proof of value | 30% |
+| `proposal` | Proposal or quote delivered | 50% |
+| `negotiation` | Contract and pricing negotiation | 75% |
+| `closed_won` | Deal closed successfully | 100% |
+| `closed_lost` | Deal lost or disqualified | 0% |
+
+## How to Configure Picklist Mapping
+
+Navigate to **Settings > Scoring > Picklist Mapping** in the PILLAR app.
+
+For each CRM stage value, assign the corresponding PILLAR canonical stage:
+
+1. PILLAR auto-detects your CRM's stage values during the first sync
+2. Review the suggested mappings (PILLAR uses fuzzy matching to suggest defaults)
+3. Adjust any incorrect mappings
+4. Save to apply the mapping to all existing and future opportunities
+
+## Common Mapping Examples
+
+### Salesforce Opportunity Stages
+
+| Salesforce Stage | PILLAR Canonical Stage |
+|-----------------|----------------------|
+| Prospecting | `discovery` |
+| Qualification | `discovery` |
+| Needs Analysis | `evaluation` |
+| Value Proposition | `evaluation` |
+| Id. Decision Makers | `evaluation` |
+| Perception Analysis | `evaluation` |
+| Proposal/Price Quote | `proposal` |
+| Negotiation/Review | `negotiation` |
+| Closed Won | `closed_won` |
+| Closed Won - Paid | `closed_won` |
+| Closed Lost | `closed_lost` |
+
+### HubSpot Deal Stages
+
+| HubSpot Stage | PILLAR Canonical Stage |
+|--------------|----------------------|
+| appointmentscheduled | `discovery` |
+| qualifiedtobuy | `discovery` |
+| presentationscheduled | `evaluation` |
+| decisionmakerboughtin | `evaluation` |
+| contractsent | `proposal` |
+| closedwon | `closed_won` |
+| closedlost | `closed_lost` |
+
+### Custom Stage Examples
+
+If your CRM uses custom stage names, map them to the closest canonical stage:
+
+| Custom Stage | PILLAR Canonical Stage | Rationale |
+|-------------|----------------------|-----------|
+| Initial Meeting | `discovery` | First contact/qualification |
+| Technical Review | `evaluation` | Customer evaluating product |
+| Procurement | `negotiation` | Contract/legal process |
+| Board Approval | `negotiation` | Final decision-maker step |
+| Verbal Commit | `negotiation` | Not yet signed |
+| Implemented | `closed_won` | Post-close, active customer |
+| No Decision | `closed_lost` | Deal stalled out |
+| Disqualified | `closed_lost` | Not a fit |
+
+## How Stages Feed Scoring
+
+### Pipeline Hygiene Score
+
+The Pipeline Hygiene model (see [Pipeline Hygiene](/scoring/pipeline-hygiene)) uses canonical stages to:
+
+- **Stage velocity**: Compare how long a deal has been in its current stage vs. the median for that stage. Deals sitting 2x the median score 100 (maximum concern).
+- **Stage probability**: Each canonical stage has a default probability used in forecast confidence calculations.
+
+### Financial Health and Revenue Metrics
+
+- Deals in `closed_won` contribute to ARR calculations and recognized revenue
+- The transition from `negotiation` to `closed_won` triggers revenue recognition signals
+- `closed_lost` deals feed win/loss ratio analysis and competitive intelligence
+
+### Renewal Risk
+
+For existing customers, the contracting momentum variable in the [Renewal Risk model](/scoring/renewal-risk) tracks whether renewal-related opportunities are progressing through stages on schedule.
+
+## Adding Custom Stage Mappings
+
+<Note>
+If your CRM has stages that do not map cleanly to the 6 canonical stages, map them to the nearest stage in the pipeline progression. PILLAR uses the canonical stages for scoring math -- the original CRM stage name is always preserved for reporting and drill-down views.
+</Note>
+
+To add a new mapping:
+
+1. Go to **Settings > Scoring > Picklist Mapping**
+2. Click **Add Mapping**
+3. Select the CRM object (Opportunity or Deal)
+4. Enter the exact CRM picklist value (case-sensitive for Salesforce, lowercase for HubSpot)
+5. Select the PILLAR canonical stage
+6. Click **Save**
+
+The mapping takes effect on the next sync cycle (within 15 minutes). Existing opportunities are re-classified automatically.
+
+## Troubleshooting
+
+<Accordion title="My pipeline views show 'Unmapped' stages">
+This means one or more CRM stage values have not been mapped to a PILLAR canonical stage. Go to **Settings > Scoring > Picklist Mapping** and map any stages marked as unmapped. The Data Health dashboard also surfaces unmapped picklist warnings.
+</Accordion>
+
+<Accordion title="Stage probabilities seem wrong in forecasts">
+Check that your mapping is correct. A common mistake is mapping a late-stage value (like "Verbal Commit") to `discovery` instead of `negotiation`. The canonical stage determines the default probability used in forecasting.
+</Accordion>
+
+<Accordion title="Deals are not showing up in pipeline views">
+Ensure the opportunity's stage value exactly matches a picklist mapping entry. Salesforce stage values are case-sensitive. Check for trailing spaces or special characters in your CRM's picklist configuration.
+</Accordion>

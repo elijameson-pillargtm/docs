@@ -12,16 +12,48 @@ The renewal risk score identifies accounts at risk of churn by evaluating multip
 
 PILLAR's renewal risk model analyzes 8 weighted variables spanning customer engagement, support health, contracting activity, stakeholder stability, satisfaction, market conditions, and payment patterns. Each variable contributes to a composite risk score on a 0-100 scale.
 
-### Key Risk Dimensions
+A 9th post-processing factor -- the **Renewal Urgency Amplifier** -- multiplies the base risk score as the renewal date approaches, ensuring that pre-existing risk is surfaced with appropriate urgency.
 
-- **Engagement Trends** -- Declining usage and activity patterns that precede churn
-- **Support Health** -- Escalation rates and support burden that indicate product friction
-- **Contracting Activity** -- Momentum (or stalling) of renewal negotiations
-- **Executive Sponsorship** -- Whether an active exec sponsor exists on the account
-- **Customer Satisfaction** -- NPS and sentiment indicators
-- **Market Context** -- Budget trends and institutional financial health (enhanced by Starbridge district intelligence when available)
-- **Stakeholder Stability** -- Turnover in key contacts and buying committee members
-- **Payment Patterns** -- Late payment history as a leading indicator
+### Weighted Variables
+
+| Variable | Default Weight | What Feeds It | What It Measures |
+|----------|---------------|---------------|-----------------|
+| Engagement Decay | **25%** | CRM activity logs, product usage connectors (Pendo, Mixpanel, etc.) | Percentage decline in usage/engagement. Uses an amplified curve: 10% drop = moderate risk, 20% = serious, 35%+ = maximum risk |
+| Support Burden | **20%** | Support ticket connectors (Intercom, Zendesk, Freshdesk), HubSpot Service Hub, Salesforce Service Cloud | Escalation percentage from support tickets. Computed from `support_ticket_snapshots` when available, falls back to `accounts.support_escalation_pct` |
+| Contracting Lag | **15%** | CRM opportunity/renewal records | Days without contracting activity as renewal approaches. Derived from `contracting_momentum` on the active renewal. Low momentum = high lag = high risk |
+| Executive Sponsor Gap | **10%** | CRM contact records (`is_exec_sponsor` flag) | Binary: is there an active executive sponsor on the account? No sponsor = 100 sub-score |
+| NPS Health | **10%** | NPS connectors (Wootric, Delighted), CRM fields | NPS score on a 0-10 scale. Below 6 = maximum risk, 7 = moderate, 8 = low, 9-10 = no risk. Defaults to 7 (neutral) when unavailable |
+| Market Context | **10%** | Starbridge district intelligence (budget trends, tech spend allocation, grant dependency) | Institutional budget health. Uses YoY budget trend (50%), tech budget as % of total (30%), and grant dependency (20%). Defaults to neutral when Starbridge data is unavailable |
+| Stakeholder Turnover | **5%** | CRM contact records (INACTIVE status) | Count of contacts who have gone inactive. 0 = no risk, 1 = 33, 2 = 67, 3+ = maximum risk |
+| Payment History | **5%** | CRM payment fields (`payment_health`) | Late payment count. 0 late = no risk, 1 = 30, 2 = 60, 3+ = maximum risk |
+
+### Renewal Urgency Amplifier
+
+The urgency amplifier is a post-processing multiplier that boosts the base risk score as the renewal date approaches. It ensures that a risky account 2 days from renewal is treated very differently from a risky account 6 months out.
+
+| Days to Renewal | Urgency Factor | Effect on a Base Score of 60 |
+|----------------|----------------|------------------------------|
+| 0-3 days | 1.0 | 60 + 30 = **90** |
+| 4-7 days | 0.9 | 60 + 27 = **87** |
+| 8-14 days | 0.75 | 60 + 23 = **83** |
+| 15-30 days | 0.5 | 60 + 15 = **75** |
+| 31-60 days | 0.3 | 60 + 9 = **69** |
+| 61-90 days | 0.15 | 60 + 5 = **65** |
+| 91-180 days | 0.05 | 60 + 2 = **62** |
+| 180+ days | 0.0 | **60** (no change) |
+
+The maximum boost coefficient is 0.5, meaning the amplifier can add up to half the base score. A healthy account (base score 15) with an imminent renewal only gets a small bump (15 + 8 = 23), while an unhealthy account (base score 60) gets a large bump (60 + 30 = 90).
+
+### Risk Severity Thresholds
+
+PILLAR uses calibrated thresholds designed to catch risk 2-3x earlier than industry benchmarks:
+
+| Severity | Score Threshold | Industry Standard |
+|----------|----------------|-------------------|
+| Low | 0-19 | 0-49 |
+| Medium | 20-34 | 50-69 |
+| High | 35-54 | 70-84 |
+| Critical | 55+ | 85+ |
 
 ## Market Context (Starbridge-Enhanced)
 
@@ -48,4 +80,4 @@ PILLAR also evaluates post-close implementation risk on late-stage and recently 
 
 All renewal risk weights, thresholds, and severity classifications are configurable per organization through your scoring profile settings.
 
-> Detailed scoring methodology, including exact variable weights, rule definitions, and severity thresholds, is available in the PILLAR Implementation Guide provided to active customers.
+All weights and thresholds shown above are the defaults (model version `1.3.0-renewal-urgency`). Your organization can customize variable weights and severity thresholds through **Settings > Scoring > Weight Configuration**.
