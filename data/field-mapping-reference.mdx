@@ -20,7 +20,7 @@ PILLAR's field mapping layer connects your CRM schema to PILLAR's canonical data
 Fields marked **Required** must be mapped for PILLAR to generate meaningful scores, signals, and next-best-actions. Optional fields improve scoring accuracy and unlock additional intelligence modules.
 </Note>
 
----
+
 
 ## Accounts
 
@@ -81,7 +81,7 @@ Accounts are the core entity in PILLAR, representing organizations (school distr
 | `fiscal_year_end` | Fiscal Year End | string | No | `Fiscal_Year_End__c`, `FYE__c`, `Budget_Cycle_End__c` | `fiscal_year_end` | MM-DD format. Drives budget cycle alerts and renewal timing. |
 | `status` | Account Status | enum | No | `Account_Status__c`, `Status__c`, `Customer_Status__c` | `hs_lead_status`, `account_status`, `customer_status` | Current lifecycle status of the account (prospect, active, churned, paused, onboarding) |
 
----
+
 
 ## Contacts
 
@@ -114,7 +114,7 @@ Contacts represent individual people at accounts -- buyers, champions, evaluator
 |---|---|---|---|---|---|---|
 | `status` | Contact Status | enum | No | `Contact_Status__c`, `Status__c` | `hs_lead_status`, `contact_status` | Current status of the contact (active, inactive, churned, do_not_contact) |
 
----
+
 
 ## Opportunities
 
@@ -171,7 +171,7 @@ Opportunities represent active deals in the pipeline -- new business, renewals, 
 | `grant_match` | Grant Match | boolean | No | `Grant_Match__c`, `Has_Grant_Funding__c` | `grant_match`, `has_grant_funding` | Whether this opportunity has a matching grant or funding source identified |
 | `procurement_complexity` | Procurement Complexity | enum | No | `Procurement_Complexity__c`, `Deal_Complexity__c` | `procurement_complexity`, `deal_complexity` | How complex the procurement process is for this specific deal (low, medium, high, very_high) |
 
----
+
 
 ## Leads
 
@@ -229,7 +229,7 @@ Leads represent pre-opportunity contacts -- people who have shown interest but h
 | `source_detail` | Lead Source Detail | string | No | `LeadSource`, `Lead_Source_Detail__c`, `Source_Detail__c` | `hs_analytics_source_data_1`, `source_detail` | Detailed lead source information (e.g., specific campaign, webinar name) |
 | `source_id` | Lead Source ID | string | No | `Campaign_ID__c`, `Source_ID__c` | `hs_analytics_source`, `source_id` | Unique identifier for the lead source or campaign |
 
----
+
 
 ## Contracts
 
@@ -268,7 +268,7 @@ Contract ingestion is currently in rollout. The Drizzle schema and catalog entri
 |---|---|---|---|---|---|---|
 | `parent_quote_id` | Source Quote ID | string | No | `SBQQ__Quote__c`, `QuoteId__c` | `hs_quote_id`, `associated_quote_id` | The CRM ID of the quote this contract was generated from (Salesforce CPQ Quote, HubSpot Quote) |
 
----
+
 
 ## Support Tickets
 
@@ -315,7 +315,7 @@ Support ticket ingestion is currently in rollout. Contact your PILLAR representa
 | `has_exec_attention` | Has Exec Attention | boolean | No | `Exec_Sponsor_Engaged__c` | `hs_executive_sponsor_engaged` | True if a customer or PILLAR user with exec/CRO/CEO role has touched the ticket. The classic "CEO is involved" risk signal. |
 | `csat_score` | CSAT Score | number | No | `CSAT__c`, `Customer_Satisfaction__c` | `hs_csat`, `customer_satisfaction` | Customer satisfaction score on a 1-5 scale, collected at ticket close. Low CSAT (1-2) is a leading indicator of churn. |
 
----
+
 
 ## Field Transforms
 
@@ -348,7 +348,7 @@ Every field mapping includes a transform type that controls how the raw CRM valu
 </Accordion>
 </AccordionGroup>
 
----
+
 
 ## Picklist Mapping
 
@@ -394,7 +394,7 @@ Your CRM Stage                    →  PILLAR Stage
 Unmapped picklist values are stored as-is, which may cause scoring rules to skip the record. Always map all active picklist values to ensure accurate scoring.
 </Warning>
 
----
+
 
 ## Custom Field Mapping
 
