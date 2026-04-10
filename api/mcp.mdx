@@ -49,18 +49,18 @@ GET  https://app.pillargtm.com/api/mcp  (server discovery)
 
 Authentication: Bearer API key in the `Authorization` header.
 
-## Available Tools (22)
+## Available Tools (26)
 
 ### Core Intelligence
 
 | Tool | Description |
 |------|-------------|
-| `get_dashboard` | Full GTM health snapshot: ARR, pipeline, NRR, at-risk accounts, signal count |
-| `get_pipeline_summary` | Pipeline totals: open, commit, best-case, weighted, NRR, ARR |
+| `get_dashboard` | Full GTM health snapshot: ARR, pipeline, NRR, at-risk accounts, signal count, forecast health |
+| `get_pipeline_summary` | Pipeline totals: open, commit, best-case, weighted pipeline, NRR, ARR |
 | `search_accounts` | Search accounts by name, segment, or territory with health/risk/priority scores |
 | `get_account_360` | Full account detail: scores, contacts, signals, opportunities, district intelligence |
-| `get_active_signals` | Active signals filtered by severity (CRITICAL/WARNING/INFO) or family (RENEWAL/PIPELINE/EXPANSION) |
-| `get_account_health` | Health, risk, and priority scores with scoring decomposition |
+| `get_active_signals` | Active signals filtered by severity (CRITICAL/WARNING/INFO) or family (RENEWAL/PIPELINE/EXPANSION/ACCOUNT/COVERAGE) |
+| `get_account_health` | Health, risk, and priority scores with scoring decomposition showing which factors drive each score |
 | `get_renewal_risk` | Upcoming renewals with risk scores, filtered by days out (30/60/90) |
 
 ### Data Readiness
@@ -68,21 +68,39 @@ Authentication: Bearer API key in the `Authorization` header.
 | Tool | Description |
 |------|-------------|
 | `get_data_readiness` | Check if CRM data is ready for scoring: readiness level (ready/degraded/blocked), scoring-ready account count, blocking issues |
-| `get_affected_records` | Identify specific accounts with data quality issues. Filter by issue code (no_contacts, no_recent_activity, missing_segment, zero_arr) |
+| `get_affected_records` | Identify specific accounts with data quality issues. Filter by issue code (no_contacts, no_recent_activity, missing_segment, zero_arr, score_imbalance, negative_arr) |
 
 ### Operational
 
 | Tool | Description |
 |------|-------------|
-| `get_forecast` | Quarterly forecast: won, commit, probable, upside breakdown |
-| `get_revenue_bowtie` | Full acquire → close → retain/expand funnel with conversion rates |
-| `get_territory_economics` | Territory P&L: revenue, costs, yield, health classification |
-| `get_leads` | Lead funnel with ICP fit and behavioral scores |
+| `get_forecast` | Quarterly forecast: won, commit, probable, upside with override amounts and rep-level detail |
+| `get_revenue_bowtie` | Full acquire → close → retain/expand funnel with conversion rates at each stage |
+| `get_territory_economics` | Territory P&L: revenue, costs, yield ratios, health classification per territory |
+| `get_leads` | Lead funnel with ICP fit scores, behavioral scores, and funnel stage. Filter by status or score threshold |
 | `acknowledge_signal` | Update a signal's status (ACKNOWLEDGED, IN_PROGRESS, RESOLVED) |
-| `create_play` | Create an intervention play for an account (SAVE_PLAY, EXPANSION_PLAY) |
+| `create_play` | Create an intervention play for an account (SAVE_PLAY, EXPANSION_PLAY, ONBOARDING_PLAY) |
 | `complete_play` | Complete a play with mandatory outcome (RENEWED, CHURNED, EXPANDED, LOST) and auto-update linked renewal |
-| `get_board_report` | Executive summary: ARR, NRR, GRR, pipeline, risk, EBITDA |
-| `get_scoring_rules` | Scoring rule summary with categories |
+| `get_board_report` | Executive summary for board meetings: ARR, NRR, GRR, pipeline coverage, risk distribution, EBITDA |
+| `get_scoring_rules` | Scoring rule summary with weights and categories |
+
+### Flywheel & Benchmarks
+
+| Tool | Description |
+|------|-------------|
+| `get_calibration_stats` | Flywheel scoring calibration dashboard: outcome distribution, weight drift from baseline, top rules by calibration impact |
+| `get_calibration_history` | Scoring weight calibration history: pending feedback count, current weights, and chronological calibration event log |
+| `get_benchmark_percentiles` | Blueprint benchmark percentile rankings: pillar scores and operational metrics ranked against anonymized peer cohort |
+| `list_benchmark_cohorts` | List available benchmark cohorts with member counts and snapshot data. Cohorts group orgs by industry, revenue range, and maturity |
+| `get_benchmark_opt_in_status` | Check whether the organization is opted in to anonymized benchmarking and which cohort is assigned |
+
+### Connector Observability
+
+| Tool | Description |
+|------|-------------|
+| `list_connectors` | List all configured data connectors across CRM, email/calendar, product usage, and support ticketing with per-provider status, last sync, and health |
+| `get_sync_log` | Recent connector sync runs from the unified sync log. Shows successes, failures, records synced, and timing. Filter by connector name |
+| `get_account_data_sources` | Per-account breakdown of which data sources contributed to its score: CRM, product analytics, support tickets, or contracts provenance |
 
 ## Compatible AI Assistants
 
@@ -125,6 +143,21 @@ PILLAR's MCP server works with any MCP-compatible client:
 > "Show me all critical signals and acknowledge the top one"
 >
 > Claude calls `get_active_signals` with `severity: "CRITICAL"` → then `acknowledge_signal` on the first result
+
+**Scoring Calibration:**
+> "How are my scoring weights drifting from baseline?"
+>
+> Claude calls `get_calibration_stats` → returns outcome distribution, weight drift, and top rules by calibration impact
+
+**Connector Health Check:**
+> "Are all my data sources syncing correctly?"
+>
+> Claude calls `list_connectors` → returns per-provider status, then `get_sync_log` for any connectors showing errors
+
+**Score Provenance:**
+> "Where does the health score for Houston ISD come from?"
+>
+> Claude calls `get_account_data_sources` with the account ID → returns which values came from CRM vs product analytics vs support tickets
 
 ## Rate Limits
 
