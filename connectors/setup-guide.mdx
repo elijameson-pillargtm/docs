@@ -20,8 +20,8 @@ PILLAR ingests data through three mechanisms:
 
 | Connector Type | Default Cadence | Configurable |
 |---|---|---|
-| CRM (Salesforce, HubSpot) | Every 15 minutes (incremental) | Yes -- can be set to 5, 15, 30, or 60 minutes |
-| Email & Calendar | Every 5 minutes | No |
+| CRM (Salesforce, HubSpot, Dynamics 365) | Every 15 minutes (incremental) | Yes -- can be set to 5, 15, 30, or 60 minutes |
+| Email & Calendar (Google Workspace, Microsoft 365) | Every 5 minutes | No |
 | Product Usage Tools | Every 60 minutes | Yes -- can be set to 15, 30, or 60 minutes |
 | Support Ticketing | Every 30 minutes | Yes |
 | NPS / Sentiment | Every 60 minutes | Yes |
@@ -147,6 +147,57 @@ Create these three custom Number properties on the Company object in HubSpot bef
 Same scoring pipeline as Salesforce -- all CRM data flows into the same canonical PILLAR tables regardless of source CRM. See the Salesforce tab above for details on which scores use which data.
 
 </Tab>
+<Tab title="Dynamics 365">
+
+### What You'll Need
+
+- A Microsoft Dynamics 365 online org (Sales or Customer Service)
+- Your Dynamics **org URL** — typically `https://yourorg.crm.dynamics.com`
+- A user with the **System Administrator** or **System Customizer** security role (needed for the initial field discovery)
+- Admin permissions in PILLAR to configure connectors
+
+<Note>
+PILLAR uses Azure AD OAuth 2.0 (multi-tenant) for Dynamics. You will be redirected to Microsoft's consent screen and asked to authorize PILLAR to access your Dynamics org. No passwords are stored — only the OAuth refresh token.
+</Note>
+
+### Steps to Connect
+
+1. In PILLAR, navigate to **Settings > Integrations**.
+2. Click **Connect** on the Dynamics 365 card.
+3. Enter your **Dynamics org URL** (e.g. `https://yourorg.crm.dynamics.com`) and click **Continue**.
+4. You will be redirected to Microsoft's OAuth consent screen. Log in with your Dynamics credentials and click **Accept**.
+5. PILLAR auto-discovers your org's entity schema and maps fields. The initial sync begins immediately.
+6. Review the auto-mapped fields by clicking **Field Mapping** on the connector card.
+
+### What Syncs
+
+| Dynamics Entity | PILLAR Table | Key Fields |
+|---|---|---|
+| Account | `accounts` | Name, ARR (`revenue`), Segment, Industry, Owner |
+| Contact | `contacts` | Full Name, Email, Job Title, Account ID |
+| Opportunity | `opportunities` | Name, Est. Revenue, Status, Close Date, Account ID |
+| Lead | `leads` | Full Name, Email, Company Name, Status, Lead Source |
+| Incident (Case) | `support_ticket_snapshots` | Account ID, Title, Status, Priority |
+
+### Score Write-Back
+
+PILLAR pushes computed scores back to Dynamics as custom fields on the Account entity:
+
+| PILLAR Score | Dynamics Field | Type |
+|---|---|---|
+| Health Score (0-100) | `pillar_healthscore` | Integer |
+| Risk Score (0-100) | `pillar_riskscore` | Integer |
+| Priority Score (0-100) | `pillar_priorityscore` | Integer |
+
+<Warning>
+You must create these three custom Integer fields on the Account entity in Dynamics before enabling write-back. Go to **Settings > Customizations > Customize the System > Entities > Account > Fields > New** and create each field with the schema name above.
+</Warning>
+
+### How It Feeds Scoring
+
+Same scoring pipeline as Salesforce and HubSpot — all CRM data normalizes into PILLAR's canonical tables regardless of source. See the Salesforce tab above for score component details.
+
+</Tab>
 </Tabs>
 
 ---
@@ -186,6 +237,99 @@ PILLAR never reads email body content. Only metadata is captured: sender, recipi
 - **Account Health** -- Email and meeting frequency contribute to the engagement component. Accounts with declining email/meeting activity trigger engagement decay signals.
 - **Contact Engagement Score** -- Individual contact engagement scores factor in email response rates and meeting attendance.
 - **Pipeline Hygiene** -- The `last_meeting_date` field on opportunities is updated from calendar data, and deals without recent meetings are flagged.
+
+</Tab>
+<Tab title="Microsoft 365 (Outlook)">
+
+### What You'll Need
+
+- A Microsoft 365 (formerly Office 365) account with Outlook enabled
+- Each user must authorize individually — this is a per-user OAuth flow
+- Admin permissions in PILLAR to configure connectors
+
+<Note>
+PILLAR never reads email body content. Only metadata is captured: sender, recipient list, timestamp, and subject line. Calendar events capture attendees, time, and duration. No message bodies, attachments, or calendar descriptions are stored.
+</Note>
+
+### Steps to Connect
+
+1. Navigate to **Settings > Integrations > Email & Calendar**.
+2. Click **Connect Microsoft 365**.
+3. Each team member will see a prompt to authorize their individual Microsoft account via Azure AD OAuth.
+4. After authorization, Outlook email metadata and calendar events begin syncing every 5 minutes.
+
+### What Syncs
+
+| Data Type | Fields Captured | Used For |
+|---|---|---|
+| Outlook email metadata | Sender, recipients, timestamp, subject line | Contact engagement scoring, activity tracking |
+| Calendar events | Attendees, start/end time, organizer | Meeting activity signals, last-meeting-date on opportunities |
+
+<Info>
+Microsoft 365 and Google Workspace provide identical engagement signal coverage. If your team uses both, PILLAR will merge engagement signals from both sources per contact — whichever sync ran most recently wins.
+</Info>
+
+### How It Feeds Scoring
+
+Same engagement signal pipeline as Google Workspace:
+
+- **Account Health** -- Outlook and Teams meeting cadence contributes to the engagement component.
+- **Contact Engagement Score** -- Email response rates and meeting attendance from Outlook.
+- **Pipeline Hygiene** -- `last_meeting_date` updated from Outlook Calendar; deals without recent meetings are flagged.
+
+</Tab>
+</Tabs>
+
+---
+
+## Notifications & Collaboration
+
+PILLAR can push signal alerts, daily digests, and play notifications to your team's collaboration tools so CSMs and AEs see critical signals where they already work.
+
+<Tabs>
+<Tab title="Microsoft Teams">
+
+### What You'll Need
+
+- A Microsoft Teams workspace
+- **Option A (Webhook — simple):** An incoming webhook URL configured in your target Teams channel
+- **Option B (Graph API — full):** Microsoft 365 admin consent to allow PILLAR to post to channels via Graph API
+
+<Note>
+Option A (incoming webhook) requires no OAuth and can be set up by any Teams channel owner in under 2 minutes. Option B (Graph API) requires an Azure AD admin to grant consent but unlocks a channel picker UI so users can route different alerts to different channels from within PILLAR.
+</Note>
+
+### Option A: Incoming Webhook (Recommended for Quick Start)
+
+1. In Microsoft Teams, open the channel where you want PILLAR alerts.
+2. Click **···** next to the channel name > **Connectors** > **Incoming Webhook** > **Configure**.
+3. Name the webhook (e.g. "PILLAR Alerts") and click **Create**.
+4. Copy the webhook URL.
+5. In PILLAR, navigate to **Settings > Integrations > Notifications**.
+6. Click **Configure** on the Microsoft Teams card and paste the webhook URL.
+7. Click **Test** to post a sample Adaptive Card, then **Save**.
+
+### Option B: Graph API (Full Integration)
+
+1. In PILLAR, navigate to **Settings > Integrations > Notifications**.
+2. Click **Connect Microsoft Teams**.
+3. You will be redirected to Microsoft's OAuth consent screen. An Azure AD admin must accept the permissions (Channel.ReadBasic.All, ChannelMessage.Send, Team.ReadBasic.All).
+4. After consent, PILLAR lists all teams and channels your account has access to.
+5. Select the channels for each alert type: signal alerts, daily digest, and play notifications.
+6. Click **Save**.
+
+### What Gets Sent
+
+| Notification Type | Trigger | Card Content |
+|---|---|---|
+| Signal Alert | New critical or high-severity signal | Account name, signal type, ARR at risk, recommended action, link to account |
+| Daily Digest | 8 AM (configurable) | Portfolio ARR, at-risk ARR, health score, critical signal count, top 3 actions |
+| Play Activation | Play triggered on an account | Account name, play type, ARR protected, link to account |
+| Renewal Risk Alert | Account crosses risk threshold | Account name, risk score, renewal date, primary risk driver |
+
+### Adaptive Cards
+
+All Teams notifications use Microsoft Adaptive Cards (v1.4) — they render natively in Teams with structured data, color-coded severity indicators, and **View in PILLAR** deep-link buttons. No plain-text messages are sent.
 
 </Tab>
 </Tabs>
