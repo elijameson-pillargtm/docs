@@ -16,10 +16,10 @@ Each org can connect one CRM provider.
 |----------|------|---------|--------------|-----------|
 | Salesforce | OAuth 2.0 | Account, Contact, Opportunity, Lead, Task | Every 15 min (incremental) | Inbound + outbound score push |
 | HubSpot | OAuth 2.0 | Company, Contact, Deal, Ticket | Every 15 min (incremental) | Inbound + outbound score push |
-| Dynamics 365 | OAuth 2.0 | Account, Contact, Opportunity, Lead | Coming soon | Coming soon |
+| Dynamics 365 | OAuth 2.0 (Azure AD) | Account, Contact, Opportunity, Lead, Case | Every 15 min (incremental) | Inbound + outbound score push |
 
 <Note>
-Salesforce and HubSpot sync accounts, contacts, and opportunities into PILLAR every 15 minutes. PILLAR also pushes computed scores (health, risk, priority) back to custom fields in your CRM so reps see PILLAR intelligence inside Salesforce/HubSpot. Dynamics 365 support is on the roadmap.
+All three CRM connectors sync on a 15-minute incremental cadence and support score write-back — PILLAR pushes computed health, risk, and priority scores back to custom fields in your CRM so reps see PILLAR intelligence without leaving their existing tools.
 </Note>
 
 ### Field Mapping
