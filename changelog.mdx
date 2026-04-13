@@ -10,11 +10,33 @@ All notable changes to the PILLAR platform are documented here.
 
 ---
 
+## v3.5.0 -- April 12, 2026
+
+**Per-Organization Configuration, Fiscal Year Engine, Segment Intelligence**
+
+- **2,395 Automated Tests with CI Gate** -- Test suite expanded from 1,874 to 2,395 tests across 52 files. New coverage spans fiscal year computation, segment classification, deal stage probability resolution, signal threshold overrides, org config null-safety, and currency formatting.
+- **Fiscal Year Engine** -- Every metric that involves a time period (pipeline coverage, quota attainment, budget variance) now computes against the organization's fiscal year rather than the calendar year. Configure your fiscal year start month in **Settings > Business Config**. Organizations that start their fiscal year in any month from January through December are fully supported.
+- **Per-Org Segment Thresholds** -- SMB, Mid-Market, and Enterprise classification boundaries are now configurable per organization. Default boundaries (SMB ≤ $50K ARR, Mid-Market ≤ $500K ARR) are used until overridden. Configure in **Settings > Scoring Thresholds**.
+- **Per-Org Deal Stage Probabilities** -- Close probability by deal stage is now configurable per organization. PILLAR ships with 30+ default stage mappings tuned for EdTech sales cycles. Override any stage's probability in **Settings > Deal Stages**. Unrecognized stages fall back to 15%.
+- **Per-Org Signal Thresholds** -- Eight signal-triggering thresholds (health warning/critical, renewal risk, ICP fit, engagement velocity, pipeline coverage, win rate, CAC ratio) are now overridable per organization. Configure in **Settings > Scoring Thresholds**.
+- **ARR Definition** -- Organizations can choose how ARR is measured: Contracted ACV (default), Trailing 12-Month Revenue, or MRR × 12. Configure in **Settings > Business Config**.
+- **Churn Definition** -- Three churn definitions supported: Revenue Churn (default), Logo Churn, and Net Revenue Retention-based. Configure in **Settings > Business Config**.
+- **Base Currency** -- Reports, deck exports, and financial calculations now use the organization's configured base currency. Ten currencies supported (USD, EUR, GBP, CAD, AUD, JPY, SGD, CHF, SEK, DKK). Configure in **Settings > Business Config**.
+- **Renewal Window** -- The look-ahead window for renewal risk monitoring is configurable from 14 to 730 days (default: 90). Configure in **Settings > Business Config**.
+- **Quota Type** -- Five quota structures supported: ARR, TCV, Revenue, Activity, and Blended. Affects quota attainment calculations across the platform. Configure in **Settings > Business Config**.
+- **Expansion Taxonomy** -- Organizations can define custom expansion categories (upsell, cross-sell, add-on seats, etc.) with their own labels. Used in the Expansion Pipeline and product affinity reporting. Configure in **Settings > Deal Stages**.
+- **Contact Role Patterns** -- Executive buyer and champion identification is now driven by configurable title-matching patterns. PILLAR ships with sensible defaults (VP, CTO, Chief, Director for execs; Champion, Advocate, Power User for champions). Configure in **Settings > Deal Stages**.
+- **DB Migration: 11 New Org Config Columns** -- All per-org configuration is stored directly on the `organizations` table. NULL = use PILLAR global default, so existing organizations continue working without any migration required.
+- **Settings UI: Three New Tabs** -- Business Config, Scoring Thresholds, and Deal Stages tabs added to **Settings**. Role-gated to CRO/CEO, RevOps, and Pillar Admin.
+- **The Guarantee: 8 New Invariants (G-O-01 through G-O-08)** -- Formally registered correctness guarantees for the per-org config layer: fiscal period computation, stage probability resolution, segment classification, signal threshold precedence, null-safety, currency formatting, enum validation, and contact role pattern classification.
+
+---
+
 ## v3.4.0 -- April 4, 2026
 
 **Mathematical Integrity Architecture, Data Readiness Gate, Formula Audit**
 
-- **1,874 Automated Tests with CI Gate** -- Every deployment to production must pass the full test suite (1,874 tests across 43 files) before Vercel allows the build to complete. Zero chance of deploying broken math.
+- **1,874 Automated Tests with CI Gate** -- Every deployment to production must pass the full test suite before Vercel allows the build to complete. Zero chance of deploying broken math. (Test count grew to 2,395 in v3.5.0.)
 - **Formula Correctness Audit** -- Audited 45+ formulas against industry standards. Fixed 5 material errors: win rate denominator (bowtie), LTV/CAC missing gross margin (scoring), CAC payback missing gross margin (dashboard), NRR conflation with total growth (decision-engine), Rule of 40 linear vs compounding annualization (org-metrics). Resolved 3 cross-file inconsistencies in burn multiple, magic number, and forecast commit weights.
 - **Data Readiness Gate** -- New enforcement layer that checks CRM data quality before scoring runs. Three states: ready (85%+), degraded (60-84%), blocked (<60% or critical issues). Banner displays on all authenticated pages when data quality is insufficient.
 - **Record-Level Data Quality Drill-Down** -- New `/api/data-readiness/affected-records` endpoint identifies every specific account with data issues, what's wrong, and severity. No more "150 accounts have problems" without knowing which 150.

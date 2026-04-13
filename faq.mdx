@@ -30,7 +30,7 @@ icon: 'circle-question'
 
 <AccordionGroup>
   <Accordion title="Can I customize scoring weights?">
-    Yes. Every scoring category and individual rule weight is configurable per organization. Navigate to **Settings > Scoring** to adjust weights. PILLAR ships with defaults tuned for EdTech GTM teams, but you can tailor them to your specific business.
+    Yes. Every scoring category and individual rule weight is configurable per organization. Navigate to **Settings > Scoring** to adjust category and rule weights. For signal-triggering thresholds (health score warning levels, renewal risk levels, etc.), use **Settings > Scoring Thresholds**. For deal stage close probabilities and pipeline weighting, use **Settings > Deal Stages** and **Settings > Pipeline Weights**. PILLAR ships with defaults tuned for EdTech GTM teams, but you can tailor them to your specific business.
   </Accordion>
 
   <Accordion title="How often are scores recalculated?">
@@ -79,6 +79,70 @@ icon: 'circle-question'
 
   <Accordion title="Can I export my data?">
     Yes. PILLAR provides full data export via the API. You can also export dashboards and reports as PDF. All data remains yours -- PILLAR operates as a processing layer on top of your existing CRM data.
+  </Accordion>
+</AccordionGroup>
+
+## Business Configuration
+
+<AccordionGroup>
+  <Accordion title="Can I configure PILLAR to match our fiscal year?">
+    Yes. Navigate to **Settings > Business Config** and set your fiscal year start month. Once configured, all period-based metrics — pipeline coverage, quota attainment, budget variance, and board report quarters — compute against your fiscal calendar rather than the calendar year. For example, an organization with a February 1 fiscal year start will see Q1 as February–April, Q2 as May–July, and so on.
+  </Accordion>
+
+  <Accordion title="How does PILLAR define ARR, and can we change it?">
+    PILLAR supports three ARR definitions, configurable in **Settings > Business Config**:
+
+    - **Contracted ACV** (default) — Annual Contract Value from signed agreements
+    - **Trailing 12-Month Revenue** — Actual recognized revenue over the past 12 months
+    - **MRR × 12** — Monthly Recurring Revenue annualized
+
+    All ARR-based calculations across the platform (NRR, churn rate, segment classification, quota attainment) use whichever definition your organization has selected.
+  </Accordion>
+
+  <Accordion title="Can we use a currency other than USD?">
+    Yes. Navigate to **Settings > Business Config** and set your base currency. PILLAR supports USD, EUR, GBP, CAD, AUD, JPY, SGD, CHF, SEK, and DKK. All financial figures in reports, exports, and dashboards display in your configured currency.
+  </Accordion>
+
+  <Accordion title="How does PILLAR classify accounts as SMB, Mid-Market, or Enterprise?">
+    PILLAR classifies accounts by ARR using configurable tier boundaries. The defaults are:
+
+    - **SMB**: ARR ≤ $50,000
+    - **Mid-Market**: ARR $50,001–$500,000
+    - **Enterprise**: ARR > $500,000
+
+    To override these boundaries for your business, navigate to **Settings > Scoring Thresholds** and adjust the SMB and Mid-Market ARR ceilings. All segment-based analytics, cohort groupings, and playbook recommendations update immediately.
+  </Accordion>
+
+  <Accordion title="Can we configure our own deal stage probabilities?">
+    Yes. PILLAR ships with 30+ default close probabilities mapped to common CRM stage names (Prospecting, Qualification, Proposal, Negotiation, etc.). If your CRM uses custom stage names or different probability assumptions, navigate to **Settings > Deal Stages** to define per-stage overrides. Any stage not in your map falls back to 15%. These probabilities feed directly into weighted pipeline calculations and forecast confidence scoring.
+  </Accordion>
+
+  <Accordion title="What is the renewal window and how do I change it?">
+    The renewal window is the look-ahead period PILLAR uses to identify accounts approaching renewal. Accounts with a renewal date within this window are included in renewal risk monitoring, procurement alignment scoring, and the renewal forecast. The default is **90 days**. You can set it between 14 and 730 days in **Settings > Business Config** to match your team's engagement lead time.
+  </Accordion>
+
+  <Accordion title="Can we define what counts as 'churn' for our business?">
+    Yes. PILLAR supports three churn definitions in **Settings > Business Config**:
+
+    - **Revenue Churn** (default) — Percentage of ARR lost from non-renewals and downgrades
+    - **Logo Churn** — Percentage of customer accounts that did not renew
+    - **Net Revenue Churn** — Net change in ARR including expansions, factoring in upsell against lost ARR
+
+    Cohort analytics, churn signals, and NRR calculations reflect whichever definition you select.
+  </Accordion>
+
+  <Accordion title="Can we customize which signal thresholds trigger alerts?">
+    Yes. Eight signal-triggering thresholds are configurable per organization in **Settings > Scoring Thresholds**:
+
+    - Health score warning and critical levels
+    - Renewal risk warning level
+    - ICP fit minimum threshold
+    - Engagement velocity minimum
+    - Pipeline coverage ratio warning
+    - Win rate warning threshold
+    - CAC ratio warning threshold
+
+    PILLAR's global defaults are used for any threshold you haven't explicitly overridden. Override indicators appear next to each customized threshold so you always know which values are org-specific.
   </Accordion>
 </AccordionGroup>
 
