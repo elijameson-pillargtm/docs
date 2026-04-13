@@ -1,6 +1,6 @@
 ---
 title: 'Connector Setup Guide'
-description: 'Step-by-step guide to connecting your CRM, product analytics, support ticketing, and NPS tools to PILLAR'
+description: 'Step-by-step guide to connecting your CRM, product analytics, support ticketing, NPS, and call intelligence tools to PILLAR'
 icon: 'plug'
 ---
 
@@ -25,6 +25,7 @@ PILLAR ingests data through three mechanisms:
 | Product Usage Tools | Every 60 minutes | Yes -- can be set to 15, 30, or 60 minutes |
 | Support Ticketing | Every 30 minutes | Yes |
 | NPS / Sentiment | Every 60 minutes | Yes |
+| Call Intelligence (Gong) | Every 4 hours | No |
 | CSV Import | Manual upload | N/A |
 
 ### The Field Mapping UI
@@ -669,6 +670,88 @@ NPS and customer sentiment data feed the Satisfaction component of Account Healt
 <Info>
 **How NPS feeds scoring**: NPS scores from any connected sentiment tool flow into `accounts.nps_score`, which is a component of the Account Health Score's Satisfaction dimension. Declining NPS triggers the `nps_decline` signal, which in turn can fire save plays or risk alerts. See the [Account Health scoring rules](/scoring/account-health) for weight details.
 </Info>
+
+---
+
+## Call Intelligence
+
+Call intelligence data powers the Call Intelligence scoring category -- 7 rules that evaluate conversation quality, rep performance, competitive mentions, and stakeholder engagement from recorded sales and CS calls.
+
+<Tabs>
+<Tab title="Gong">
+
+### What You'll Need
+
+- Gong workspace with API access enabled
+- A Gong user with admin permissions to authorize the OAuth connection
+- Admin permissions in PILLAR to configure connectors
+
+<Note>
+PILLAR uses Gong's OAuth 2.0 authorization flow. No API keys or passwords are stored -- only the OAuth refresh token. Your Gong admin may need to approve the PILLAR app in Gong's API settings.
+</Note>
+
+### Gong Plan Requirements
+
+<Warning>
+**Full call analytics (sentiment, talk ratio, trackers, topics) require Gong Business or Enterprise plan.** Basic call tracking (title, participants, duration, direction) works on all Gong plans. If your Gong workspace is on a lower-tier plan, PILLAR will sync call metadata but the Call Intelligence scoring rules will return neutral scores for analytics-dependent fields until your Gong plan includes the analytics API endpoints.
+</Warning>
+
+| Gong Plan | What PILLAR Can Access |
+|---|---|
+| **Essentials / Pro** | Call list (title, participants, duration, direction, outcome). CI rules return neutral scores for missing analytics. |
+| **Business** | Full analytics: talk ratios, interactivity, topics, trackers, next steps, call outcomes. All 7 CI rules fire with real data. |
+| **Enterprise** | Everything in Business, plus transcript access for future keyword analysis features. |
+
+### Steps to Connect
+
+1. Navigate to **Settings > Integrations > Call Intelligence**.
+2. Click **Connect** on the Gong card.
+3. You will be redirected to Gong's OAuth consent screen. Authorize the connection.
+4. PILLAR begins an initial sync of the last 90 days of call data.
+5. Ongoing syncs run every 4 hours automatically.
+
+### What Syncs
+
+| Data Point | Cadence | Used For |
+|---|---|---|
+| Call metadata (title, direction, duration, outcome) | Every 4 hours | Call frequency scoring (CI-006) |
+| Participants (name, email, title, affiliation) | Every 4 hours | Exec participation detection (CI-005), account matching |
+| Rep talk ratio | Every 4 hours | Rep talk ratio scoring (CI-001) |
+| Customer talk ratio | Every 4 hours | Customer engagement scoring (CI-007) |
+| Sentiment (overall, customer, rep) | Every 4 hours | Sentiment trend analysis (CI-002) |
+| Topics discussed | Every 4 hours | Conversation topic tracking |
+| Trackers (competitor mentions, pricing, next steps) | Every 4 hours | Competitive mention detection (CI-003), next steps scoring (CI-004) |
+| Interactivity score | Every 4 hours | Engagement quality |
+
+### How PILLAR Matches Calls to Accounts
+
+PILLAR automatically resolves which account a call belongs to by:
+
+1. **Email domain matching** -- External participant email domains are matched against `accounts.domain`
+2. **Contact email matching** -- If domain matching fails, individual participant emails are matched against `contacts.email`
+
+Calls that cannot be matched to an account are stored but do not contribute to scoring until a match is established.
+
+### How It Feeds Scoring
+
+The Call Intelligence category includes 7 scoring rules:
+
+| Rule | What It Measures |
+|---|---|
+| **CI-001: Rep Talk Ratio** | Ideal reps talk 40-50% of the time. Over-talking (>60%) or under-talking (<30%) reduces the score. |
+| **CI-002: Customer Sentiment Trend** | Average customer sentiment across the last 3 calls. Declining sentiment is an early churn signal. |
+| **CI-003: Competitive Mentions** | Whether competitors were discussed in recent calls. Frequent mentions indicate active evaluation risk. |
+| **CI-004: Next Steps Commitment** | Whether next steps were explicitly mentioned on the most recent call. Calls without next steps indicate stalled momentum. |
+| **CI-005: Exec Participation** | Whether executive stakeholders (VP+, C-suite) have joined recent calls. Exec presence signals strategic buy-in. |
+| **CI-006: Call Frequency** | Whether call volume is appropriate for the account's deal stage and renewal proximity. |
+| **CI-007: Customer Engagement** | Customer talk ratio in recent calls. Customers who talk more are more engaged; silent customers are at-risk. |
+
+<Info>
+**When Gong is not connected**, all 7 CI rules return a neutral score of 50 and are not counted as triggered. This means the Call Intelligence category does not drag down account health scores for organizations that do not use Gong.
+</Info>
+
+</Tab>
+</Tabs>
 
 ---
 
