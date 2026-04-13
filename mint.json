@@ -109,7 +109,7 @@
       ]
     },
     {
-      "group": "Settings",
+      "group": "Configuration",
       "pages": [
         "settings/configuration"
       ]
