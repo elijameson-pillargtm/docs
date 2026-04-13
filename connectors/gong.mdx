@@ -18,7 +18,7 @@ When Gong is connected, PILLAR pulls conversation analytics every 4 hours and sc
 
 | Rule | What It Measures | Why It Matters |
 |------|-----------------|----------------|
-| **CI-001: Rep Talk Ratio** | Percentage of time the rep speaks vs. listens. Ideal range: 40-50%. | Reps who talk >60% aren't listening. Reps who talk <30% may lack control of the conversation. |
+| **CI-001: Rep Talk Ratio** | Percentage of time the rep speaks vs. listens. Ideal range: 40-50%. | Reps who talk over 60% aren't listening. Reps who talk under 30% may lack control of the conversation. |
 | **CI-002: Customer Sentiment Trend** | Average customer sentiment across the last 3 calls (-1.0 to +1.0 scale). | Declining sentiment is one of the earliest churn signals -- often visible 2-3 months before a renewal decision. |
 | **CI-003: Competitive Mentions** | Whether competitors were discussed in recent calls. | Frequent competitor mentions indicate the customer is actively evaluating alternatives. |
 | **CI-004: Next Steps Commitment** | Whether next steps were explicitly stated on the most recent call. | Calls without next steps indicate stalled deal momentum or disengaged stakeholders. |
@@ -46,7 +46,7 @@ PILLAR uses OAuth 2.0 to connect to your Gong workspace. Each PILLAR customer co
 
 ### Setup
 
-1. Navigate to **Settings > Integrations > Call Intelligence**
+1. Navigate to **Settings → Integrations → Call Intelligence**
 2. Click **Connect** on the Gong card
 3. You'll be redirected to Gong's OAuth consent screen
 4. Authorize PILLAR to read your call data
@@ -70,14 +70,14 @@ PILLAR uses OAuth 2.0 to connect to your Gong workspace. Each PILLAR customer co
 
 PILLAR automatically resolves which account a Gong call belongs to using a two-step process:
 
-1. **Email domain matching** -- External participant email domains (e.g., `@legendsoflearning.com`) are matched against the `domain` field on your PILLAR accounts
+1. **Email domain matching** -- External participant email domains (for example, legendsoflearning.com) are matched against the `domain` field on your PILLAR accounts
 2. **Contact email matching** -- If domain matching fails, individual participant emails are matched against contact records in PILLAR
 
 Calls that cannot be matched to any account are stored but do not contribute to scoring until a match is established (e.g., after a new account is synced from your CRM).
 
 ## How It Feeds Scoring
 
-Call Intelligence is the **9th scoring category** in PILLAR's scoring engine, weighted at 7% of the composite account health score by default. The weight is configurable per organization in **Settings > Configuration > Scoring Weights**.
+Call Intelligence is the **9th scoring category** in PILLAR's scoring engine, weighted at 7% of the composite account health score by default. The weight is configurable per organization in **Settings → Configuration → Scoring Weights**.
 
 ### When Gong Is Not Connected
 
@@ -126,6 +126,6 @@ Every 4 hours. The sync is incremental -- only new or updated calls since the la
 </Accordion>
 
 <Accordion title="Can I adjust the weight of Call Intelligence in my health score?">
-Yes. Navigate to **Settings > Configuration > Scoring Weights** to adjust the Call Intelligence category weight. The default is 7% of the composite score.
+Yes. Navigate to **Settings → Configuration → Scoring Weights** to adjust the Call Intelligence category weight. The default is 7% of the composite score.
 </Accordion>
 </AccordionGroup>
