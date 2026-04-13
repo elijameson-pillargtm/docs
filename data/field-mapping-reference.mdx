@@ -1,12 +1,12 @@
 ---
 title: 'Field Mapping Reference'
-description: 'Complete reference of all 126+ fields PILLAR ingests from Salesforce and HubSpot, organized by data object'
+description: 'Complete reference of all 126+ fields PILLAR ingests from Salesforce, HubSpot, and Microsoft Dynamics 365, organized by data object'
 icon: 'table-columns'
 ---
 
 # Field Mapping Reference
 
-PILLAR's field mapping layer connects your CRM schema to PILLAR's canonical data model. When you connect Salesforce or HubSpot, PILLAR auto-discovers your CRM's fields and maps them to the 126+ internal fields listed below across 6 data objects.
+PILLAR's field mapping layer connects your CRM schema to PILLAR's canonical data model. When you connect Salesforce, HubSpot, or Microsoft Dynamics 365, PILLAR auto-discovers your CRM's fields and maps them to the 126+ internal fields listed below across 6 data objects.
 
 ## How Field Mapping Works
 
@@ -15,6 +15,10 @@ PILLAR's field mapping layer connects your CRM schema to PILLAR's canonical data
 3. **Manual Review** -- You can review, override, or add custom mappings via **Settings > Integrations > Field Mapping**.
 4. **Transform Layer** -- Each mapping includes a transform type that controls how the raw CRM value is converted to PILLAR's internal format (see [Field Transforms](#field-transforms) below).
 5. **Continuous Sync** -- Mapped fields are synced every 15 minutes via incremental pull. PILLAR also pushes computed scores (Health, Risk, Priority) back to your CRM.
+
+<Note>
+**Dynamics 365 field names** are listed in a dedicated section at the bottom of this page. All Salesforce and HubSpot mappings apply to Dynamics 365 via the same auto-discovery process — Dynamics-specific field names are documented in [Dynamics 365 Field Mappings](#dynamics-365-field-mappings) below.
+</Note>
 
 <Note>
 Fields marked **Required** must be mapped for PILLAR to generate meaningful scores, signals, and next-best-actions. Optional fields improve scoring accuracy and unlock additional intelligence modules.
@@ -315,7 +319,129 @@ Support ticket ingestion is currently in rollout. Contact your PILLAR representa
 | `has_exec_attention` | Has Exec Attention | boolean | No | `Exec_Sponsor_Engaged__c` | `hs_executive_sponsor_engaged` | True if a customer or PILLAR user with exec/CRO/CEO role has touched the ticket. The classic "CEO is involved" risk signal. |
 | `csat_score` | CSAT Score | number | No | `CSAT__c`, `Customer_Satisfaction__c` | `hs_csat`, `customer_satisfaction` | Customer satisfaction score on a 1-5 scale, collected at ticket close. Low CSAT (1-2) is a leading indicator of churn. |
 
+---
 
+## Dynamics 365 Field Mappings
+
+PILLAR connects to Dynamics 365 via OAuth 2.0 (Azure AD). The field discovery and auto-mapping process works identically to Salesforce and HubSpot — PILLAR reads your Dynamics schema on first connect and fuzzy-matches against the field names below. Custom fields in Dynamics follow the `cr_xxx_fieldname` or `new_fieldname` naming convention depending on your publisher prefix.
+
+<Note>
+Custom fields in Dynamics 365 are prefixed with your organization's publisher prefix (e.g., `cr_abc_`, `new_`, or a custom prefix). PILLAR's auto-discovery reads both standard and custom fields. If a required field lives in a custom field, map it manually via **Settings → Integrations → Field Mapping**.
+</Note>
+
+### Accounts (`account` entity)
+
+| PILLAR Field | Dynamics 365 Standard Field | Notes |
+|---|---|---|
+| `name` | `name` | Account name |
+| `arr` | `revenue` | Standard Annual Revenue field. Map to a custom field (e.g., `cr_xxx_arr`) if your org tracks ARR separately from total revenue |
+| `segment` | `customertypecode` | Customer Type picklist. Map values to PILLAR segments via Picklist Mapping |
+| `industry` | `industrycode` | Industry picklist |
+| `domain` | `websiteurl` | Primary website URL |
+| `state` | `address1_stateorprovince` | Billing address state |
+| `territory` | `territoryid` | Territory lookup. Requires territory management to be enabled in Dynamics |
+| `owner_id` | `ownerid` | SystemUser lookup — resolves to the assigned rep |
+| `tier` | Custom field | No standard equivalent. Map from a custom option set field |
+| `student_count` | Custom field | Map from `cr_xxx_studentcount` or equivalent custom field |
+| `annual_budget` | Custom field | Map from `cr_xxx_annualbudget` or equivalent |
+| `health_score` | Custom field | Map from `cr_xxx_healthscore` if tracked in Dynamics; otherwise PILLAR computes it |
+| `priority_score` | Custom field | Map from `cr_xxx_priorityscore` if tracked in Dynamics |
+| `renewal_risk_score` | Custom field | Map from `cr_xxx_renewalrisk` if tracked in Dynamics |
+| `fiscal_year_end` | Custom field | No standard equivalent |
+| `status` | `statecode` / `statuscode` | Active = 0, Inactive = 1 |
+| `staff_count` | `numberofemployees` | Standard field |
+| `nces_id` | Custom field | EdTech-specific — map from custom field |
+
+### Contacts (`contact` entity)
+
+| PILLAR Field | Dynamics 365 Standard Field | Notes |
+|---|---|---|
+| `name` | `fullname` | Computed from `firstname` + `lastname` automatically |
+| `account_id` | `parentcustomerid` | Account lookup — resolved to PILLAR UUID via lookup transform |
+| `email` | `emailaddress1` | Primary email. `emailaddress2` and `emailaddress3` available as fallbacks |
+| `phone` | `telephone1`, `mobilephone` | Business phone and mobile |
+| `department` | `department` | Department |
+| `title` | `jobtitle` | Job title — used to infer buying role (Champion, Economic Buyer, etc.) |
+| `buying_role` | Custom field | No standard equivalent. Map from a custom option set |
+| `is_champion` | Custom field | Map from `cr_xxx_ischampion` (boolean) |
+| `is_exec_sponsor` | Custom field | Map from `cr_xxx_isexecsponsor` (boolean) |
+| `last_activity_date` | `lastusedincampaign`, `modifiedon` | No exact equivalent. Use `modifiedon` as a proxy or a custom field updated by workflow |
+| `engagement_score` | Custom field | Map from custom field if tracked |
+| `status` | `statecode` | Active = 0, Inactive = 1 |
+
+### Opportunities (`opportunity` entity)
+
+| PILLAR Field | Dynamics 365 Standard Field | Notes |
+|---|---|---|
+| `name` | `name` | Opportunity name |
+| `amount` | `estimatedvalue` | Estimated Revenue. Map to a custom ACV/ARR field if your org tracks those separately |
+| `stage` | `salesstage`, `stepname` | `salesstage` is the picklist stage; `stepname` is the free-text process step. Use `salesstage` for stage mapping |
+| `close_date` | `estimatedclosedate` | Estimated close date |
+| `account_id` | `customerid` | Customer lookup (Account or Contact) — PILLAR resolves to account UUID |
+| `owner_id` | `ownerid` | SystemUser lookup |
+| `probability` | `closeprobability` | 0-100 close probability |
+| `forecast_category` | `msdyn_forecastcategory` | Requires Dynamics 365 Sales Forecasting module. Values: Best Case, Committed, Omitted, Pipeline, Won |
+| `next_step` | `description`, custom field | No dedicated Next Step field. Map from `description` or a custom field |
+| `opportunity_type` | `opportunityratingcode`, custom field | Rating Code (Hot/Warm/Cold) is not equivalent. Use a custom option set for New Business / Renewal / Expansion |
+| `created_date` | `createdon` | System-generated creation timestamp |
+| `competitor` | `competitorid` | Competitor lookup. Requires Competitors to be configured in Dynamics |
+| `has_economic_buyer` | Custom field | Map from `cr_xxx_haseconomicbuyer` (boolean) |
+| `has_next_step` | Custom field | Map from `cr_xxx_hasnextstep` (boolean) or derive from whether `description` is populated |
+| `push_count` | Custom field | No standard equivalent — requires a custom counter field updated by workflow |
+| `contact_count` | Computed | Count of contacts associated via opportunity contact roles |
+
+### Leads (`lead` entity)
+
+| PILLAR Field | Dynamics 365 Standard Field | Notes |
+|---|---|---|
+| `name` | `fullname` | Computed from `firstname` + `lastname` |
+| `email` | `emailaddress1` | Primary email |
+| `company_name` | `companyname` | Company name on the lead |
+| `assigned_to` | `ownerid` | SystemUser lookup |
+| `state` | `address1_stateorprovince` | Address state |
+| `title` | `jobtitle` | Job title |
+| `status` | `statuscode` | Lead status picklist (New, Contacted, Qualified, Disqualified, etc.) |
+| `segment` | Custom field | No standard equivalent — map from custom option set |
+| `lead_score` | Custom field | Map from `cr_xxx_leadscore` if scored externally, or PILLAR computes it |
+| `mql_date` | Custom field | No standard equivalent. Use a workflow to stamp a custom date field on MQL qualification |
+| `sql_date` | Custom field | Same approach as `mql_date` |
+| `opportunity_id` | `qualifyingopportunityid` | Set when a lead is qualified/converted to an opportunity |
+
+### Contracts (`contract` entity)
+
+| PILLAR Field | Dynamics 365 Standard Field | Notes |
+|---|---|---|
+| `account_id` | `customerid` | Customer (Account) lookup — resolved to PILLAR UUID |
+| `contract_number` | `contractnumber`, `title` | `contractnumber` is system-generated; `title` is the human-readable name |
+| `start_date` | `activeon` | Contract activation date |
+| `end_date` | `expireson` | Contract expiration date — canonical renewal anchor |
+| `contract_value` | `totalvalue` | Total contract value. Custom field if tracking ACV separately |
+| `term_months` | Custom field | No standard equivalent — map from custom field |
+| `currency` | `transactioncurrencyid` | Currency lookup |
+| `billing_frequency` | Custom field | No standard equivalent |
+| `status` | `statecode` | Draft = 0, Invoiced = 1, Active = 2, On Hold = 3, Cancelled = 4, Expired = 5 |
+| `auto_renew` | Custom field | Map from `cr_xxx_autorenew` (boolean) |
+| `opt_out_notice_days` | Custom field | Map from `cr_xxx_optoutnoticedays` |
+| `signed_date` | Custom field | No standard equivalent |
+
+### Support Tickets (`incident` / Case entity)
+
+| PILLAR Field | Dynamics 365 Standard Field | Notes |
+|---|---|---|
+| `account_id` | `customerid` | Customer (Account) lookup — resolved to PILLAR UUID |
+| `ticket_number` | `ticketnumber` | System-generated case number (e.g., CAS-01234-ABCDE) |
+| `subject` | `title` | Case title |
+| `type` | `casetypecode` | Question, Problem, or Request |
+| `status` | `statecode` / `statuscode` | Active = 0, Resolved = 1, Cancelled = 2 |
+| `priority` | `prioritycode` | High = 1, Normal = 2, Low = 3 |
+| `severity` | Custom field | No standard equivalent — map from `cr_xxx_severity` if tracked |
+| `opened_at` | `createdon` | Ticket creation timestamp |
+| `resolved_at` | `resolvedon` | Set when the incident is resolved via the Resolve Case action |
+| `last_activity_at` | `modifiedon` | Last modified timestamp |
+| `is_escalated` | `isescalated` | Standard boolean field |
+| `csat_score` | Custom field | No standard equivalent — map from `cr_xxx_csatscore` if collected |
+| `contact_id` | `primarycontactid` | Primary contact on the case |
+| `first_response_at` | Custom field | No standard equivalent — requires a workflow to stamp a custom datetime field on first response |
 
 ## Field Transforms
 
