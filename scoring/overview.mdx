@@ -31,15 +31,20 @@ PILLAR's scoring engine evaluates every account against a comprehensive set of r
 
 ## Early Detection
 
-PILLAR's calibrated thresholds are designed to surface risk earlier than traditional health scoring approaches, giving revenue teams more time to intervene before accounts reach a critical state.
+PILLAR's signal-triggering thresholds are designed to surface risk earlier than traditional health scoring approaches, giving revenue teams more time to intervene before accounts reach a critical state. Eight thresholds are configurable per organization in **Settings → Scoring Thresholds**, including health score warning and critical levels, renewal risk level, ICP fit minimum, and engagement velocity floor.
 
 ## Configurable Weights
 
-Organizations can customize the scoring engine through:
+Organizations can customize the scoring engine through **Settings**:
 
-1. **Category weights**: Adjust the relative importance of each of the 8 categories
-2. **Rule weight overrides**: Fine-tune individual rule weights within each category
-3. **ICP profiles**: Customize ICP fit scoring tiers, persona rules, and behavioral weights
-4. **Threshold settings**: Adjust severity classification boundaries
+| What | Where in Settings |
+|------|-------------------|
+| Category weights — relative importance of each of the 8 categories | **Scoring** |
+| Rule weight overrides — individual rule weights within each category | **Scoring** |
+| ICP profiles — fit scoring tiers, persona rules, and behavioral weights | **Scoring** |
+| Signal thresholds — health warning/critical levels, renewal risk, engagement velocity, and 4 more | **Scoring Thresholds** |
+| Segment ARR boundaries — SMB, Mid-Market, and Enterprise tier cutoffs | **Scoring Thresholds** |
+| Pipeline forecast weights — probability weighting by forecast category (Commit, Probable, Upside, Projection) | **Pipeline Weights** |
+| Deal stage close probabilities — per-stage probability map for weighted pipeline and forecast confidence | **Deal Stages** |
 
-> Detailed scoring methodology, including exact rule definitions, weight distributions, and threshold values, is available in the PILLAR Implementation Guide provided to active customers.
+> Detailed scoring methodology, including exact rule definitions, weight distributions, and default threshold values, is available in the PILLAR Implementation Guide provided to active customers.
