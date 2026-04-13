@@ -1,0 +1,322 @@
+---
+title: 'Settings: Configuration'
+description: 'How to configure PILLAR for your organization — fiscal year, ARR definition, segment boundaries, deal stages, and pipeline weights'
+icon: 'sliders'
+---
+
+# Settings → Configuration
+
+The Configuration tab is where you define how PILLAR interprets your business. Every report, score, signal, and board export is shaped by what you set here.
+
+<Note>
+**Who can access this tab:** `CRO/CEO`, `RevOps`, and `PILLAR Admin` roles only. Configure once during onboarding — settings can be adjusted at any time thereafter without requiring a re-sync.
+</Note>
+
+The tab contains four sub-sections, each covering a distinct configuration area:
+
+| Sub-section | What it controls |
+|---|---|
+| **Business Definitions** | Fiscal year, ARR definition, churn definition, currency, renewal window, quota type |
+| **Segments & Thresholds** | Account tier boundaries (SMB / Mid-Market / Enterprise) and signal-firing thresholds |
+| **Deal Stages** | CRM stage-to-probability mapping, expansion taxonomy, contact role patterns |
+| **Pipeline Weights** | Forecast category weights and CRM stage → PILLAR category mappings |
+
+---
+
+## Business Definitions
+
+These settings define the language PILLAR uses across every calculation, label, and export. Set these first — they affect everything downstream.
+
+### Fiscal Year Start Month
+
+The calendar month your fiscal year begins. Affects quarter labels (`Q1`, `Q2`, etc.), period-over-period comparisons, and board report date ranges.
+
+**Default:** January
+
+<AccordionGroup>
+  <Accordion title="Common fiscal year configurations">
+    | Organization type | Typical start month |
+    |---|---|
+    | Standard US company | January |
+    | EdTech / K-12 | July (aligns with academic year) |
+    | UK / Australia | April |
+    | Retail / fashion | February |
+
+    If your fiscal year starts in July, PILLAR's Q1 = July–September, Q2 = October–December, etc. Board reports and renewal windows will all use this calendar.
+  </Accordion>
+</AccordionGroup>
+
+**Decision question:** *"Does your fiscal year start in January, or a different month?"*
+
+---
+
+### ARR Definition
+
+How PILLAR measures Annual Recurring Revenue. This drives the ARR figure shown on the dashboard KPI, in board reports, and in territory P&L.
+
+**Default:** Contracted ACV (the value on the signed contract / opportunity)
+
+| Option | When to use |
+|---|---|
+| Contracted ACV | Clean signed-contract values exist on every opportunity |
+| Trailing 12-month revenue | You recognize revenue on delivery and ACV is imprecise |
+| MRR × 12 | Monthly subscription model where ACV is not tracked |
+
+**Decision question:** *"Do you use signed contract ACV, trailing 12-month revenue, or MRR × 12?"*
+
+---
+
+### Churn Definition
+
+What counts as churn for NRR/GRR calculations and churn risk scoring.
+
+**Default:** Revenue churn (any reduction in ARR from a customer)
+
+| Option | What it counts |
+|---|---|
+| Revenue churn (default) | Full cancellations + downsells both count as churn |
+| Logo churn only | Only full cancellations count; downsells are excluded |
+
+<Warning>
+This setting directly affects your NRR and GRR figures. If you switch from revenue churn to logo churn after data has been loaded, historical NRR calculations will change. Align on this definition before your first board export.
+</Warning>
+
+**Decision question:** *"Do you count only full cancellations, or do downsells count as churn too?"*
+
+---
+
+### Base Currency
+
+The currency used for all ARR displays, territory P&L, and exports.
+
+**Default:** USD
+
+Only change this if your organization primarily operates in a non-USD currency. Multi-currency support (per-account currency with conversion) is on the roadmap — this setting controls the display denomination for all aggregated metrics.
+
+---
+
+### Renewal Window
+
+How many days in advance of a contract end date PILLAR begins surfacing the account in renewal workflows — the triage board, renewal risk signals, and upcoming renewal KPIs.
+
+**Default:** 90 days
+
+| Organization type | Recommended window |
+|---|---|
+| SMB / transactional | 30–60 days |
+| Mid-market (standard) | 90 days (default) |
+| Enterprise / complex procurement | 180–365 days |
+| K-12 / government / public sector | 180+ days (procurement cycles are long) |
+
+**Decision question:** *"When does your team typically start engaging a renewal — 30 days out? 90? 180?"*
+
+---
+
+### Quota Type
+
+How quota attainment is measured for your sales team. Affects the quota attainment KPI, territory P&L projections, and rep performance metrics.
+
+**Default:** ARR
+
+| Option | Use when |
+|---|---|
+| ARR | Reps are measured on annual contract value |
+| TCV | Reps are measured on total contract value (multi-year deals) |
+| Revenue | Reps are measured on recognized revenue |
+| Activity | Reps are measured on activity volume (calls, meetings) |
+
+**Decision question:** *"Is your sales team on ARR quota, TCV, revenue, or activity?"*
+
+---
+
+## Segments & Thresholds
+
+### Segment ARR Boundaries
+
+PILLAR scores and triages accounts differently based on their segment. These boundaries define which ARR range maps to SMB, Mid-Market, and Enterprise.
+
+**Defaults:** SMB below $50K ARR, Mid-Market $50K–$500K, Enterprise above $500K
+
+<Note>
+For K-12 and EdTech organizations, it's common to map to district-level segments rather than pure ARR. Example: Districts (Enterprise), Schools (Mid-Market), Teachers (SMB) — then set the ARR cutoffs to match the revenue distribution in your portfolio.
+</Note>
+
+**Decision question:** *"How do you define SMB vs Mid-Market vs Enterprise — by ARR band, by headcount, or by account type?"*
+
+---
+
+### Signal Thresholds
+
+Eight thresholds control when PILLAR fires a signal. Each threshold has a global default, and each can be overridden per organization.
+
+| Threshold | What it controls | Default |
+|---|---|---|
+| `health_score_warning` | Health score at which an account enters "warning" state | 60 |
+| `health_score_critical` | Health score at which an account enters "critical" state | 40 |
+| `renewal_risk_level` | Renewal risk score that triggers a renewal risk signal | 65 |
+| `icp_fit_minimum` | Minimum ICP fit score before an account appears in expansion plays | 50 |
+| `engagement_velocity_floor` | Minimum engagement velocity before a "low engagement" signal fires | 30 |
+| `days_since_activity` | Days of inactivity before a "no activity" signal fires | 30 |
+| `usage_pct_low` | Product usage percentile below which a "low adoption" signal fires | 25 |
+| `adoption_pct_low` | Feature adoption rate below which a signal fires | 20 |
+
+<AccordionGroup>
+  <Accordion title="K-12 / EdTech seasonality adjustments">
+    June–August is summer break. Students and teachers are not using the product, and contacts are not checking email. If you use standard thresholds, PILLAR will generate a high volume of "no activity" and "low usage" signals every summer — most of which are false alarms.
+
+    **Recommended adjustment:**
+    - Raise `days_since_activity` from 30 → 60 or 90 during summer months
+    - Raise `usage_pct_low` threshold to account for expected summer drop-off
+
+    This can be adjusted seasonally — set it higher before summer, reset in September.
+  </Accordion>
+  <Accordion title="PLG / self-serve product adjustments">
+    For product-led growth or self-serve products, users operate more autonomously. Low direct engagement with your team does not necessarily indicate risk.
+
+    **Recommended adjustment:**
+    - Raise `usage_pct_low` — users at the 25th percentile may still be healthy in a PLG model
+    - Lower `days_since_activity` is less meaningful when the product is self-serve; consider disabling this signal or raising the threshold significantly
+  </Accordion>
+  <Accordion title="Enterprise / long-cycle adjustments">
+    Enterprise accounts have longer natural engagement cycles — quarterly business reviews instead of weekly check-ins.
+
+    **Recommended adjustment:**
+    - Raise `days_since_activity` to 45–60 days
+    - Widen the renewal window (set in Business Definitions) to 180+ days
+  </Accordion>
+</AccordionGroup>
+
+**Decision question:** *"Does your business have seasonality or usage patterns that would cause the standard thresholds to generate noise? K-12 summer, PLG self-serve, long enterprise cycles?"*
+
+---
+
+## Deal Stages
+
+### Stage Probabilities
+
+Maps each of your CRM's opportunity stage names to a close probability. This drives:
+- Weighted pipeline calculations on the dashboard and board report
+- Forecast confidence scoring
+- Pipeline health signals
+
+PILLAR comes with default templates for Salesforce and HubSpot. After loading a template, customize any stage name or probability that doesn't match your org's definition.
+
+**How to configure:**
+1. Click the template that matches your CRM to pre-fill standard stage names
+2. Review each stage — does the probability reflect your team's actual win rate at that stage?
+3. Add any custom stages your CRM uses that aren't in the template
+4. Save — changes take effect immediately on all weighted pipeline metrics
+
+<Tip>
+Common overrides: "Technical Validation" → 70%, "Legal Review" → 80–85%, "Verbal Commit" → 90%, "Contract Sent" → 95%. If your team uses a stage name that implies a near-certain close, make sure the probability reflects that.
+</Tip>
+
+**Decision question:** *"Pull your CRM's full stage picklist. For each stage, what close probability does your team actually believe it implies?"*
+
+---
+
+### Expansion Taxonomy
+
+Tells PILLAR how to distinguish expansion opportunities from new business in your CRM.
+
+**Default:** PILLAR uses forecast category to infer expansion intent — no field required.
+
+If your CRM has an `Opportunity Type` field (or similar) that explicitly tags expansions:
+1. Set the **Field name** (e.g., `opportunity_type`, `deal_type`)
+2. Set the **Expansion values** — the picklist values that identify expansion (e.g., `Expansion`, `Upsell`, `Cross-sell`)
+
+PILLAR will then use that field directly for expansion reporting, expansion signals, and the expansion pipeline view.
+
+**Decision question:** *"Do you have an Opportunity Type or similar field that distinguishes expansion from new business? What are the picklist values for expansion?"*
+
+---
+
+### Contact Role Patterns
+
+PILLAR automatically identifies executive sponsors and champion contacts by matching contact titles against pattern lists. The defaults cover standard enterprise titles.
+
+**Default executive patterns:** VP, SVP, EVP, CTO, Chief, Director, President, C-Suite
+
+**Default champion patterns:** Champion, Advocate, Power User, Project Lead
+
+Only change these if your target market uses unusual title conventions. For example, in K-12, `Curriculum Director` and `Superintendent` carry executive authority — consider adding those patterns if they're not being caught by the defaults.
+
+---
+
+## Pipeline Weights
+
+### Forecast Category Weights
+
+Defines what percentage of face value PILLAR assigns to each forecast category when calculating weighted pipeline.
+
+**PILLAR defaults:**
+
+| Category | Default weight |
+|---|---|
+| Commit | 95% |
+| Best Case | 50% |
+| Upside | 25% |
+| Pipeline | 15% |
+
+Override any category where your team's definition implies a different close probability. For example, if your "Commit" means 100% certainty (not ~95%), set it to 100. If your "Best Case" historically closes at 35%, set it to 35.
+
+<Warning>
+These weights affect every weighted pipeline number across the platform — dashboard KPIs, board reports, territory P&L, and quota attainment projections. Confirm these with your CRO or VP of Sales before saving, as changes are immediately reflected everywhere.
+</Warning>
+
+**Decision question:** *"When a rep calls something 'Commit', what close probability does that actually imply on your team? 85%? 95%? 100%?"*
+
+---
+
+### CRM Stage Mappings
+
+Maps your CRM's raw stage names to PILLAR's canonical forecast categories (Commit, Best Case, Upside, Pipeline, Closed Won, Closed Lost). This runs before the weight lookup — a stage name that isn't mapped falls back to 15% weight.
+
+**How to configure:**
+1. Click the template for your CRM (Salesforce / HubSpot / Microsoft Dynamics) to pre-fill standard mappings
+2. Add any custom stages your org uses
+3. Verify every stage is mapped — unmapped stages default to 15% (Pipeline weight)
+4. Save
+
+<Note>
+If your CRM uses forecast categories natively (Salesforce Forecast Category field), the connector maps those directly. CRM stage mappings here are a fallback for orgs that don't use native forecast categories, or want to override the CRM's category assignments.
+</Note>
+
+---
+
+## Recommended Configuration Order
+
+1. **Business Definitions first** — fiscal year and ARR definition affect how everything else is calculated
+2. **Segments & Thresholds** — set ARR boundaries before scoring runs so accounts land in the right tier on the first pass
+3. **Deal Stages** — load your CRM template, customize stage probabilities, confirm expansion taxonomy
+4. **Pipeline Weights** — align forecast category weights with your CRO before saving; confirm stage mappings cover all active stages
+
+After saving all four sections, PILLAR re-applies the configuration to all existing scores and pipeline metrics within the next 15-minute scoring cycle. No re-sync required.
+
+---
+
+## Frequently Asked Questions
+
+<AccordionGroup>
+  <Accordion title="Can I change these settings after go-live?">
+    Yes — all Configuration settings can be changed at any time. Changes take effect within the next 15-minute scoring cycle. There is no re-sync or data reload required. Be aware that changing ARR definition or churn definition will alter historical metric calculations, which can affect board report comparisons.
+  </Accordion>
+  <Accordion title="What happens if I don't configure anything?">
+    PILLAR uses global defaults for everything. The defaults are calibrated for a typical B2B SaaS company with a January fiscal year, USD ARR, 90-day renewal window, and standard Salesforce stage names. If your org matches those defaults, you may need minimal or no configuration.
+  </Accordion>
+  <Accordion title="Who should be in the room when configuring this?">
+    At minimum: **RevOps** (knows the CRM data model and stage definitions) and **CRO or VP Sales** (owns the forecast category definitions and quota type). The fiscal year and ARR definition should be confirmed with Finance if possible — these affect board-level reporting.
+  </Accordion>
+  <Accordion title="Do these settings apply to all users, or just the user who configures them?">
+    These are **org-level settings** — they apply to every user in your organization. A change made by RevOps to the fiscal year start month will immediately affect what the CRO sees on their dashboard.
+  </Accordion>
+  <Accordion title="What does 'signal threshold' mean in practice?">
+    A threshold is the value at which PILLAR decides something is worth surfacing. For example, `days_since_activity = 30` means: if an account has had no logged activity for 30 days, fire a "No Recent Activity" signal. Raising the threshold to 60 means PILLAR waits longer before treating inactivity as a risk — useful for seasonal businesses or long-cycle enterprise accounts.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Need help configuring?
+
+Contact your PILLAR implementation contact or email [support@pillargtm.com](mailto:support@pillargtm.com). For white-glove implementations, your PILLAR contact will walk through every setting with you during the Day 3–4 configuration session.

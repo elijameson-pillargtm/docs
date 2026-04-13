@@ -109,6 +109,12 @@
       ]
     },
     {
+      "group": "Settings",
+      "pages": [
+        "settings/configuration"
+      ]
+    },
+    {
       "group": "Connectors",
       "pages": [
         "connectors/setup-guide",
