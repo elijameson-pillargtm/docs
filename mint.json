@@ -118,6 +118,7 @@
       "group": "Connectors",
       "pages": [
         "connectors/setup-guide",
+        "connectors/gong",
         "connectors/picklist-mapping"
       ]
     },

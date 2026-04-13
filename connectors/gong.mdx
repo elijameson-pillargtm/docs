@@ -1,0 +1,131 @@
+---
+title: 'Gong Call Intelligence'
+description: 'Connect Gong to PILLAR for conversation analytics, talk ratios, sentiment trends, and 7 Call Intelligence scoring rules'
+icon: 'phone'
+---
+
+# Gong Call Intelligence Connector
+
+<Note>
+**Status: Coming Soon** -- PILLAR's Gong integration is fully built and pending Gong developer program approval. This documentation covers the complete feature set that will be available once the integration goes live.
+</Note>
+
+PILLAR's Gong connector syncs call analytics into a dedicated **Call Intelligence** scoring category. Seven scoring rules evaluate every recorded customer and prospect conversation, surfacing deal risk and coaching signals that feed directly into account health scores.
+
+## What You Get
+
+When Gong is connected, PILLAR pulls conversation analytics every 4 hours and scores them across 7 dimensions:
+
+| Rule | What It Measures | Why It Matters |
+|------|-----------------|----------------|
+| **CI-001: Rep Talk Ratio** | Percentage of time the rep speaks vs. listens. Ideal range: 40-50%. | Reps who talk >60% aren't listening. Reps who talk <30% may lack control of the conversation. |
+| **CI-002: Customer Sentiment Trend** | Average customer sentiment across the last 3 calls (-1.0 to +1.0 scale). | Declining sentiment is one of the earliest churn signals -- often visible 2-3 months before a renewal decision. |
+| **CI-003: Competitive Mentions** | Whether competitors were discussed in recent calls. | Frequent competitor mentions indicate the customer is actively evaluating alternatives. |
+| **CI-004: Next Steps Commitment** | Whether next steps were explicitly stated on the most recent call. | Calls without next steps indicate stalled deal momentum or disengaged stakeholders. |
+| **CI-005: Exec Participation** | Whether VP+ or C-suite stakeholders have attended recent calls. | Executive presence signals strategic buy-in and faster decision-making. |
+| **CI-006: Call Frequency** | Whether call volume matches the account's deal stage and renewal proximity. | Too few calls near a renewal = disengagement risk. Too few calls on an active deal = stalling. |
+| **CI-007: Customer Engagement** | Customer talk ratio in recent calls. Ideal: 40-60%. | Silent customers are at-risk customers. Engaged customers ask questions and drive the conversation. |
+
+## Gong Plan Requirements
+
+<Warning>
+Full call analytics require **Gong Business or Enterprise** plan. This is a requirement on your Gong workspace, not on PILLAR.
+</Warning>
+
+| Your Gong Plan | What PILLAR Can Access |
+|---|---|
+| **Essentials / Pro** | Basic call metadata: title, participants, duration, direction, outcome. Call Intelligence rules return neutral scores (50) for analytics fields that aren't available. Your overall health scores are not penalized. |
+| **Business** | Full analytics: talk ratios, interactivity scores, topics discussed, keyword trackers (competitor mentions, pricing, next steps), call outcomes, and participant-level data. All 7 CI rules fire with real data. |
+| **Enterprise** | Everything in Business, plus transcript access for future keyword analysis features. |
+
+## How It Works
+
+### Authentication
+
+PILLAR uses OAuth 2.0 to connect to your Gong workspace. Each PILLAR customer connects their own Gong workspace independently -- PILLAR never shares data across organizations.
+
+### Setup
+
+1. Navigate to **Settings > Integrations > Call Intelligence**
+2. Click **Connect** on the Gong card
+3. You'll be redirected to Gong's OAuth consent screen
+4. Authorize PILLAR to read your call data
+5. PILLAR begins an initial sync of the last 90 days of calls
+6. Ongoing syncs run automatically every 4 hours
+
+### What Syncs
+
+| Data Point | Sync Cadence | Used For |
+|---|---|---|
+| Call metadata (title, direction, duration, outcome) | Every 4 hours | Call frequency scoring (CI-006) |
+| Participants (name, email, title, internal/external) | Every 4 hours | Exec detection (CI-005), account matching |
+| Rep talk ratio | Every 4 hours | Rep talk ratio scoring (CI-001) |
+| Customer talk ratio | Every 4 hours | Customer engagement scoring (CI-007) |
+| Sentiment (overall, customer, rep) | Every 4 hours | Sentiment trend analysis (CI-002) |
+| Topics discussed | Every 4 hours | Conversation topic tracking |
+| Trackers (competitor, pricing, next steps) | Every 4 hours | Competitive mentions (CI-003), next steps (CI-004) |
+| Interactivity score | Every 4 hours | Engagement quality |
+
+### How Calls Are Matched to Accounts
+
+PILLAR automatically resolves which account a Gong call belongs to using a two-step process:
+
+1. **Email domain matching** -- External participant email domains (e.g., `@legendsoflearning.com`) are matched against the `domain` field on your PILLAR accounts
+2. **Contact email matching** -- If domain matching fails, individual participant emails are matched against contact records in PILLAR
+
+Calls that cannot be matched to any account are stored but do not contribute to scoring until a match is established (e.g., after a new account is synced from your CRM).
+
+## How It Feeds Scoring
+
+Call Intelligence is the **9th scoring category** in PILLAR's scoring engine, weighted at 7% of the composite account health score by default. The weight is configurable per organization in **Settings > Configuration > Scoring Weights**.
+
+### When Gong Is Not Connected
+
+All 7 CI rules return a **neutral score of 50** and are marked as "not triggered." This means the Call Intelligence category does not drag down or inflate account health scores for organizations that don't use Gong. The 7% weight effectively redistributes as neutral noise.
+
+### Signals Generated
+
+When CI rules detect issues, PILLAR generates signals that appear in the Signals dashboard and can trigger plays:
+
+- **Rep over-talking** -- CI-001 fires when avg rep talk ratio exceeds 60% across recent calls
+- **Customer sentiment decline** -- CI-002 fires when avg customer sentiment drops below neutral
+- **Competitor evaluation risk** -- CI-003 fires when competitors are mentioned in 2+ of the last 5 calls
+- **Stalled momentum** -- CI-004 fires when the most recent call had no next steps
+- **Missing executive engagement** -- CI-005 fires when no exec has joined calls (positive signal when execs are present)
+- **Engagement gap** -- CI-006 fires when call frequency is below expected for the deal stage or renewal proximity
+- **Silent customer** -- CI-007 fires when customer talk ratio drops below 30%
+
+## Database Tables
+
+Gong data is stored in 4 dedicated tables, all org-scoped with Row Level Security:
+
+| Table | Purpose |
+|---|---|
+| `gong_calls` | Core call record with analytics (talk ratios, sentiment, key event flags) |
+| `gong_topics` | Topic breakdown per call (topic name, duration, sentiment) |
+| `gong_trackers` | Keyword tracker hits per call (competitor mentions, pricing, next steps) |
+| `gong_participants` | Who attended each call (name, email, title, affiliation, talk ratio) |
+
+## Frequently Asked Questions
+
+<AccordionGroup>
+<Accordion title="Does PILLAR store call recordings or transcripts?">
+No. PILLAR only reads call analytics data (metadata, talk ratios, sentiment, topics, trackers, participants). No audio recordings or transcripts are stored in PILLAR. Your recordings stay in Gong.
+</Accordion>
+
+<Accordion title="Can I use Gong with any CRM?">
+Yes. The Gong connector is independent of your CRM connector. PILLAR matches Gong calls to accounts using participant email domains and contact records, regardless of whether your CRM is Salesforce, HubSpot, or Dynamics 365.
+</Accordion>
+
+<Accordion title="What happens if a call can't be matched to an account?">
+The call data is still stored and available for future matching. When new accounts or contacts are synced from your CRM, PILLAR will automatically associate previously unmatched calls on the next sync cycle.
+</Accordion>
+
+<Accordion title="How often does Gong data sync?">
+Every 4 hours. The sync is incremental -- only new or updated calls since the last sync are fetched. The initial sync pulls the last 90 days of call history.
+</Accordion>
+
+<Accordion title="Can I adjust the weight of Call Intelligence in my health score?">
+Yes. Navigate to **Settings > Configuration > Scoring Weights** to adjust the Call Intelligence category weight. The default is 7% of the composite score.
+</Accordion>
+</AccordionGroup>
