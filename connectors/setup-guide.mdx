@@ -96,6 +96,48 @@ You must create these three custom Number fields on the Account object in Salesf
 - **ICP Fit** -- Scores accounts against your ideal customer profile using segment, industry, student count, budget, and other firmographic data
 - **Lead Score** -- Combines fit signals (title, segment, enrollment) with engagement signals (email opens, content downloads, website visits, demo requests)
 
+### Common Salesforce CPQ Patterns
+
+Many organizations using Salesforce CPQ or custom quoting workflows store deal values on **custom Opportunity fields** rather than the standard `Amount` field. PILLAR's field mapping UI handles these patterns natively — you just map your CPQ-derived amount field to PILLAR's canonical `amount` field during implementation.
+
+<Warning>
+If your team uses Salesforce CPQ or a custom quoting workflow, confirm which field holds the deal value **before** the PILLAR implementation kicks off. Mapping the wrong field will cause weighted pipeline, forecast, and ARR calculations to be incorrect across every dashboard.
+</Warning>
+
+**Common variants we've seen in EdTech organizations:**
+
+| Pattern | Typical Field API Name | When You'll See This |
+|---|---|---|
+| **Standard Amount** | `Amount` | Most Salesforce orgs without CPQ. PILLAR's default mapping. |
+| **Selected Quote Amount** | `Amount - Selected Quote` / `SBQQ__SelectedQuoteAmount__c` | Salesforce CPQ with multi-quote workflows. Opportunity.Amount is auto-synced from the active quote. |
+| **Proposal Amount** | `Proposal_Amount__c` / `Total_Proposal_Value__c` | Orgs with a proposal-approval step separate from the quote. |
+| **Quote Amount (Custom)** | `Quote_Amount__c` / `Custom_Quote_Amount__c` | Custom-built quoting tools or migrations from legacy CPQ systems. |
+| **Annual Contract Value** | `Annual_Contract_Value__c` / `ACV__c` | Orgs that want ACV (not TCV) to drive pipeline calculations. |
+| **Total Contract Value** | `Total_Contract_Value__c` / `TCV__c` | Orgs with multi-year deals where the full contract value lives on Opp. |
+
+### How to Decide Which Field to Map
+
+Ask your Salesforce admin these three questions:
+
+1. **"When a rep creates a quote with the standard CPQ flow, does Opportunity.Amount get updated automatically?"** If yes, map `Amount`. If the team instead works off a custom field that drives pipeline reports, map that field.
+
+2. **"Which field do your Salesforce pipeline reports pull for the 'deal value' column?"** Whatever that field is, map it to PILLAR's `amount`. This ensures PILLAR's pipeline numbers match what your team sees in Salesforce.
+
+3. **"Do your leadership dashboards show ACV or TCV?"** Map the field that matches what your exec team reviews. PILLAR's pipeline and forecast calculations will then speak the same language as your board reports.
+
+### Mapping in PILLAR
+
+Once you know the correct field:
+
+1. Navigate to **Settings → Integrations → Salesforce → Field Mapping**
+2. Find the `amount` row under the Opportunity section
+3. Change the CRM Field dropdown from `Amount` to your CPQ field (e.g. `SBQQ__SelectedQuoteAmount__c` or `Amount - Selected Quote`)
+4. Click **Save**. The next sync will pull the correct values.
+
+<Info>
+PILLAR also supports mapping different amount fields for different Opportunity record types if your org uses record types to distinguish New Business vs Renewal vs Expansion. Reach out to support@pillargtm.com if you need per-record-type amount mappings.
+</Info>
+
 </Tab>
 <Tab title="HubSpot">
 
