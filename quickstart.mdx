@@ -24,6 +24,7 @@ Navigate to **Settings > Integrations** and click **Connect** on your CRM provid
 |-----|---------------|----------------|-----------------|
 | Salesforce | Every 15 minutes | Accounts, Contacts, Opportunities, Leads | Health, Risk, Priority scores |
 | HubSpot | Every 15 minutes | Companies, Contacts, Deals, Tickets | Health, Risk, Priority scores |
+| Microsoft Dynamics 365 | Every 15 minutes | Accounts, Contacts, Opportunities, Leads | Health, Risk, Priority scores |
 
 The initial sync typically completes in 5-15 minutes depending on the size of your CRM.
 
@@ -61,7 +62,7 @@ Use the **Push Scores** button on the connector card in Settings > Integrations 
 PILLAR ingests email metadata and calendar events to power activity-based signals. Navigate to **Settings > Integrations** and connect:
 
 - **Google Workspace** — email send/receive metadata, calendar events
-- **Microsoft 365** — email and calendar (coming soon)
+- **Microsoft 365** — email and calendar metadata
 
 PILLAR never reads email body content. Only metadata (sender, recipient, timestamp, subject line) is ingested for activity scoring.
 
@@ -107,6 +108,43 @@ Once your CRM sync completes, your dashboard populates automatically:
 - **Revenue Bowtie** — full funnel from lead to expansion with conversion rates
 - **Board Report** — executive-ready view combining CRM data with financial metrics
 
+## Step 7: Meet Drafter
+
+Every authenticated PILLAR page has a floating **✦ Drafter** button in the bottom-right. Drafter is the in-app AI agent — ask any GTM question and it picks the right tools from the 65-tool MCP surface, pulls evidence, and returns a specific answer with citations.
+
+Good first prompts to try:
+
+- "Why does [account name] have its current renewal risk score?"
+- "Which connectors haven't synced in the last 24 hours?"
+- "What's our biggest pipeline risk this quarter?"
+- "Show me my top expansion candidates right now"
+
+Proposals (create a play, acknowledge a signal, create a task) surface in the drawer with approve/reject controls. Every decision is logged to `agent_actions` for audit + flywheel learning.
+
+## Step 8: Connect External AI Assistants via MCP
+
+If you want to query PILLAR from Claude Desktop, Cursor, VS Code, ChatGPT Desktop, Zed, or Windsurf, use the native MCP server.
+
+1. Navigate to **Settings > Integrations > API Keys & MCP Server** and generate an API key
+2. Add this to your AI assistant's MCP config:
+
+```json
+{
+  "mcpServers": {
+    "pillar": {
+      "url": "https://app.pillargtm.com/api/mcp",
+      "headers": {
+        "Authorization": "Bearer pk_live_your_key_here"
+      }
+    }
+  }
+}
+```
+
+3. Start asking natural-language questions ("what's at risk this quarter?", "simulate NRR going from 108% to 115%", "generate a board narrative for Tuesday")
+
+See the [MCP Server guide](/api/mcp) for the full 65-tool catalog and example conversations.
+
 ## What Happens Next
 
 After initial setup, PILLAR continuously:
@@ -118,5 +156,6 @@ After initial setup, PILLAR continuously:
 5. **Routes notifications** to Slack and email
 6. **Pushes scores** back to your CRM custom fields
 7. **Updates dashboards** with real-time insights
+8. **Answers questions** via Drafter (in-app) or your MCP-connected AI assistant
 
 Your team can start acting on signals immediately. No manual data entry required.

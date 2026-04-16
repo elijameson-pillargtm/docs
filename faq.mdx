@@ -14,11 +14,11 @@ icon: 'circle-question'
   </Accordion>
 
   <Accordion title="Which CRMs does PILLAR support?">
-    PILLAR currently supports **Salesforce** and **HubSpot** with OAuth 2.0 authentication. Both integrations sync Accounts, Contacts, Opportunities, and Leads (or their HubSpot equivalents) into PILLAR every 15 minutes. PILLAR also pushes health scores, risk scores, and priority scores back to custom fields in your CRM. Dynamics 365 support is on the roadmap.
+    PILLAR currently supports **Salesforce**, **HubSpot**, and **Microsoft Dynamics 365** with OAuth 2.0 authentication. All three integrations sync Accounts, Contacts, Opportunities, and Leads (or their platform equivalents) into PILLAR every 15 minutes. PILLAR also pushes health scores, risk scores, and priority scores back to custom fields in your CRM.
   </Accordion>
 
   <Accordion title="What email/calendar integrations are available?">
-    PILLAR integrates with **Google Workspace** for email metadata and calendar event ingestion. Microsoft 365 support is coming soon. PILLAR never reads email body content -- only metadata (sender, recipient, timestamp, subject line) is used for activity-based scoring.
+    PILLAR integrates with **Google Workspace** and **Microsoft 365** for email metadata and calendar event ingestion. PILLAR never reads email body content -- only metadata (sender, recipient, timestamp, subject line) is used for activity-based scoring.
   </Accordion>
 
   <Accordion title="How do I invite team members?">
@@ -155,5 +155,29 @@ icon: 'circle-question'
 
   <Accordion title="How do Blueprint results relate to PILLAR?">
     Blueprint identifies where your GTM operations are strong and where gaps exist. Each pillar and category maps directly to PILLAR platform capabilities. For example, low Process scores indicate areas where PILLAR's automated scoring, signals, and plays can drive immediate improvement. See the [Blueprint deep-dive](/blueprint) for the full mapping.
+  </Accordion>
+</AccordionGroup>
+
+## AI Agents and MCP
+
+<AccordionGroup>
+  <Accordion title="What is PILLAR's MCP server?">
+    PILLAR ships a native **Model Context Protocol (MCP)** server that exposes 65 tools spanning the full revenue architecture — core intelligence, plays, tasks, expansion whitespace, financial cascade (NRR simulation, procurement, cohorts), market intelligence (TAM/SAM, headcount simulation), AI orchestration (Ask PILLAR RAG, generated narratives), scoring transparency, and governed writes. Any MCP-compatible AI client — Claude Desktop, Cursor, VS Code, ChatGPT Desktop, Zed, Windsurf — can query and act on your PILLAR data in natural language. See the [MCP Server guide](/api/mcp) for setup.
+  </Accordion>
+
+  <Accordion title="What is Drafter?">
+    **Drafter** is the in-app AI agent layer, mounted globally across every authenticated PILLAR page as a floating chat widget. Ask any GTM question — "why does Houston ISD have its current renewal risk score?", "what's our biggest pipeline risk this quarter?", "simulate NRR going from 108% to 115%" — and Drafter picks the right subset of MCP tools, pulls evidence, and returns a specific answer. Every run writes to an audit table for the approval gate and flywheel learning. Drafter and the external MCP server share the same 65-tool catalog, so behavior is consistent across surfaces.
+  </Accordion>
+
+  <Accordion title="How is Drafter different from the MCP server?">
+    Same capabilities, different surfaces. The **MCP server** is for external AI assistants (Claude Desktop, Cursor, ChatGPT, etc.) working alongside PILLAR. **Drafter** is the in-app experience — you never leave pillargtm.com, it knows which page you're on, and write actions route through a visual approval gate before executing. Both consume the same tool catalog (`src/lib/mcp/tool-catalog.ts`) so an answer you get from Drafter matches what Claude Desktop would return for the same question.
+  </Accordion>
+
+  <Accordion title="Can AI agents make changes to my data?">
+    Yes, but with governance. PILLAR distinguishes **read tools** (most of the 65) from **governed writes** — `create_play`, `complete_play`, `acknowledge_signal`, `create_task`, `update_task`, `update_signal_status`, `set_renewal_disposition`, `opt_in_benchmarks`. External MCP clients can invoke writes directly with your API key's permissions. The in-app Drafter cannot — writes are surfaced as proposals in the drawer with approve/reject controls, and every decision is logged to `agent_actions` for audit. You can review the full [governance model](/data/governance).
+  </Accordion>
+
+  <Accordion title="Does Drafter know the current date?">
+    Yes. Every Drafter run prepends today's date + day-of-week (America/New_York) to the system prompt so urgency phrasing anchors to your actual now, not the model's training cutoff. Snapshot briefings are day-agnostic — no "Monday briefing" on a Wednesday.
   </Accordion>
 </AccordionGroup>

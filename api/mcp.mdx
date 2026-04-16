@@ -6,7 +6,7 @@ icon: 'robot'
 
 # PILLAR MCP Server
 
-PILLAR is the first AI-native GTM operating system with a native MCP (Model Context Protocol) server. Query your revenue architecture — account health, pipeline, signals, renewals, and scoring — directly from any AI assistant.
+PILLAR is the first AI-native GTM operating system with a native MCP (Model Context Protocol) server. Query your revenue architecture — account health, pipeline, signals, renewals, scoring, plays, tasks, financial cascade, market intelligence, AI-generated narratives, and governed writes — directly from any AI assistant.
 
 ## Quick Start
 
@@ -37,8 +37,10 @@ Ask your AI assistant natural language questions about your revenue data:
 
 - "What's my pipeline summary?"
 - "Which accounts are at risk this quarter?"
-- "Show me critical signals"
-- "Get the account 360 for Houston ISD"
+- "Show me critical signals and the top 3 save plays that have worked on similar accounts"
+- "Simulate what NRR going from 108% to 115% would mean for ARR and AE headcount"
+- "What's the top expansion opportunity in the West territory right now?"
+- "Ask PILLAR: who's at risk of churning next quarter and why?"
 
 ## Endpoint
 
@@ -49,9 +51,13 @@ GET  https://app.pillargtm.com/api/mcp  (server discovery)
 
 Authentication: Bearer API key in the `Authorization` header.
 
-## Available Tools (26)
+## Available Tools (65)
 
-### Core Intelligence
+PILLAR's MCP surface spans six tiers covering every layer of the revenue architecture.
+
+### Tier 0 — Core (26 tools)
+
+#### Core Intelligence
 
 | Tool | Description |
 |------|-------------|
@@ -63,14 +69,7 @@ Authentication: Bearer API key in the `Authorization` header.
 | `get_account_health` | Health, risk, and priority scores with scoring decomposition showing which factors drive each score |
 | `get_renewal_risk` | Upcoming renewals with risk scores, filtered by days out (30/60/90) |
 
-### Data Readiness
-
-| Tool | Description |
-|------|-------------|
-| `get_data_readiness` | Check if CRM data is ready for scoring: readiness level (ready/degraded/blocked), scoring-ready account count, blocking issues |
-| `get_affected_records` | Identify specific accounts with data quality issues. Filter by issue code (no_contacts, no_recent_activity, missing_segment, zero_arr, score_imbalance, negative_arr) |
-
-### Operational
+#### Operational
 
 | Tool | Description |
 |------|-------------|
@@ -78,13 +77,20 @@ Authentication: Bearer API key in the `Authorization` header.
 | `get_revenue_bowtie` | Full acquire → close → retain/expand funnel with conversion rates at each stage |
 | `get_territory_economics` | Territory P&L: revenue, costs, yield ratios, health classification per territory |
 | `get_leads` | Lead funnel with ICP fit scores, behavioral scores, and funnel stage. Filter by status or score threshold |
-| `acknowledge_signal` | Update a signal's status (ACKNOWLEDGED, IN_PROGRESS, RESOLVED) |
-| `create_play` | Create an intervention play for an account (SAVE_PLAY, EXPANSION_PLAY, ONBOARDING_PLAY) |
-| `complete_play` | Complete a play with mandatory outcome (RENEWED, CHURNED, EXPANDED, LOST) and auto-update linked renewal |
+| `acknowledge_signal` | Update a signal's status (ACKNOWLEDGED, IN_PROGRESS, RESOLVED). *Write.* |
+| `create_play` | Create an intervention play for an account (SAVE_PLAY, EXPANSION_PLAY, ONBOARDING_PLAY). *Write.* |
+| `complete_play` | Complete a play with mandatory outcome (RENEWED, CHURNED, EXPANDED, LOST) and auto-update linked renewal. *Write.* |
 | `get_board_report` | Executive summary for board meetings: ARR, NRR, GRR, pipeline coverage, risk distribution, EBITDA |
 | `get_scoring_rules` | Scoring rule summary with weights and categories |
 
-### Flywheel & Benchmarks
+#### Data Readiness
+
+| Tool | Description |
+|------|-------------|
+| `get_data_readiness` | Check if CRM data is ready for scoring: readiness level (ready/degraded/blocked), scoring-ready account count, blocking issues |
+| `get_affected_records` | Identify specific accounts with data quality issues. Filter by issue code (no_contacts, no_recent_activity, missing_segment, zero_arr, score_imbalance, negative_arr) |
+
+#### Flywheel & Benchmarks
 
 | Tool | Description |
 |------|-------------|
@@ -94,13 +100,94 @@ Authentication: Bearer API key in the `Authorization` header.
 | `list_benchmark_cohorts` | List available benchmark cohorts with member counts and snapshot data. Cohorts group orgs by industry, revenue range, and maturity |
 | `get_benchmark_opt_in_status` | Check whether the organization is opted in to anonymized benchmarking and which cohort is assigned |
 
-### Connector Observability
+#### Connector Observability
 
 | Tool | Description |
 |------|-------------|
 | `list_connectors` | List all configured data connectors across CRM, email/calendar, product usage, and support ticketing with per-provider status, last sync, and health |
 | `get_sync_log` | Recent connector sync runs from the unified sync log. Shows successes, failures, records synced, and timing. Filter by connector name |
 | `get_account_data_sources` | Per-account breakdown of which data sources contributed to its score: CRM, product analytics, support tickets, or contracts provenance |
+
+### Tier A — Plays, Tasks, Expansion (8 tools)
+
+#### Plays Intelligence
+
+| Tool | Description |
+|------|-------------|
+| `list_plays` | List plays in flight. Filter by account, state (PENDING, ACTIVE, COMPLETED, DISMISSED), or owner. Answers "what's already in flight?" |
+| `get_play_effectiveness` | Template-level win rate, ARR impact, health delta, and which templates are underperforming. Filterable by segment/tier/territory |
+| `get_play_recommendations` | System-suggested plays per account based on signal patterns, scoring, and historical effectiveness |
+
+#### Tasks & Activities
+
+| Tool | Description |
+|------|-------------|
+| `list_tasks` | Platform task list with filters (assignee, status, account, source, priority). Includes summary counts and overdue flag |
+| `get_activity_timeline` | Email, call, meeting, task, and play event timeline. Filter by account, user, or date range |
+
+#### Expansion Whitespace
+
+| Tool | Description |
+|------|-------------|
+| `get_expansion_summary` | Org-wide expansion whitespace: total addressable expansion ARR, top candidate accounts, product-level whitespace distribution |
+| `get_expansion_signals` | Layer-I signals tagged as expansion triggers (adoption surge, champion promoted, new use case detected) |
+| `get_expansion_affinity` | Product co-adoption matrix and cross-sell probability per product pair |
+
+### Tier B — Financial Cascade (9 tools)
+
+| Tool | Description |
+|------|-------------|
+| `simulate_nrr_impact` | Simulate ARR / headcount / ROI impact of moving NRR from current to target. Returns AE and CSM-equivalent headcount, retain-vs-acquire cost comparison |
+| `get_revenue_impact` | ARR-at-stake analysis across renewal window, expansion opportunity value, churn exposure, net revenue position |
+| `get_budget_variance` | GTM budget variance vs plan per period (rep cost, marketing spend, CS cost) |
+| `get_procurement_calendar` | Procurement windows by account: fiscal year alignment, renewal overlap. Filterable by territory/segment/upcoming |
+| `get_procurement_forecast` | Procurement-window-aware forecast (different from stage-based `get_forecast`) |
+| `get_cohort_curves` | Customer retention + NRR cohort curves by acquisition period. Investor-grade |
+| `list_cohort_definitions` | Available cohort slicing definitions (acquisition quarter, segment, deal size, territory) |
+| `get_forecasted_renewals` | ML-forecasted renewal outcomes combining base rates + current risk scores |
+| `get_customer_readiness` | Implementation and adoption readiness: onboarded, stuck, milestone status, time-to-value risk |
+
+### Tier C — Market Intelligence (5 tools)
+
+| Tool | Description |
+|------|-------------|
+| `get_tam_sam` | TAM / SAM / SOM sizing by vertical, filterable by fiscal year |
+| `get_territory_equity` | Territory fairness analysis: ARR balance, account distribution, quota-to-pipeline ratios |
+| `simulate_headcount_change` | Project ARR uplift, ramp lag, cost impact, and breakeven quarter of adding/removing reps |
+| `get_district_intelligence` | K-12 district enrichment (enrollment, demographics, bond measures, superintendent changes) via Starbridge |
+| `get_data_health` | Org-wide data health dashboard: freshness lag, orphan counts, duplicate counts, pipeline blockers |
+
+### Tier D — AI Orchestration (7 tools)
+
+| Tool | Description |
+|------|-------------|
+| `ask_pillar` | Ask PILLAR's native RAG layer a question. Returns grounded answer with citations from CRM + signals + scoring |
+| `list_narratives` | List cached AI-generated narratives (board briefings, forecast commentary, account deep-dives) |
+| `get_narrative` | Full prose body + citations for a specific narrative |
+| `generate_action_plan` | AI-authored per-account action plan: owner assignments, sequenced tasks, expected outcomes, SLAs |
+| `generate_account_intelligence` | Multi-source account brief (CRM + signals + scoring + district intel + contact web) |
+| `generate_coaching_insights` | Rep-level forecast accuracy, deal-velocity patterns, stuck-deal flags, 1:1 talking points |
+| `generate_board_narrative` | Board-grade prose from the current dashboard data |
+
+### Tier E — Scoring Transparency (5 tools)
+
+| Tool | Description |
+|------|-------------|
+| `get_scoring_backtest` | Historical accuracy of scoring models: how well did risk/priority/expansion scores predict actual outcomes over 12 months |
+| `get_scoring_profile` | Org's customized scoring rule weights and active configuration |
+| `get_forecast_weights` | Custom forecast probability weights per stage + category mappings |
+| `get_contracts_config` | Contracts object configuration: date models, term lengths, expansion vs new-biz classification |
+| `get_scoring_thresholds` | Org's custom score-severity thresholds (CRITICAL vs WARNING vs INFO per model) |
+
+### Tier F — Governed Writes (5 tools)
+
+| Tool | Description |
+|------|-------------|
+| `create_task` | Create a platform task. Source type distinguishes NBA / signal / play / MQL handoff / manual. Governance log entry automatic. *Write.* |
+| `update_task` | Update status, assignee, priority, or due date. *Write.* |
+| `update_signal_status` | Set signal to ACKNOWLEDGED / IN_PROGRESS / RESOLVED / SNOOZED / DISMISSED with optional reason. *Write.* |
+| `set_renewal_disposition` | Set renewal disposition directly (RENEWED / CHURNED / EXPANDED / LOST / PENDING). *Write.* |
+| `opt_in_benchmarks` | Opt the org in or out of anonymized peer-cohort benchmarking. *Write.* |
 
 ## Compatible AI Assistants
 
@@ -121,6 +208,7 @@ PILLAR's MCP server works with any MCP-compatible client:
 - Keys can be revoked instantly from Settings > Integrations
 - All data is org-scoped — you can only query your own organization's data
 - MCP server inherits PILLAR's multi-tenant isolation
+- All tools are defined in a single source-of-truth catalog at `src/lib/mcp/tool-catalog.ts` which both the external MCP server and the in-app Drafter runtime consume. No drift between surfaces.
 
 ## Example Conversations
 
@@ -129,35 +217,45 @@ PILLAR's MCP server works with any MCP-compatible client:
 >
 > Claude calls `get_dashboard` → returns ARR, pipeline, at-risk accounts, signal count, forecast health
 
-**Renewal Review:**
-> "Which renewals are at risk in the next 30 days?"
+**Renewal Review with NRR simulation:**
+> "Which renewals are at risk in the next 30 days — and what would saving all of them do to NRR?"
 >
-> Claude calls `get_renewal_risk` with `days_out: 30` → returns at-risk renewals with scores and account details
+> Claude calls `get_renewal_risk` with `days_out: 30` → totals at-risk ARR → calls `simulate_nrr_impact` with current and projected NRR to show ARR uplift + AE-equivalent headcount
 
-**Account Deep Dive:**
-> "Tell me everything about the Houston ISD account"
+**Account Deep Dive with Effectiveness:**
+> "Tell me about Houston ISD and recommend the best save play template for a district like this"
 >
-> Claude calls `search_accounts` with `query: "Houston ISD"` → then `get_account_360` with the account ID → returns full account intelligence
+> Claude calls `search_accounts` → `get_account_360` → `get_play_effectiveness` filtered to the account's segment/tier → recommends the highest-win-rate template with evidence
 
-**Signal Triage:**
-> "Show me all critical signals and acknowledge the top one"
+**Signal Triage with Task Creation:**
+> "Show me critical signals, acknowledge the top one, and create a follow-up task for the account owner"
 >
-> Claude calls `get_active_signals` with `severity: "CRITICAL"` → then `acknowledge_signal` on the first result
+> Claude calls `get_active_signals` with `severity: "CRITICAL"` → `update_signal_status` → `create_task` with source_type: "signal"
 
-**Scoring Calibration:**
-> "How are my scoring weights drifting from baseline?"
+**Procurement-aware Forecast:**
+> "What's our forecast by procurement window instead of CRM stage?"
 >
-> Claude calls `get_calibration_stats` → returns outcome distribution, weight drift, and top rules by calibration impact
+> Claude calls `get_procurement_forecast` → explains the difference vs stage-based forecast → flags which deals are likely to slip based on procurement alignment
+
+**Board Briefing Generation:**
+> "Generate a board-grade narrative for Tuesday's meeting and pull the cohort retention curves to go with it"
+>
+> Claude calls `generate_board_narrative` → `get_cohort_curves` → composes the pack
+
+**Scoring Credibility Check:**
+> "How accurate has PILLAR's renewal risk score been historically?"
+>
+> Claude calls `get_scoring_backtest` → reports hit rate, false positives, and calibration drift
 
 **Connector Health Check:**
 > "Are all my data sources syncing correctly?"
 >
-> Claude calls `list_connectors` → returns per-provider status, then `get_sync_log` for any connectors showing errors
+> Claude calls `list_connectors` → `get_sync_log` for any connectors showing errors
 
 **Score Provenance:**
 > "Where does the health score for Houston ISD come from?"
 >
-> Claude calls `get_account_data_sources` with the account ID → returns which values came from CRM vs product analytics vs support tickets
+> Claude calls `get_account_data_sources` → returns which values came from CRM vs product analytics vs support tickets
 
 ## Rate Limits
 

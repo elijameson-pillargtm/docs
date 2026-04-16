@@ -59,4 +59,19 @@ All enforcement actions are written to a governance log for audit purposes, trac
 
 ## MCP Integration
 
-The `complete_play` MCP tool enforces the same governance, allowing AI agents (Claude Desktop, Cursor) to close plays with mandatory outcomes through the MCP protocol.
+Every governed write is addressable via the MCP server so AI agents (Claude Desktop, Cursor, VS Code, ChatGPT, Zed, Windsurf) can take action through the same enforcement layer as the UI:
+
+| MCP Tool | What It Does | Governance |
+|----------|--------------|------------|
+| `acknowledge_signal` | Mark a signal ACKNOWLEDGED / IN_PROGRESS / RESOLVED | Status transitions logged |
+| `create_play` | Create a save / expansion / onboarding play | SLA timer starts on creation |
+| `complete_play` | Close a play with mandatory outcome (RENEWED / CHURNED / EXPANDED / LOST) | Auto-updates linked renewal disposition + logs governance entry |
+| `create_task` | Create a platform task from NBA / signal / play / MQL handoff / manual | Governance log entry automatic |
+| `update_task` | Change task status, assignee, priority, or due date | Transition logged |
+| `update_signal_status` | Set signal status including SNOOZED / DISMISSED with reason | Reason required for non-standard transitions |
+| `set_renewal_disposition` | Set renewal disposition directly | Governance log entry automatic |
+| `opt_in_benchmarks` | Opt the org in/out of anonymized peer-cohort benchmarking | Cohort reassignment logged |
+
+### External MCP vs In-App Drafter
+
+External MCP clients invoke write tools directly with the caller's API-key permissions. The in-app **Drafter** agent does NOT call writes directly — it routes every mutation through the `propose_action` meta-tool, which surfaces the proposal in the drawer with approve / reject / edit controls. Every decision is written to `agent_actions` for audit and flywheel learning. Both surfaces share the same 65-tool catalog, so an AI acting via Claude Desktop and a user acting via Drafter land in the same governance trail.

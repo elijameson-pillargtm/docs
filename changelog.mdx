@@ -10,6 +10,20 @@ All notable changes to the PILLAR platform are documented here.
 
 ---
 
+## v3.6.0 -- April 16, 2026
+
+**65-Tool MCP Surface, Drafter Agent, Shared Tool Catalog, Accounts API Fix**
+
+- **MCP Server: 65 Tools Across 6 Tiers** -- Expanded from 26 tools to 65 covering every layer of the revenue architecture. Full catalog now spans core intelligence, plays intelligence, tasks & activities, expansion whitespace, financial cascade (NRR impact simulation, procurement calendar, cohort curves, forecasted renewals, customer readiness), market intelligence (TAM/SAM, territory equity, headcount simulation, K-12 district intelligence, data health), AI orchestration (Ask PILLAR RAG, narratives, generated action plans, account intelligence, coaching insights, board narratives), scoring transparency (backtest, scoring profile, forecast weights, contracts config, scoring thresholds), and governed writes (create/update task, update signal status, set renewal disposition, opt-in benchmarks).
+- **Drafter Agent (Global)** -- The in-app agentic layer (renamed from "Copilot" due to Microsoft brand conflict) is now mounted globally across every authenticated page via a compact floating chat widget. Ask any GTM question and Drafter routes to the right subset of MCP tools automatically. Every run writes to the `agent_actions` audit table for the approval gate + flywheel learning.
+- **Shared Tool Catalog (Single Source of Truth)** -- All tool definitions now live in `src/lib/mcp/tool-catalog.ts`. Both the external MCP server and the in-app Drafter runtime consume from this catalog. Prevents the class of drift that caused a silent 404 on `search_accounts` when each consumer maintained its own parallel tool list.
+- **`/api/accounts` GET Route** -- New lean-list endpoint supporting `?search=` (fuzzy name match), plus explicit `?segment=`, `?tier=`, `?territory=`, `?limit=` filters. Returns the full scoring row per account ordered by priority. Fixes `search_accounts` for both the external MCP server and the in-app Drafter.
+- **Temporal Context in Drafter** -- Every Drafter run now prepends today's date + day-of-week (America/New_York) to the system prompt so urgency phrasing anchors to the user's actual now, not the model's training cutoff. No more "Monday briefing" on a Wednesday.
+- **Drafter UI: Ask-PILLAR-style Chat Widget** -- Compact 380px floating chat panel matching the marketing site's Ask PILLAR aesthetic. User/bot message bubbles, auto-growing textarea, inline proposal cards with approve/reject/skip controls, evidence-trail disclosure. Dark-slate pill FAB in the bottom-right of every authenticated page.
+- **Org-Agnostic Example Prompts** -- Drafter welcome message uses `[account name]` placeholder convention so pilot users at any org see examples that work with their own data rather than hardcoded references.
+
+---
+
 ## v3.5.0 -- April 12, 2026
 
 **Per-Organization Configuration, Fiscal Year Engine, Segment Intelligence**
