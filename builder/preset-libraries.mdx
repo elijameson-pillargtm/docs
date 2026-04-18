@@ -9,13 +9,26 @@ These libraries are **conversation starters**, not products. The Implementation 
 
 ## Quick selector
 
-| If your customer is... | Run these libraries |
-| ---------------------- | ------------------- |
-| Pure private-market K-12 SaaS | **EdTech** |
-| AI-platform / PLG-leaning curriculum | **EdTech + AI-Automation** |
-| State/local/federal seller | **Public-Sector** (often standalone) |
-| Hybrid district + family-direct | **Family-Literacy + Public-Sector** |
-| Public-sector with PLG | **Public-Sector + AI-Automation** |
+<CardGroup cols={2}>
+  <Card title="Pure private-market K-12 SaaS" icon="graduation-cap">
+    **EdTech**
+  </Card>
+  <Card title="AI-platform / PLG-leaning curriculum" icon="robot">
+    **EdTech + AI-Automation**
+  </Card>
+  <Card title="State / local / federal seller" icon="landmark">
+    **Public-Sector** (often standalone)
+  </Card>
+  <Card title="Hybrid district + family-direct" icon="book-open-reader">
+    **Family-Literacy + Public-Sector**
+  </Card>
+  <Card title="Public-sector with PLG signals" icon="layer-group">
+    **Public-Sector + AI-Automation**
+  </Card>
+  <Card title="Other vertical SaaS" icon="puzzle-piece">
+    Closest preset + author 3–5 customer-specific rules from scratch
+  </Card>
+</CardGroup>
 
 ## EdTech library (5 rules)
 
@@ -33,7 +46,7 @@ These libraries are **conversation starters**, not products. The Implementation 
 ## Public-Sector library (5 rules)
 
 **File:** `scripts/seed-builder-presets-public-sector.ts`
-**Best fit:** State/local/federal sellers (any public-sector segment)
+**Best fit:** State / local / federal sellers (any public-sector segment)
 
 | Rule | Trigger | Action |
 | ---- | ------- | ------ |
@@ -73,9 +86,20 @@ These libraries are **conversation starters**, not products. The Implementation 
 
 Different motions have fundamentally different leading indicators and handoff paths:
 
-- **EdTech's** "MQL handoff drift" rule assumes the AE → CSM handoff. **Family-Literacy** uses Marketing → Enrollment Specialist. Mixing the wrong preset would seed a handoff rule that doesn't match the customer's actual motion.
-- **Public-Sector's** FY-end cron uses Monday-morning timing because public RFP responses go out Mon-Wed. AI-Automation's monthly token-cost cron runs at 9am PT because most AI customers are West-Coast-headquartered. Generic timing would feel off.
-- **HIGH IMPACT designations** differ. EdTech flags exec sponsor syncs as high-impact. AI-Automation flags contract restructure conversations. Public-Sector flags board-meeting agenda touchpoints. Each library gets the right `is_high_impact` defaults.
+<CardGroup cols={2}>
+  <Card title="Handoff-path differences" icon="arrows-left-right">
+    EdTech's "MQL handoff drift" rule assumes the AE → CSM handoff. Family-Literacy uses Marketing → Enrollment Specialist. Mixing the wrong preset would seed a handoff rule that doesn't match the customer's actual motion.
+  </Card>
+  <Card title="Cron timing differences" icon="clock">
+    Public-Sector's FY-end cron uses Monday-morning timing because public RFP responses go out Mon–Wed. AI-Automation's monthly token-cost cron runs at 9am PT because most AI customers are West-Coast-headquartered.
+  </Card>
+  <Card title="High-impact differences" icon="triangle-exclamation">
+    EdTech flags exec sponsor syncs as high-impact. AI-Automation flags contract restructure conversations. Public-Sector flags board-meeting agenda touchpoints. Each library gets the right `is_high_impact` defaults.
+  </Card>
+  <Card title="Vocabulary differences" icon="language">
+    A `completion_rate` predicate makes sense for Family-Literacy but not pure EdTech. A `committed_spend_ratio` makes sense for AI-Automation but not Public-Sector. Each library uses field names that match its motion.
+  </Card>
+</CardGroup>
 
 ## Stacking rules across libraries
 
@@ -89,8 +113,10 @@ For a curriculum-SaaS customer with product usage telemetry, the recommended sta
 
 When a new ICP emerges (e.g. healthcare-revenue-cycle or vertical-saas-finance), the right path is to:
 
-1. Identify the 5 most-distinctive automation patterns for that motion
-2. Write a `scripts/seed-builder-presets-<icp-slug>.ts` modeled on the existing four
-3. Test against a real customer's data on dev before adding to docs
-4. Add a new section to this page
-5. Add the preset to the implementation methodology in [BUILDER configuration](/builder/configuration)
+<Steps>
+  <Step title="Identify the 5 most-distinctive automation patterns for that motion" />
+  <Step title="Write a `scripts/seed-builder-presets-<icp-slug>.ts` modeled on the existing four" />
+  <Step title="Test against a real customer's data on dev before adding to docs" />
+  <Step title="Add a new section to this page" />
+  <Step title="Add the preset to the implementation methodology in [BUILDER configuration](/builder/configuration)" />
+</Steps>

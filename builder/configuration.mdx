@@ -13,55 +13,73 @@ A customer who arrives at `/builder` and sees five rules already shaped around h
 
 ## The three steps of implementation-phase configuration
 
-### 1. Run the matching preset library
+<Steps>
+  <Step title="Run the matching preset library">
+    Choose the library (or combination of libraries) that matches the customer's motion:
 
-Choose the library (or combination of libraries) that matches the customer's motion:
+    <CardGroup cols={2}>
+      <Card title="EdTech" icon="graduation-cap">
+        Pure private-market K-12 SaaS with district-level sales motion.
+      </Card>
+      <Card title="AI-Automation" icon="robot">
+        AI-platform or PLG-leaning vendor with product usage telemetry. Often stacked with EdTech for curriculum SaaS that has rich Mode/Mixpanel-style data.
+      </Card>
+      <Card title="Public-Sector" icon="landmark">
+        State / local / federal seller with RFP / coop-purchasing / FOIA exposure.
+      </Card>
+      <Card title="Family-Literacy" icon="book-open-reader">
+        Hybrid district + family-direct EdTech with family-engagement signals. Often stacked with Public-Sector since family-literacy sellers usually contract with school districts.
+      </Card>
+    </CardGroup>
 
-- **Pure private-market K-12 SaaS** with district sales motion → EdTech
-- **AI-platform or PLG-leaning** vendor with product usage telemetry → AI-Automation (often stacked with EdTech for curriculum SaaS that has rich Mode/Mixpanel-style data)
-- **State / local / federal seller** with RFP / coop-purchasing / FOIA exposure → Public-Sector
-- **Hybrid district + family-direct** EdTech with family-engagement signals → Family-Literacy (often stacked with Public-Sector since family-literacy sellers usually contract with school districts)
+    Multiple libraries can stack. Each library inserts 5 starter rules into the customer's `builder_rules` table, all in shadow mode with `shadow_started_at = NOW()`.
 
-Multiple libraries can stack. Each library inserts 5 starter rules into the customer's `builder_rules` table, all in shadow mode with `shadow_started_at = NOW()`.
+    ```bash
+    ORG_ID=<customer-org-uuid> \
+    OWNER_USER_ID=<customer-admin-uuid> \
+    npx tsx scripts/seed-builder-preset-rules.ts          # EdTech
+    npx tsx scripts/seed-builder-presets-ai-automation.ts # AI-Automation
+    npx tsx scripts/seed-builder-presets-public-sector.ts # Public-Sector
+    npx tsx scripts/seed-builder-presets-family-literacy.ts # Family-Literacy
+    ```
+  </Step>
 
-```bash
-ORG_ID=<customer-org-uuid> \
-OWNER_USER_ID=<customer-admin-uuid> \
-npx tsx scripts/seed-builder-preset-rules.ts          # EdTech
-npx tsx scripts/seed-builder-presets-ai-automation.ts # AI-Automation
-npx tsx scripts/seed-builder-presets-public-sector.ts # Public-Sector
-npx tsx scripts/seed-builder-presets-family-literacy.ts # Family-Literacy
-```
+  <Step title="Customize each preset rule to match the customer's actual numbers">
+    The EdTech "Renewal-risk → save play" rule defaults to ARR > $100k.
 
-### 2. Customize each preset rule to match the customer's actual numbers
+    - For a customer whose median ACV is $20k, that threshold is wrong on day one.
+    - For a customer whose top accounts are $500k+, it's also wrong.
 
-The EdTech "Renewal-risk → save play" rule defaults to ARR > $100k.
+    The Implementation Engineer (or the customer's Architect) opens each preset rule's edit page (`/builder/[id]/edit`) and tunes:
 
-- For a customer whose median ACV is $20k, that threshold is wrong on day one.
-- For a customer whose top accounts are $500k+, it's also wrong.
+    <CardGroup cols={2}>
+      <Card title="Conditions" icon="filter">
+        ARR thresholds, segment filters, day-window distances, completion-rate floors.
+      </Card>
+      <Card title="Trigger config" icon="clock">
+        Cron times in the customer's HQ timezone, SLA durations matching their actual rhythms.
+      </Card>
+      <Card title="Action targets" icon="bullseye">
+        `assignee` references that resolve to the customer's actual user IDs and roles.
+      </Card>
+      <Card title="Rate limits" icon="gauge-high">
+        Appropriate for their account count and motion velocity.
+      </Card>
+    </CardGroup>
 
-The Implementation Engineer (or the customer's Architect) opens each preset rule's edit page (`/builder/[id]/edit`) and tunes:
+    This customization is the **difference between a generic rule and a rule that fits**. It's also the conversation that builds buy-in — the customer's revenue team sees you tuning the system to them, not them to it.
+  </Step>
 
-- **Conditions** — ARR thresholds, segment filters, day-window distances, completion-rate floors
-- **Trigger config** — cron times in the customer's HQ timezone, SLA durations matching their actual rhythms
-- **Action targets** — `assignee` references that resolve to the customer's actual user IDs and roles
-- **Rate limits** — appropriate for their account count
+  <Step title="Author 1–3 customer-specific rules from scratch">
+    No preset library can anticipate a customer's most differentiated leading indicator. A family-literacy customer's "completion-rate drop" rule is one example — it's tuned to their leading indicator (parent/family engagement with reading programs), not a generic K-12 indicator. A K-12 curriculum customer's "summer dampening" rule is another — it relaxes SLA timers June–August because teacher engagement legitimately drops over the summer break and shouldn't trigger save-play escalation during that window.
 
-This customization is the **difference between a generic rule and a rule that fits**. It's also the conversation that builds buy-in — the customer's revenue team sees you tuning the system to them, not them to it.
+    These authored rules can be drafted in plain English via DRAFTER's `propose_builder_rule` tool, then refined in the editor:
 
-### 3. Author 1-3 customer-specific rules from scratch
+    > "Author: when an account's product usage drops more than 40% in 7 days AND the account has been onboarded less than 90 days, fire an `onboarding_friction` signal at WARNING severity."
 
-No preset library can anticipate a customer's most differentiated leading indicator. A family-literacy customer's "completion-rate drop" rule is one example — it's tuned to their leading indicator (parent/family engagement with reading programs), not a generic K-12 indicator. A K-12 curriculum customer's "summer dampening" rule is another — it relaxes SLA timers June–August because teacher engagement legitimately drops over the summer break and shouldn't trigger save-play escalation during that window.
-
-These authored rules can be drafted in plain English via DRAFTER's `propose_builder_rule` tool, then refined in the editor:
-
-```
-"Author: when an account's product usage drops more than 40% in 7 days
-AND the account has been onboarded less than 90 days, fire an
-onboarding_friction signal at WARNING severity."
-```
-
-DRAFTER returns a structured draft with the right trigger type, condition operators, and action shape. The Implementation Engineer reviews + saves to shadow mode.
+    DRAFTER returns a structured draft with the right trigger type, condition operators, and action shape. The Implementation Engineer reviews + saves to shadow mode.
+  </Step>
+</Steps>
 
 ## The insight
 
@@ -73,21 +91,45 @@ This is why every customer onboarding includes a dedicated BUILDER configuration
 
 A typical pilot Implementation Plan dedicates a section to BUILDER that covers:
 
-1. **Which preset libraries are activated** — usually 1-3 stacked
-2. **Per-preset customization** — every threshold tuned to the customer's actual numbers
-3. **3 customer-specific rules** — drafted with DRAFTER during the configuration session, refined together
-4. **Promotion timeline** — typically all rules in shadow for Week 1-2, propose for Week 3-4, first execute-mode promotion in Week 5+
-5. **Approval queue assignments** — which rule's proposed actions go to which team members
-6. **Kill-switch designation** — which Admin holds the emergency stop authority
+<CardGroup cols={2}>
+  <Card title="Active preset libraries" icon="layer-group">
+    Which preset libraries are activated — usually 1–3 stacked.
+  </Card>
+  <Card title="Per-preset customization" icon="sliders">
+    Every threshold tuned to the customer's actual numbers.
+  </Card>
+  <Card title="3 customer-specific rules" icon="pen-to-square">
+    Drafted with DRAFTER during the configuration session, refined together.
+  </Card>
+  <Card title="Promotion timeline" icon="timeline">
+    All rules in shadow Week 1–2, propose Week 3–4, first execute promotion Week 5+.
+  </Card>
+  <Card title="Approval queue assignments" icon="user-check">
+    Which rule's proposed actions go to which team members.
+  </Card>
+  <Card title="Kill-switch designation" icon="hand">
+    Which Admin holds the emergency-stop authority.
+  </Card>
+</CardGroup>
 
 Each pilot's Implementation Plan dedicates a section to BUILDER configuration with their actual numbers and routing. The Implementation Engineer drafts that section during the Week 3 configuration session.
 
 ## What you do NOT do during configuration
 
-- **Don't promote rules out of shadow on Day 1.** The 7-day shadow gate exists for a reason. Even if a rule looks perfect, watch it for a week.
-- **Don't enable execute mode in Week 1.** Even if the customer is impatient. The 14-day propose minimum + 80% approval rate threshold are not configurable.
-- **Don't author 30 rules during the configuration session.** Start with the preset libraries + 3 custom rules. Adding rules is easy; un-doing trust damage from a misfiring rule is hard.
-- **Don't let the customer skip the kill-switch designation.** Every org needs at least one Admin who knows where the kill switch is, what to look for, and how to release it. That's a people issue, not a software one.
+<CardGroup cols={2}>
+  <Card title="Don't promote rules out of shadow on Day 1" icon="ban">
+    The 7-day shadow gate exists for a reason. Even if a rule looks perfect, watch it for a week.
+  </Card>
+  <Card title="Don't enable execute mode in Week 1" icon="ban">
+    Even if the customer is impatient. The 14-day propose minimum + 80% approval rate threshold are not configurable.
+  </Card>
+  <Card title="Don't author 30 rules during the configuration session" icon="ban">
+    Start with the preset libraries + 3 custom rules. Adding rules is easy; un-doing trust damage from a misfiring rule is hard.
+  </Card>
+  <Card title="Don't let the customer skip the kill-switch designation" icon="ban">
+    Every org needs at least one Admin who knows where the kill switch is, what to look for, and how to release it. That's a people issue, not a software one.
+  </Card>
+</CardGroup>
 
 ## Re-configuration over time
 

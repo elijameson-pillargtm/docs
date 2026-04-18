@@ -5,122 +5,108 @@ description: "Every guardrail BUILDER ships with: shadow mode, rate limits, circ
 
 BUILDER's biggest design constraint isn't "what can it do" — it's "what's it prevented from doing without explicit human approval." This page is the catalog.
 
-## Mandatory shadow mode
+## Per-rule guardrails
 
-Every new rule starts in shadow mode. **Cannot bypass this.** The system enforces a 7-day minimum in shadow before promotion to propose, and a 14-day minimum in propose with an 80%+ approval rate before promotion to execute.
+<CardGroup cols={2}>
+  <Card title="Mandatory shadow mode" icon="eye">
+    Every new rule starts in shadow mode. **Cannot bypass this.** The system enforces a 7-day minimum in shadow before promotion to propose, and a 14-day minimum in propose with an 80%+ approval rate before promotion to execute.
+  </Card>
+  <Card title="Per-account rate limit" icon="gauge">
+    Default: 1 fire per account per day per rule. Configurable per-rule (`rate_limit_per_account_per_day`). Prevents a runaway loop where Rule A fires Signal X which triggers Rule A again on the same account in the same minute.
+  </Card>
+  <Card title="Per-rule rate limit" icon="gauge-high">
+    Default: 50 fires per hour per rule. Configurable per-rule (`rate_limit_per_hour`). Prevents a single misconfigured rule from saturating the action pipeline org-wide.
+  </Card>
+  <Card title="Circuit breaker" icon="bolt-slash">
+    Default: 5 errors in 10 minutes auto-disables the rule. Auto-disabled rules show a red AUTO-DISABLED badge with the failure reason. The customer's Architect must manually re-enable after fixing the root cause — the system never auto-re-enables.
+  </Card>
+  <Card title="Postgres advisory locks" icon="lock">
+    The action-executor takes a per-(rule_id, entity_id) advisory lock before executing. Two concurrent BUILDER cron ticks cannot act on the same rule + same account simultaneously.
+  </Card>
+  <Card title="Action idempotency keys" icon="fingerprint">
+    Each action invocation includes an idempotency key in `builder_runs.provenance`. If the same rule + entity + action fires twice within the dedup window, the second invocation no-ops with a stamped reason. Prevents double-charges, duplicate task creation, etc.
+  </Card>
+</CardGroup>
 
-In shadow mode:
-- Every trigger is evaluated
-- Every condition is checked with full diagnostics
-- The verdict is written to `builder_runs`
-- **No actions are taken**
+## Org-level guardrails
 
-The customer's Architect reads the run history before promoting. If the rule isn't matching what they'd expect, they edit it and the 7-day clock restarts.
-
-## Per-account rate limit
-
-Default: 1 fire per account per day per rule. Configurable per-rule (`rate_limit_per_account_per_day`).
-
-Use case: prevents a runaway loop where Rule A fires Signal X which triggers Rule A again on the same account in the same minute.
-
-## Per-rule rate limit
-
-Default: 50 fires per hour per rule. Configurable per-rule (`rate_limit_per_hour`).
-
-Use case: prevents a single misconfigured rule from saturating the action pipeline org-wide.
-
-## Circuit breaker
-
-Default: 5 errors in 10 minutes auto-disables the rule. Configurable per-rule (`circuit_breaker_errors`, `circuit_breaker_window_minutes`).
-
-Auto-disabled rules show a red AUTO-DISABLED badge on the dashboard with the failure reason in `auto_disabled_reason`. The customer's Architect must manually re-enable after fixing the root cause — the system never auto-re-enables.
-
-## Global kill switch
-
-Admin-only emergency stop. From the `/builder` dashboard, an Admin clicks the red **🛑 Kill switch** button, enters a reason (5+ chars), and **every active rule in the org is set to `is_active=false` within ~1 second**.
-
-Each rule's `auto_disabled_reason` is stamped with the kill-switch reason so the audit trail is preserved. A red banner appears on every `/builder` page showing engager, time, reason.
-
-The release button (visible while engaged) clears the org-level kill-switch state but **does NOT auto-re-enable rules**. That's intentional — it forces a triage step where someone has to look at each rule and decide whether to re-enable.
-
-See the on-call runbook (`BUILDER_KillSwitch_Runbook.md` in PILLAR Spec Documents) for the full procedure including when to engage and how to triage after.
-
-## Approval expiry
-
-Default: propose-mode actions expire 48h after creation if no human decides on them. Hard-coded for v1.
-
-Expired approvals stay in the queue with an EXPIRED status pill. The corresponding action does not execute.
-
-## Postgres advisory locks
-
-The action-executor takes a per-(rule_id, entity_id) advisory lock before executing. Two concurrent BUILDER cron ticks cannot act on the same rule + same account simultaneously.
-
-This is enforced at the Postgres level via `try_advisory_lock_builder(key1, key2)` and matching release function — both shipped in the Phase 2 RPCs migration.
-
-## Action idempotency keys
-
-Each action invocation includes an idempotency key in `builder_runs.provenance`. If the same rule + entity + action fires twice within the dedup window, the second invocation no-ops with a stamped reason.
-
-Prevents double-charges, duplicate task creation, etc. when an upstream cron tick lands twice.
+<CardGroup cols={2}>
+  <Card title="Global kill switch" icon="hand">
+    Admin-only emergency stop. From the `/builder` dashboard, an Admin clicks the red **🛑 Kill switch** button, enters a reason (5+ chars), and **every active rule in the org is set to `is_active=false` within ~1 second**.
+  </Card>
+  <Card title="Approval expiry" icon="clock-rotate-left">
+    Default: propose-mode actions expire 48h after creation if no human decides on them. Hard-coded for v1. Expired approvals stay in the queue with an EXPIRED status pill — the action does not execute.
+  </Card>
+  <Card title="High-impact action gating" icon="triangle-exclamation">
+    Marking a rule `is_high_impact = true` requires Architect+ role to ever promote out of shadow. Subject to the Guarantee downgrade gate. Logged with `severity: "high"` in `governance_log`. Surfaced with a HIGH IMPACT pill in the UI.
+  </Card>
+  <Card title="Kill-switch reason audit" icon="clipboard-list">
+    Each rule's `auto_disabled_reason` is stamped with the kill-switch reason so the audit trail is preserved. Releasing the kill switch does NOT auto-re-enable rules — that's intentional. It forces a triage step where someone has to look at each rule.
+  </Card>
+</CardGroup>
 
 ## Guarantee runtime (Phase 8 §E)
 
-The biggest safety feature. Every BUILDER execution passes through three verification gates before the action runs:
+The biggest safety feature. Every BUILDER execution passes through three verification gates before the action runs.
 
-### Pre-execution freshness check
+<CardGroup cols={3}>
+  <Card title="Pre-execution freshness check" icon="clock">
+    Before the rule even evaluates, the engine checks underlying data freshness: scoring outputs ≤ 6 hours old, signals ≤ 2 hours old, CRM-synced fields ≤ 24 hours old. Configurable per-rule.
+  </Card>
+  <Card title="Real formula version stamping" icon="hashtag">
+    Every rule that references a `formula_name` in its conditions gets the formula's current version stamped on the run (sha256 hash of `scoring_config` rows). When formulas change, future runs carry the new version stamp.
+  </Card>
+  <Card title="Optimistic concurrency check" icon="lock-open">
+    Right before BUILDER executes, it re-reads the target entity's `updated_at`. If a human modified the account between when BUILDER decided to act and when it would have acted, BUILDER aborts with a `state_changed` log entry.
+  </Card>
+</CardGroup>
 
-Before the rule even evaluates, the engine checks underlying data freshness:
-
-- Scoring outputs ≤ 6 hours old
-- Signals ≤ 2 hours old
-- CRM-synced fields ≤ 24 hours old
-
-Configurable per-rule. **If freshness fails AND the action is high-impact**, the rule's verdict is `guarantee_verified: false` and the action is **automatically downgraded** from `execute` mode to `propose` mode. The downgraded proposal lands in the approval queue with the freshness reason stamped — a human has to confirm before it runs.
+**The downgrade rule:** if freshness fails AND the action is high-impact, the rule's verdict is `guarantee_verified: false` and the action is **automatically downgraded** from `execute` mode to `propose` mode. The downgraded proposal lands in the approval queue with the freshness reason stamped — a human has to confirm before it runs.
 
 Standard-impact actions on stale data still execute (logged as `governance_status: "unverified"`) but get telemetry. Only high-impact gets the safety downgrade.
 
-### Real formula version stamping
-
-Every rule that references a `formula_name` in its conditions gets the formula's current version stamped on the run. Implementation: sha256 hash of the underlying `scoring_config` rows for that formula, first 12 chars.
-
-When the customer's Architect updates `scoring_config` (e.g. changes the renewal_risk weights), the formula version stamp changes. Future runs of any dependent rule carry the new version. This makes it possible to ask "did this rule fire before or after the scoring change?" with precision.
-
-### Optimistic concurrency check
-
-Right before BUILDER executes an action, it re-reads the target entity's `updated_at` timestamp. If a human modified the account between when BUILDER decided to act and when it would have acted, BUILDER aborts with a `state_changed` log entry and **does not run the action**.
-
-This prevents: BUILDER decides to escalate a play at 9:00. CSM manually completes the play at 9:01. BUILDER's escalation goes to fire at 9:02 — concurrency check sees the play state changed, aborts cleanly.
-
-## High-impact actions
-
-Marking a rule as `is_high_impact = true` enforces additional guardrails:
-
-- Architect+ role required to ever promote out of shadow (Architect can author shadow rules, but only Admin or `pillar_admin` can promote)
-- Subject to the Guarantee downgrade gate (above)
-- Logged with `severity: "high"` in `governance_log`
-- Surfaced with a HIGH IMPACT pill on the rule list and detail page
-
-Example high-impact rule patterns: any action that creates customer-facing communication (emails, exec calls), any action that modifies financial data (renewal disposition, contract restructure), any action with regulatory implications (FOIA logging, compliance touchpoints).
-
 ## Audit trail
 
-Every BUILDER run — matched or not — writes a row to `builder_runs` with:
+Every BUILDER run — matched or not — writes a row to `builder_runs` with full context:
 
-- The trigger source (which event, which cron tick, which SLA breach)
-- Every condition's verdict (which predicates passed, with the actual values that were tested)
-- What actions were proposed and what was executed
-- Duration in ms
-- Guarantee verification status + reason
+<CardGroup cols={2}>
+  <Card title="Trigger source" icon="bell">
+    Which event, which cron tick, which SLA breach.
+  </Card>
+  <Card title="Condition diagnostics" icon="filter">
+    Every predicate's verdict with the actual values that were tested.
+  </Card>
+  <Card title="Actions proposed + executed" icon="list-check">
+    The full action body for both proposed and executed actions.
+  </Card>
+  <Card title="Guarantee verification" icon="shield-halved">
+    `guarantee_verified` boolean + reason text + freshness check + formula versions used + concurrency-check timestamp.
+  </Card>
+</CardGroup>
 
 Every executed action ALSO writes to `governance_log` with the rule, the run, the action body, and the Guarantee status. You can trace from "this email got sent" → "this run fired the rule" → "this evaluation said the conditions matched" → "this signal triggered it" → "this scoring formula said the account was at risk" → "this CRM field changed". Full lineage. One click to audit.
 
 ## What BUILDER will NOT do under any circumstance
 
-- Execute an action without writing to `builder_runs`
-- Execute an action while the kill switch is engaged for that org
-- Execute on the same (rule, entity) twice without idempotency
-- Bypass the 7-day shadow gate, even on a rule that's been deleted and re-authored
-- Execute a high-impact action on stale data without a human in the loop
-- Cross-tenant — every query is `org_id`-scoped at the SQL level + RLS-enforced
+These are the lines. If any of them are crossed, file a security ticket immediately.
 
-If any of those happen, file a security ticket immediately. They're the line.
+<CardGroup cols={2}>
+  <Card title="Execute without writing to builder_runs" icon="ban">
+    Every action is logged. No exceptions.
+  </Card>
+  <Card title="Execute while kill switch engaged" icon="ban">
+    Every cron tick checks the org's kill-switch state.
+  </Card>
+  <Card title="Execute the same (rule, entity) twice without idempotency" icon="ban">
+    Advisory locks + idempotency keys both prevent this.
+  </Card>
+  <Card title="Bypass the 7-day shadow gate" icon="ban">
+    Even on a rule that's been deleted and re-authored.
+  </Card>
+  <Card title="Execute high-impact on stale data without a human" icon="ban">
+    The Guarantee downgrade gate enforces this.
+  </Card>
+  <Card title="Cross-tenant access" icon="ban">
+    Every query is `org_id`-scoped at SQL + RLS-enforced at Postgres.
+  </Card>
+</CardGroup>
