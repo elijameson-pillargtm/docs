@@ -20,7 +20,7 @@ These libraries are **conversation starters**, not products. The Implementation 
 ## EdTech library (5 rules)
 
 **File:** `scripts/seed-builder-preset-rules.ts`
-**Best fit:** Private K-12 SaaS with district sales motion (e.g. Legends of Learning)
+**Best fit:** Private K-12 SaaS with district-level sales motion
 
 | Rule | Trigger | Action |
 | ---- | ------- | ------ |
@@ -59,7 +59,7 @@ These libraries are **conversation starters**, not products. The Implementation 
 ## Family-Literacy library (5 rules)
 
 **File:** `scripts/seed-builder-presets-family-literacy.ts`
-**Best fit:** Hybrid district + family-direct EdTech (e.g. Springboard Collaborative)
+**Best fit:** Hybrid district + family-direct EdTech with family-engagement signals
 
 | Rule | Trigger | Action |
 | ---- | ------- | ------ |
@@ -73,7 +73,7 @@ These libraries are **conversation starters**, not products. The Implementation 
 
 Different motions have fundamentally different leading indicators and handoff paths:
 
-- **EdTech's** "MQL handoff drift" rule assumes the AE → CSM handoff. **Family-Literacy** uses Marketing → Enrollment Specialist. Generic preset would seed the wrong rule for Springboard.
+- **EdTech's** "MQL handoff drift" rule assumes the AE → CSM handoff. **Family-Literacy** uses Marketing → Enrollment Specialist. Mixing the wrong preset would seed a handoff rule that doesn't match the customer's actual motion.
 - **Public-Sector's** FY-end cron uses Monday-morning timing because public RFP responses go out Mon-Wed. AI-Automation's monthly token-cost cron runs at 9am PT because most AI customers are West-Coast-headquartered. Generic timing would feel off.
 - **HIGH IMPACT designations** differ. EdTech flags exec sponsor syncs as high-impact. AI-Automation flags contract restructure conversations. Public-Sector flags board-meeting agenda touchpoints. Each library gets the right `is_high_impact` defaults.
 
@@ -81,9 +81,9 @@ Different motions have fundamentally different leading indicators and handoff pa
 
 Multiple libraries can stack on the same org. The seed scripts are idempotent on `(org_id, name)` — running the same library twice skips duplicates.
 
-For Springboard (the new design partner), the recommended stack is **Family-Literacy + Public-Sector** since they sell to school districts (RFP / FOIA / coop-purchasing all apply) AND engage families directly (completion rates, family-welcome SLAs).
+For a family-literacy customer that sells to districts, the recommended stack is **Family-Literacy + Public-Sector** — the family-engagement rules cover the family-direct motion, while the public-sector rules cover RFP / FOIA / coop-purchasing exposure on the district contracts.
 
-For Legends of Learning, the recommended stack is **EdTech + AI-Automation** since they're a curriculum SaaS (EdTech base) with product usage telemetry (Mode reports → AI-Automation usage rules).
+For a curriculum-SaaS customer with product usage telemetry, the recommended stack is **EdTech + AI-Automation** — the EdTech base covers district sales motion + renewal cadence, while the AI-Automation rules cover usage-spike expansion + rate-limit warning + engagement-decay signals from the product telemetry.
 
 ## Adding a new preset library
 

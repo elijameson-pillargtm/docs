@@ -3,9 +3,7 @@ title: "BUILDER configuration"
 description: "Why BUILDER's value is configured during implementation, not over time, and how the implementation-phase seed design works."
 ---
 
-<Note>
 **Read this first.** It's the most important thing about BUILDER.
-</Note>
 
 The product BUILDER ships with — the engine, the safety gates, the dashboard, the kill switch — is the same for every customer. What's different is **what BUILDER does on day one for that specific customer**.
 
@@ -19,10 +17,10 @@ A customer who arrives at `/builder` and sees five rules already shaped around h
 
 Choose the library (or combination of libraries) that matches the customer's motion:
 
-- **Pure private-market K-12 SaaS** (Legends of Learning) → EdTech
-- **AI-platform / PLG-leaning** (LoL with product usage telemetry, AI-tooling vendors) → AI-Automation (often stacked with EdTech)
-- **State/local/federal** (any public-sector seller) → Public-Sector
-- **Hybrid district + family-direct** (Springboard Collaborative) → Family-Literacy (often stacked with Public-Sector since they sell to districts)
+- **Pure private-market K-12 SaaS** with district sales motion → EdTech
+- **AI-platform or PLG-leaning** vendor with product usage telemetry → AI-Automation (often stacked with EdTech for curriculum SaaS that has rich Mode/Mixpanel-style data)
+- **State / local / federal seller** with RFP / coop-purchasing / FOIA exposure → Public-Sector
+- **Hybrid district + family-direct** EdTech with family-engagement signals → Family-Literacy (often stacked with Public-Sector since family-literacy sellers usually contract with school districts)
 
 Multiple libraries can stack. Each library inserts 5 starter rules into the customer's `builder_rules` table, all in shadow mode with `shadow_started_at = NOW()`.
 
@@ -53,7 +51,7 @@ This customization is the **difference between a generic rule and a rule that fi
 
 ### 3. Author 1-3 customer-specific rules from scratch
 
-No preset library can anticipate a customer's most differentiated leading indicator. Springboard's "completion-rate drop" rule is one example — it's tuned to their leading indicator, not a generic K-12 indicator. Legends of Learning's "summer dampening" rule is another — it relaxes SLA timers June-August because their teacher engagement legitimately drops over summer.
+No preset library can anticipate a customer's most differentiated leading indicator. A family-literacy customer's "completion-rate drop" rule is one example — it's tuned to their leading indicator (parent/family engagement with reading programs), not a generic K-12 indicator. A K-12 curriculum customer's "summer dampening" rule is another — it relaxes SLA timers June–August because teacher engagement legitimately drops over the summer break and shouldn't trigger save-play escalation during that window.
 
 These authored rules can be drafted in plain English via DRAFTER's `propose_builder_rule` tool, then refined in the editor:
 
@@ -82,7 +80,7 @@ A typical pilot Implementation Plan dedicates a section to BUILDER that covers:
 5. **Approval queue assignments** — which rule's proposed actions go to which team members
 6. **Kill-switch designation** — which Admin holds the emergency stop authority
 
-See the [Legends of Learning Implementation Plan](https://pillargtm.com/implementations/legends-of-learning) for a worked example.
+Each pilot's Implementation Plan dedicates a section to BUILDER configuration with their actual numbers and routing. The Implementation Engineer drafts that section during the Week 3 configuration session.
 
 ## What you do NOT do during configuration
 
