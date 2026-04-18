@@ -1,0 +1,96 @@
+---
+title: "Preset libraries"
+description: "The four out-of-the-box BUILDER rule libraries (EdTech, Public-Sector, AI-Automation, Family-Literacy), what's in each, and which customers fit which library."
+---
+
+PILLAR ships four BUILDER preset libraries. Each contains 5 starter rules tuned for a specific go-to-market motion. **All start in shadow mode** with `shadow_started_at = NOW()`, so the 7-day promotion clock starts on first install.
+
+These libraries are **conversation starters**, not products. The Implementation Engineer customizes every threshold to match the customer's actual numbers before promoting any rule out of shadow. See [BUILDER configuration](/builder/configuration) for the full implementation methodology.
+
+## Quick selector
+
+| If your customer is... | Run these libraries |
+| ---------------------- | ------------------- |
+| Pure private-market K-12 SaaS | **EdTech** |
+| AI-platform / PLG-leaning curriculum | **EdTech + AI-Automation** |
+| State/local/federal seller | **Public-Sector** (often standalone) |
+| Hybrid district + family-direct | **Family-Literacy + Public-Sector** |
+| Public-sector with PLG | **Public-Sector + AI-Automation** |
+
+## EdTech library (5 rules)
+
+**File:** `scripts/seed-builder-preset-rules.ts`
+**Best fit:** Private K-12 SaaS with district sales motion (e.g. Legends of Learning)
+
+| Rule | Trigger | Action |
+| ---- | ------- | ------ |
+| Renewal-risk → save play | Event (CRITICAL Renewal Risk signal + ARR > $100k) | Start `renewal_save_critical` play |
+| Daily rescore — accounts approaching renewal | Schedule (6am ET daily) + renewal in 90d | Rescore account |
+| Escalate stale save plays >48h | SLA timer (48h, play not_completed) | Escalate + notify manager |
+| Health-score crash → exec sponsor sync (HIGH IMPACT) | Event (account.health_changed + drop ≥15 in 7d + ARR > $250k) | Create exec sponsor task |
+| MQL handoff drift | Event (lead → MQL with no CSM in SLA) | Fire HANDOFF_DRIFT signal |
+
+## Public-Sector library (5 rules)
+
+**File:** `scripts/seed-builder-presets-public-sector.ts`
+**Best fit:** State/local/federal sellers (any public-sector segment)
+
+| Rule | Trigger | Action |
+| ---- | ------- | ------ |
+| RFP detected — assemble response team | Event (Procurement Activity signal, WARNING+) | Notify AE + capture lead, create response team task |
+| Fiscal-year-end window — accelerate stage | Schedule (8am ET Mondays) + FY-end < 90d + Stage ≤ 3 | Push to Stage 4 task |
+| Cooperative purchasing eligibility check | Event (lead.score changed + no coop vehicle) | Fire `no_coop_vehicle` signal |
+| Board-meeting agenda detected — exec sync (HIGH IMPACT) | Event (board_agenda_mention signal + ARR > $100k) | Create exec sponsor sync task |
+| FOIA / public-records request → log + notify | Event (foia_inbound signal) | Notify compliance lead, log governance signal |
+
+## AI-Automation library (5 rules)
+
+**File:** `scripts/seed-builder-presets-ai-automation.ts`
+**Best fit:** AI-product / automation-platform sales (PLG + sales-led hybrid)
+
+| Rule | Trigger | Action |
+| ---- | ------- | ------ |
+| Usage spike → expansion play | Event (usage > 200% trailing-30d avg, non-enterprise plan) | Fire usage_spike_expansion signal + notify AE |
+| Rate-limit warning → proactive plan upgrade | Schedule (7am PT daily) + rate_limit_hits_7d > 0 | Plan upgrade conversation task |
+| Model-deprecation notice → migration sync | Event (model_deprecation_announced signal) | Fire model_migration_required signal + create CSM task |
+| Eval-stage stuck > 14d → unblock motion | SLA timer (14d, task stale) + opp in Eval/POC + no exec sponsor | Notify manager + create stakeholder task |
+| Token-cost spike → finance review (HIGH IMPACT) | Schedule (9am PT 1st of month) + token_cost +50% MoM + committed_spend < 100% | Contract restructure task |
+
+## Family-Literacy library (5 rules)
+
+**File:** `scripts/seed-builder-presets-family-literacy.ts`
+**Best fit:** Hybrid district + family-direct EdTech (e.g. Springboard Collaborative)
+
+| Rule | Trigger | Action |
+| ---- | ------- | ------ |
+| Completion-rate drop → engagement check | Schedule (7am ET Mondays) + completion < 60% + > 500 families | Fire program_engagement_at_risk signal + create CSM task |
+| New-family welcome SLA | SLA timer (72h, family_welcome task not_completed) | Escalate to enrollment manager |
+| District renewal + family churn cross-check | Schedule (8am ET daily) + renewal < 90d + family churn > 25% | Fire renewal_with_family_churn CRITICAL signal |
+| Marketing → Enrollment specialist handoff | Event (lead → enrolled_pending without specialist in 24h) | Fire handoff_drift_enrollment signal |
+| Multi-school district expansion | Schedule (9am ET 1st of month) + single-school + 80%+ adoption + 6mo+ tenure | Create expansion conversation task |
+
+## Why four separate libraries instead of one
+
+Different motions have fundamentally different leading indicators and handoff paths:
+
+- **EdTech's** "MQL handoff drift" rule assumes the AE → CSM handoff. **Family-Literacy** uses Marketing → Enrollment Specialist. Generic preset would seed the wrong rule for Springboard.
+- **Public-Sector's** FY-end cron uses Monday-morning timing because public RFP responses go out Mon-Wed. AI-Automation's monthly token-cost cron runs at 9am PT because most AI customers are West-Coast-headquartered. Generic timing would feel off.
+- **HIGH IMPACT designations** differ. EdTech flags exec sponsor syncs as high-impact. AI-Automation flags contract restructure conversations. Public-Sector flags board-meeting agenda touchpoints. Each library gets the right `is_high_impact` defaults.
+
+## Stacking rules across libraries
+
+Multiple libraries can stack on the same org. The seed scripts are idempotent on `(org_id, name)` — running the same library twice skips duplicates.
+
+For Springboard (the new design partner), the recommended stack is **Family-Literacy + Public-Sector** since they sell to school districts (RFP / FOIA / coop-purchasing all apply) AND engage families directly (completion rates, family-welcome SLAs).
+
+For Legends of Learning, the recommended stack is **EdTech + AI-Automation** since they're a curriculum SaaS (EdTech base) with product usage telemetry (Mode reports → AI-Automation usage rules).
+
+## Adding a new preset library
+
+When a new ICP emerges (e.g. healthcare-revenue-cycle or vertical-saas-finance), the right path is to:
+
+1. Identify the 5 most-distinctive automation patterns for that motion
+2. Write a `scripts/seed-builder-presets-<icp-slug>.ts` modeled on the existing four
+3. Test against a real customer's data on dev before adding to docs
+4. Add a new section to this page
+5. Add the preset to the implementation methodology in [BUILDER configuration](/builder/configuration)

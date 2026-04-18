@@ -1,0 +1,222 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "PILLAR Data Reference",
+  "colors": {
+    "primary": "#2D5BDA",
+    "light": "#4B7BF5",
+    "dark": "#1E3A8A"
+  },
+  "favicon": "/favicon-animated.svg",
+  "navigation": {
+    "anchors": [
+      {
+        "anchor": "Documentation",
+        "icon": "book-open",
+        "tabs": [
+          {
+            "tab": "Documentation",
+            "groups": [
+              {
+                "group": "Overview",
+                "pages": [
+                  "introduction",
+                  "quickstart",
+                  "architecture",
+                  "data-sources"
+                ]
+              },
+              {
+                "group": "Resources",
+                "pages": [
+                  "blueprint",
+                  "data-readiness",
+                  "faq",
+                  "changelog"
+                ]
+              },
+              {
+                "group": "Configuration",
+                "pages": [
+                  "settings/configuration"
+                ]
+              },
+              {
+                "group": "BUILDER",
+                "pages": [
+                  "builder/overview",
+                  "builder/configuration",
+                  "builder/preset-libraries",
+                  "builder/safety-rails"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Data Model",
+            "groups": [
+              {
+                "group": "Data Model",
+                "pages": [
+                  "data/accounts",
+                  "data/contacts",
+                  "data/opportunities",
+                  "data/leads",
+                  "data/renewals",
+                  "data/activities",
+                  "data/signals",
+                  "data/plays",
+                  "data/territory",
+                  "data/revenue-economics",
+                  "data/revenue-impact",
+                  "data/expansion-pipeline",
+                  "data/governance",
+                  "data/pipeline-triage",
+                  "data/financial-data",
+                  "data/ai-intelligence",
+                  "data/decision-engine",
+                  "data/renewal-forecasting",
+                  "data/procurement-intelligence",
+                  "data/product-affinity",
+                  "data/cohort-intelligence",
+                  "data/playbook-evolution",
+                  "data/board-narratives",
+                  "data/field-mapping-reference"
+                ]
+              },
+              {
+                "group": "District Intelligence",
+                "pages": [
+                  "data/starbridge-overview",
+                  "data/starbridge-buyer-attributes",
+                  "data/starbridge-contacts",
+                  "data/starbridge-spend-data",
+                  "data/starbridge-conferences",
+                  "data/starbridge-rfps",
+                  "data/starbridge-documents"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Connectors",
+            "groups": [
+              {
+                "group": "Connectors",
+                "pages": [
+                  "connectors/setup-guide",
+                  "connectors/gong",
+                  "connectors/picklist-mapping"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Scoring Rules",
+            "groups": [
+              {
+                "group": "Scoring Engine",
+                "pages": [
+                  "scoring/overview",
+                  "scoring/account-health",
+                  "scoring/icp-fit",
+                  "scoring/lead-score",
+                  "scoring/renewal-risk",
+                  "scoring/pipeline-hygiene",
+                  "scoring/forecast-confidence",
+                  "scoring/expansion-readiness",
+                  "scoring/territory-equity",
+                  "scoring/economics-rules"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Signals",
+            "groups": [
+              {
+                "group": "Signal Taxonomy",
+                "pages": [
+                  "signals/overview",
+                  "signals/pipeline-signals",
+                  "signals/renewal-signals",
+                  "signals/expansion-signals",
+                  "signals/account-signals",
+                  "signals/economics-signals",
+                  "signals/coverage-signals",
+                  "signals/trend-warnings"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "API Reference",
+            "groups": [
+              {
+                "group": "API Reference",
+                "pages": [
+                  "api/authentication",
+                  "api/dashboard",
+                  "api/accounts",
+                  "api/connectors",
+                  "api/scoring",
+                  "api/signals",
+                  "api/forecast",
+                  "api/territory",
+                  "api/blueprint",
+                  "api/decision-engine",
+                  "api/renewal-forecast",
+                  "api/procurement",
+                  "api/expansion-intelligence",
+                  "api/cohorts",
+                  "api/playbook",
+                  "api/narratives",
+                  "api/mcp"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "anchor": "Blueprint Assessment",
+        "href": "https://pillargtm.com/blueprint",
+        "icon": "clipboard-check"
+      },
+      {
+        "anchor": "Support",
+        "icon": "life-ring",
+        "groups": [
+          {
+            "group": "Resources",
+            "pages": [
+              "support"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "logo": {
+    "light": "/logo/pillar-light.svg",
+    "dark": "/logo/pillar-dark.svg"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "App",
+        "href": "https://app.pillargtm.com"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Get Started",
+      "href": "https://app.pillargtm.com"
+    }
+  },
+  "footer": {
+    "socials": {
+      "website": "https://pillargtm.com"
+    }
+  }
+}

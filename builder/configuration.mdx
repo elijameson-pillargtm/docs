@@ -1,0 +1,98 @@
+---
+title: "BUILDER configuration"
+description: "Why BUILDER's value is configured during implementation, not over time, and how the implementation-phase seed design works."
+---
+
+<Note>
+**Read this first.** It's the most important thing about BUILDER.
+</Note>
+
+The product BUILDER ships with — the engine, the safety gates, the dashboard, the kill switch — is the same for every customer. What's different is **what BUILDER does on day one for that specific customer**.
+
+That difference is configured during implementation. PILLAR ships four [preset libraries](/builder/preset-libraries) (EdTech, Public-Sector, AI-Automation, Family-Literacy) as **conversation starters**, not products. They're scaffolds you and the customer's revenue team sit down with on Week 1, then customize: their cycles, their thresholds, their handoff paths, their leading indicators.
+
+A customer who arrives at `/builder` and sees five rules already shaped around how they actually work has a fundamentally different experience than one who sees an empty list. **The presets exist to make Day 1 land hard.**
+
+## The three steps of implementation-phase configuration
+
+### 1. Run the matching preset library
+
+Choose the library (or combination of libraries) that matches the customer's motion:
+
+- **Pure private-market K-12 SaaS** (Legends of Learning) → EdTech
+- **AI-platform / PLG-leaning** (LoL with product usage telemetry, AI-tooling vendors) → AI-Automation (often stacked with EdTech)
+- **State/local/federal** (any public-sector seller) → Public-Sector
+- **Hybrid district + family-direct** (Springboard Collaborative) → Family-Literacy (often stacked with Public-Sector since they sell to districts)
+
+Multiple libraries can stack. Each library inserts 5 starter rules into the customer's `builder_rules` table, all in shadow mode with `shadow_started_at = NOW()`.
+
+```bash
+ORG_ID=<customer-org-uuid> \
+OWNER_USER_ID=<customer-admin-uuid> \
+npx tsx scripts/seed-builder-preset-rules.ts          # EdTech
+npx tsx scripts/seed-builder-presets-ai-automation.ts # AI-Automation
+npx tsx scripts/seed-builder-presets-public-sector.ts # Public-Sector
+npx tsx scripts/seed-builder-presets-family-literacy.ts # Family-Literacy
+```
+
+### 2. Customize each preset rule to match the customer's actual numbers
+
+The EdTech "Renewal-risk → save play" rule defaults to ARR > $100k.
+
+- For a customer whose median ACV is $20k, that threshold is wrong on day one.
+- For a customer whose top accounts are $500k+, it's also wrong.
+
+The Implementation Engineer (or the customer's Architect) opens each preset rule's edit page (`/builder/[id]/edit`) and tunes:
+
+- **Conditions** — ARR thresholds, segment filters, day-window distances, completion-rate floors
+- **Trigger config** — cron times in the customer's HQ timezone, SLA durations matching their actual rhythms
+- **Action targets** — `assignee` references that resolve to the customer's actual user IDs and roles
+- **Rate limits** — appropriate for their account count
+
+This customization is the **difference between a generic rule and a rule that fits**. It's also the conversation that builds buy-in — the customer's revenue team sees you tuning the system to them, not them to it.
+
+### 3. Author 1-3 customer-specific rules from scratch
+
+No preset library can anticipate a customer's most differentiated leading indicator. Springboard's "completion-rate drop" rule is one example — it's tuned to their leading indicator, not a generic K-12 indicator. Legends of Learning's "summer dampening" rule is another — it relaxes SLA timers June-August because their teacher engagement legitimately drops over summer.
+
+These authored rules can be drafted in plain English via DRAFTER's `propose_builder_rule` tool, then refined in the editor:
+
+```
+"Author: when an account's product usage drops more than 40% in 7 days
+AND the account has been onboarded less than 90 days, fire an
+onboarding_friction signal at WARNING severity."
+```
+
+DRAFTER returns a structured draft with the right trigger type, condition operators, and action shape. The Implementation Engineer reviews + saves to shadow mode.
+
+## The insight
+
+BUILDER isn't a product that customers configure themselves over time. BUILDER is a product whose **shape on Day 1 is half the implementation deliverable.** The other half is the trust-building that happens in shadow → propose → execute over the following 30 days.
+
+This is why every customer onboarding includes a dedicated BUILDER configuration session, and why the BUILDER section of every PILLAR Implementation Plan is customer-specific.
+
+## What configuration looks like in an Implementation Plan
+
+A typical pilot Implementation Plan dedicates a section to BUILDER that covers:
+
+1. **Which preset libraries are activated** — usually 1-3 stacked
+2. **Per-preset customization** — every threshold tuned to the customer's actual numbers
+3. **3 customer-specific rules** — drafted with DRAFTER during the configuration session, refined together
+4. **Promotion timeline** — typically all rules in shadow for Week 1-2, propose for Week 3-4, first execute-mode promotion in Week 5+
+5. **Approval queue assignments** — which rule's proposed actions go to which team members
+6. **Kill-switch designation** — which Admin holds the emergency stop authority
+
+See the [Legends of Learning Implementation Plan](https://pillargtm.com/implementations/legends-of-learning) for a worked example.
+
+## What you do NOT do during configuration
+
+- **Don't promote rules out of shadow on Day 1.** The 7-day shadow gate exists for a reason. Even if a rule looks perfect, watch it for a week.
+- **Don't enable execute mode in Week 1.** Even if the customer is impatient. The 14-day propose minimum + 80% approval rate threshold are not configurable.
+- **Don't author 30 rules during the configuration session.** Start with the preset libraries + 3 custom rules. Adding rules is easy; un-doing trust damage from a misfiring rule is hard.
+- **Don't let the customer skip the kill-switch designation.** Every org needs at least one Admin who knows where the kill switch is, what to look for, and how to release it. That's a people issue, not a software one.
+
+## Re-configuration over time
+
+After the initial implementation, customers add and edit rules through DRAFTER, the rule editor, or YAML config-as-code. The implementation-phase configuration sets the foundation; the customer's revenue ops + Architect roles maintain it.
+
+When a customer's motion changes meaningfully (new ICP, new pricing model, new sales motion), schedule a re-configuration session. Treat it like the initial implementation: review which preset libraries still apply, which thresholds need adjusting, which custom rules need replacement.

@@ -115,6 +115,15 @@
       ]
     },
     {
+      "group": "BUILDER",
+      "pages": [
+        "builder/overview",
+        "builder/configuration",
+        "builder/preset-libraries",
+        "builder/safety-rails"
+      ]
+    },
+    {
       "group": "Connectors",
       "pages": [
         "connectors/setup-guide",

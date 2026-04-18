@@ -1,0 +1,65 @@
+---
+title: "BUILDER overview"
+description: "What BUILDER is, how it fits with PILLAR and DRAFTER, and what it ships with on day one."
+---
+
+BUILDER is the third layer of PILLAR, the Revenue Architecture Operating System.
+
+- **PILLAR** is the dashboard — your account 360, your scoring, your signals.
+- **DRAFTER** is the assistant — ask any question, get answers grounded in your data.
+- **BUILDER** is the automation — when something happens in your data, the right thing happens automatically. Or, more often, the right thing gets proposed to a human and they click "approve" in one tap.
+
+If PILLAR is the eyes and DRAFTER is the brain, BUILDER is the hands. With three safety nets so the hands don't move until the brain has watched them long enough to trust them.
+
+## What BUILDER does
+
+BUILDER takes a **rule** like:
+
+> "When a customer with annual contract value over $250,000 has their health score drop by 15+ points in 7 days, schedule an executive sponsor sync."
+
+and turns it into a real thing that runs while you sleep — but only after watching it operate safely for at least 7 days first.
+
+## Three trigger types
+
+| Trigger | Fires when... | Example |
+| ------- | ------------ | ------- |
+| **Event** | Something happened in your data | Critical signal fired, deal stage changed, score crashed |
+| **Schedule** | The calendar says it's time | Daily 6am ET, every Monday, first of the month |
+| **SLA timer** | A deadline elapsed | Save play has been open 48h with no activity |
+
+## Three execution modes (with mandatory progression)
+
+1. **Shadow mode** — BUILDER watches every signal and writes down what it _would_ have done. No actions taken. Read the log every few days; decide whether the rule is matching the right things.
+2. **Propose mode** — BUILDER does almost everything. When conditions match, it creates a **proposed action** in your approval queue. A human approves or rejects with one click.
+3. **Execute mode** — BUILDER does the action directly. Logs everything. Reversible via the global kill switch.
+
+Every new rule **must** spend at least 7 days in shadow before promotion to propose. And at least 14 days in propose with an 80%+ approval rate before promotion to execute. The system enforces these gates — they're not suggestions.
+
+## Ten action types
+
+| Action | What it does |
+| ------ | ----------- |
+| `notify_user` | In-app, email, Slack, or Teams notification |
+| `create_task` | Drops a task in someone's queue with a due date |
+| `start_play` | Kicks off a play from your play templates |
+| `escalate_play` | Reassigns to a manager + bumps severity + notifies |
+| `update_signal_status` | Acknowledge / resolve / suppress a signal |
+| `rescore_account` | Forces an immediate scoring run |
+| `fire_signal` | Creates a new signal — used to chain rules together |
+| `update_field` | Generic field update (with high-impact gate) |
+| `dispatch_webhook` | Calls an external webhook (Slack, Zapier, etc.) |
+| `invoke_mcp_tool` | Escape hatch — calls any tool in PILLAR's MCP catalog |
+
+Plus `require_approval` which can be inserted as a "pause here for a human" step in the middle of any action chain.
+
+## Three authoring paths
+
+1. **The UI** at `/builder` — form for the common case (90% of rules), JSON DSL textarea for conditions and actions.
+2. **YAML config-as-code** — export any rule as YAML, edit in your code editor, version-control alongside your scoring config, reapply with `pillar rules apply` from the CLI.
+3. **DRAFTER (natural language)** — describe a rule in plain English. DRAFTER calls `propose_builder_rule`, returns a structured draft, you refine + save.
+
+## Where to go next
+
+- [BUILDER configuration](/builder/configuration) — how BUILDER is shaped during implementation
+- [Preset libraries](/builder/preset-libraries) — the four out-of-the-box rule sets
+- [Safety rails](/builder/safety-rails) — every guardrail BUILDER ships with
