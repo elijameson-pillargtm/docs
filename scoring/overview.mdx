@@ -8,6 +8,10 @@ icon: 'calculator'
 
 PILLAR's scoring engine evaluates every account against a comprehensive set of rules across 8 categories, producing a composite 0-100 health score. All weights are configurable per organization.
 
+<Note>
+  Correctness of every output on this page is enforced by [The Guarantee](/the-guarantee) — specifically the Decomposition (D) and Calibration (C) invariant categories. Every weighted contribution sums to the final score within ±1, every formula's weights sum to 1.0 ±0.001, and the golden-fixture snapshot tracked by `G-D-02` locks scoring behavior against regressions.
+</Note>
+
 ## How It Works
 
 1. **Context Building**: The engine assembles a complete picture of each account -- contacts, opportunities, renewals, activities, signals, products, and derived metrics

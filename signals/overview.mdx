@@ -8,6 +8,10 @@ icon: 'bolt'
 
 PILLAR generates signals when scoring outputs cross configurable thresholds or when external events (Starbridge webhooks) are detected. Signals are the primary action-driving mechanism in the platform.
 
+<Note>
+  Signal correctness is enforced by [The Guarantee](/the-guarantee) — specifically the Signals (S) and Rules (R) invariant categories. Every signal traces back to a triggered rule (no ghost signals), the rule catalog itself is append-only with stable IDs (`G-R-02`), and the signal-to-source consistency tests verify that scoring audit decomposition matches the underlying contact, renewal, and activity data.
+</Note>
+
 ## 8 Signal Families
 
 | Family | Description |

@@ -1,0 +1,125 @@
+---
+title: 'The Guarantee'
+description: "PILLAR's three-link chain of Spec → Guarantee → Test. Every behavior we commit to is a named, enforced, append-only invariant — 66 spec entries, 63 Guarantees across 17 categories, 2,479 tests on every commit."
+icon: 'shield-check'
+---
+
+> **Every behavior PILLAR commits to is a named, enforced, append-only invariant, and we can show you the exact test that proves each one.**
+
+Most AI-native tools ask you to take the math on faith. PILLAR doesn't. We publish our correctness spec, enforce it in CI, and show you the tests. This article walks through the framework so you can verify what we claim — and what we don't.
+
+## Why this exists
+
+In early 2026, a customer's renewal risk score rendered a number on the dashboard that was obviously wrong to any human reading it. The root cause was two bugs in how scoring functions passed values between each other — the kind of orchestration-layer failure that unit tests don't catch because each formula looks correct in isolation.
+
+We built The Guarantee to close that class of bug. Every invariant you'll see below was added because a past failure slipped through a test boundary it should have hit. The framework is append-only: once a behavior is promised, it stays promised.
+
+## The chain: Spec → Guarantee → Test
+
+### 1. The Spec — what PILLAR commits to
+
+Every behavior PILLAR commits to is a numbered entry in the public spec. Seven domain files cover scoring correctness, signal intelligence, multi-tenant isolation, integration fidelity, per-org configuration, UI journeys, and API contracts.
+
+Examples of concrete commitments:
+
+- `SPEC-SCORING-04` — A pipeline run that changes `renewal_risk` flows the fresh value into `account_priority` via the `risk_urgency` weight in the same invocation. No stale reads between scoring models.
+- `SPEC-TENANCY-03` — Every public API route handler that queries an org-scoped table filters by `org_id`, or is explicitly allowlisted as cross-org (admin, cron, webhook).
+- `SPEC-VALIDATION-01` — Every API route that reads a JSON body validates input via Zod with `parseBody` — no exceptions, enforced across all 92 body-accepting routes.
+- `SPEC-INGESTION-07` — When a non-terminated contracts row exists for an account, the scoring pipeline uses `contracts.end_date` as the canonical renewal anchor, falling back to `renewals.renewal_date` for tenants without contracts enumerated.
+
+Each entry has a `status`: `required` (must be enforced), `aspirational` (intent tracked for future enforcement), or `retired` (explicitly deprecated, with a pointer to what replaced it). IDs are append-only — spec numbers never get reused.
+
+**Current count: 66 entries** (61 required, 5 aspirational — an explicitly published roadmap of commitments PILLAR intends to enforce as the UI and integration-test harnesses expand).
+
+### 2. The Guarantee — how each commitment is enforced
+
+Every required spec entry has at least one named Guarantee that enforces it in code. IDs follow `G-<category>-<NN>`, where the category letter maps to a class of correctness failure:
+
+| Code | Category | What it enforces |
+| --- | --- | --- |
+| F | Freshness | Cross-model staleness — when score A feeds score B, B sees the current run's A |
+| M | Monotonicity | Directional correctness — worse input raises risk, better raises priority |
+| B | Bounds | Scores ∈ [0, 100]. No NaN. No Infinity. |
+| D | Decomposition | Weighted contributions sum to the final score within ±1 |
+| S | Signals | Every signal traces back to a triggered rule; no ghost signals |
+| R | Rules | Rule catalog well-formedness (unique IDs, valid score_models) |
+| C | Calibration | Weights sum to 1.0 per formula |
+| T | Tenancy | Multi-tenant isolation at every layer (routes, helpers, POST bodies) |
+| I | Ingestion | CRM connector + field-mapping fidelity |
+| P | Performance | Per-call latency budgets under load |
+| W | forecast-Weights | Per-org forecast category weight resolution |
+| O | Org-config | Per-org business configuration resolution |
+| A | Audit-shape | `scoring_audit` persisted-row contract |
+| H | Hermeticity | CI independence from external state |
+| V | Validation | API-boundary input validation via Zod |
+| U | UI | User-facing journey correctness (Playwright) |
+| E | Endpoint | API input → output contract invariants |
+
+**Current count: 63 Guarantees** across 17 categories.
+
+### 3. The Tests — evidence the invariants hold
+
+Every Guarantee has at least one automated test whose description starts with the Guarantee ID, so coverage is directly attributable. Four strategies:
+
+- **Fixed-example tests** — hand-picked inputs exercising known-tricky cases.
+- **Property-based tests** — [fast-check](https://fast-check.dev/) generates 100s to 1000s of random inputs per assertion; any failure shrinks to a minimal counterexample.
+- **Endpoint-contract tests** — lock the shape of every API response plus invariants about the output data (e.g. decomposition sums to score within ±1).
+- **UI tests** — [Playwright](https://playwright.dev/) exercises user-facing pages end-to-end.
+
+**Current count: 2,479 tests** — 2,376 unit + 103 integration running on every commit, plus 3 Playwright UI tests against the public auth + unsubscribe surfaces.
+
+## What makes the claim falsifiable
+
+Anyone can write tests. The structural claim that makes "every behavior is enforced" provable is the build-level check of the chain itself:
+
+- **Add a spec entry without a Guarantee** → build fails (`spec-check.test.ts` cross-references spec `id` ↔ Guarantee `spec_ref`).
+- **Add a Guarantee without a matching test** → build fails (`index.test.ts` cross-references registry entries ↔ `it("<ID>: ...")` descriptions).
+- **Orphan test referencing a Guarantee that doesn't exist** → build fails (same cross-check, in the other direction).
+- **Retire a Guarantee without naming its replacement** → build fails.
+
+The chain can't break silently. If we publish a commitment, the test exists. If we delete a commitment, the spec explicitly retires it with a pointer to what replaced it.
+
+## What this gets you, the customer
+
+- **Procurement sign-off in days, not quarters.** Hand your CTO or CISO the spec. They read 61 behaviors, not 61 pages of marketing.
+- **Confidence at the seams.** Every time PILLAR ships an integration (Salesforce, HubSpot, Gong, Pendo, Slack), a new Ingestion Guarantee (`G-I-*`) locks the field-mapping + override fidelity. Breaking it in a future refactor fails the build.
+- **Zero "vibe-coded" surprises.** Input at every API boundary goes through Zod schema validation, enforced by the `G-V-01` / `G-V-02` invariants across 92 route files.
+- **A changelog that doesn't lie.** Every scoring-model update bumps `MODEL_VERSION` and updates the golden-fixture snapshot, tracked by `G-D-02`. The [Changelog](/changelog) references affected SPEC / Guarantee IDs for each release.
+- **Silent breakage caught automatically.** The integration-health canary (`G-I-10` / `G-I-11`) runs every 15 minutes and pages the on-call when a tenant's OAuth token expires, a sync stalls, or a connection flips to `error`. No more "the dashboard is wrong and nobody noticed until the customer asked."
+
+## Categories in depth
+
+### Freshness (F)
+
+When the scoring pipeline runs, one model's output often feeds another — `renewal_risk` flows into `account_priority` via the `risk_urgency` weight, and `pipeline_hygiene` flows into `forecast_confidence`. The freshness Guarantees (`G-F-01` through `G-F-05`) prove the downstream model sees the current run's upstream value, not a stale cache. This closes the class of bug where a customer saw the right renewal risk on the account page but the wrong priority ranking in triage — because the priority calculation had read last night's risk score, not this morning's.
+
+### Tenancy (T)
+
+Six Guarantees (`G-T-01` through `G-T-06`) enforce multi-tenant isolation at three layers: pure scoring functions (the compute is scoped to a context object, never a global pool), route handlers (every query filters by `org_id`), and downstream workflow helpers (every helper re-applies the org filter, because a task's `source_id` could reference a resource in another org). Expanded after a 2026-04-08 pen-test-style review found 11 gaps in task-completion helpers and 4 gaps in the plays POST body handler.
+
+### Ingestion (I)
+
+Eleven Guarantees (`G-I-01` through `G-I-11`) lock the fidelity of data flowing from your CRM + tooling into PILLAR's scoring pipeline. Direct field mappings copy verbatim. Picklist translations fall back gracefully when a value is missing. Contracts-object renewal anchors override legacy renewal-date fields. Usage snapshots drive `renewal_risk` via a NEUTRAL baseline on insufficient data (missing usage never downgrades; only observed decline does). The integration-health canary detects expired OAuth tokens and stalled scoring pipelines 15 minutes after they start, not days later when a customer notices.
+
+### Validation (V)
+
+Every API route that reads a JSON body or `searchParams` runs input through a Zod schema before touching it. The `G-V-01` and `G-V-02` Guarantees enforce this across 92 body-accepting routes and all query-parsing routes, with a shrinking exemption allowlist tracked in the test file — adding a new unvalidated route requires explicit review.
+
+### Hermeticity (H)
+
+`G-H-01` ensures the integration-tests CI job runs against a local Supabase CLI stack, not a cloud Supabase credential. Eliminates an entire class of paste-corruption failures where a rotated credential would silently break every PR check. CI must be runnable from a clean clone without access to production secrets.
+
+### UI (U)
+
+Three Playwright-backed Guarantees (`G-U-01` through `G-U-03`) verify the public-surface integrity layer: the `/login` page responds non-5xx and renders an interactive email input, and `/api/architects/unsubscribe?t=<invalid>` returns a branded 200 HTML page rather than leaking a stack trace. Data-aware UI invariants (account detail scoring, triage ordering, signal feed tenancy) are tracked as aspirational SPEC entries and will land with the hermetic Playwright fixture seed.
+
+## Related reading
+
+- [Scoring Overview](/scoring/overview) — how the five scoring formulas connect to the Decomposition (D) + Calibration (C) Guarantees.
+- [Signal Overview](/signals/overview) — how the eight signal families connect to the Signals (S) + Rules (R) Guarantees.
+- [Data Readiness](/data-readiness) — the enforcement layer that checks CRM data quality before scoring runs, covered by the Ingestion (I) Guarantees.
+- [Changelog](/changelog) — every release references the SPEC and Guarantee IDs it affected.
+
+## Questions?
+
+Email [support@pillargtm.com](mailto:support@pillargtm.com) or ask in-app via Drafter. For a live walkthrough of the framework, [schedule 15 minutes with Eli](https://calendar.app.google/LuY4NbxkJjkQKbRy5).

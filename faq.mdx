@@ -69,6 +69,10 @@ icon: 'circle-question'
     PILLAR uses Row-Level Security (RLS) enforcing strict multi-tenant data isolation. Every query is filtered by organization, ensuring your data is never accessible to other organizations. Authentication uses industry-standard session tokens, and all data is encrypted in transit and at rest.
   </Accordion>
 
+  <Accordion title="How does PILLAR prove its math is correct?">
+    Every behavior PILLAR commits to is a named, enforced, append-only invariant, and we can show you the exact test that proves each one. 66 public spec entries → 63 named Guarantees across 17 categories → 2,479 automated tests running on every commit (2,376 unit + 103 integration + 3 Playwright UI). The chain is build-enforced — a spec entry without a Guarantee fails the build, a Guarantee without a matching test fails the build, an orphan test referencing a Guarantee that doesn't exist fails the build. See [The Guarantee](/the-guarantee) for the full framework, invariant categories, and what each code means.
+  </Accordion>
+
   <Accordion title="What is Starbridge district intelligence?">
     **Starbridge.ai** provides 120+ buyer attributes for K-12 school districts and higher education institutions, including budget data, technology adoption, procurement history, RFP activity, job changes, and conference attendance. PILLAR enriches every matching account with Starbridge data automatically via webhook and on-demand API calls.
   </Accordion>
