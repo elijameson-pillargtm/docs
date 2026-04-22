@@ -70,7 +70,7 @@ icon: 'circle-question'
   </Accordion>
 
   <Accordion title="How does PILLAR prove its math is correct?">
-    Every behavior PILLAR commits to is a named, enforced, append-only invariant, and we can show you the exact test that proves each one. 66 public spec entries → 63 named Guarantees across 17 categories → 2,479 automated tests running on every commit (2,376 unit + 103 integration + 3 Playwright UI). The chain is build-enforced — a spec entry without a Guarantee fails the build, a Guarantee without a matching test fails the build, an orphan test referencing a Guarantee that doesn't exist fails the build. See [The Guarantee](/the-guarantee) for the full framework, invariant categories, and what each code means.
+    Every behavior PILLAR commits to is a named, enforced, append-only invariant, and we can show you the exact test that proves each one. 66 public spec entries → 63 named Guarantees across 17 categories → 2,500+ automated tests running on every commit (unit + integration + Playwright UI). The chain is build-enforced — a spec entry without a Guarantee fails the build, a Guarantee without a matching test fails the build, an orphan test referencing a Guarantee that doesn't exist fails the build. See [The Guarantee](/the-guarantee) for the full framework, invariant categories, and what each code means.
   </Accordion>
 
   <Accordion title="What is Starbridge district intelligence?">
@@ -166,11 +166,11 @@ icon: 'circle-question'
 
 <AccordionGroup>
   <Accordion title="What is PILLAR's MCP server?">
-    PILLAR ships a native **Model Context Protocol (MCP)** server that exposes 65 tools spanning the full revenue architecture — core intelligence, plays, tasks, expansion whitespace, financial cascade (NRR simulation, procurement, cohorts), market intelligence (TAM/SAM, headcount simulation), AI orchestration (Ask PILLAR RAG, generated narratives), scoring transparency, and governed writes. Any MCP-compatible AI client — Claude Desktop, Cursor, VS Code, ChatGPT Desktop, Zed, Windsurf — can query and act on your PILLAR data in natural language. See the [MCP Server guide](/api/mcp) for setup.
+    PILLAR ships a native **Model Context Protocol (MCP)** server that exposes 70+ tools spanning the full revenue architecture — core intelligence, plays, tasks, expansion whitespace, financial cascade (NRR simulation, procurement, cohorts), market intelligence (TAM/SAM, headcount simulation), AI orchestration (Ask PILLAR RAG, generated narratives), scoring transparency, and governed writes. Any MCP-compatible AI client — Claude Desktop, Cursor, VS Code, ChatGPT Desktop, Zed, Windsurf — can query and act on your PILLAR data in natural language. See the [MCP Server guide](/api/mcp) for setup.
   </Accordion>
 
   <Accordion title="What is Drafter?">
-    **Drafter** is the in-app AI agent layer, mounted globally across every authenticated PILLAR page as a floating chat widget. Ask any GTM question — "why does Houston ISD have its current renewal risk score?", "what's our biggest pipeline risk this quarter?", "simulate NRR going from 108% to 115%" — and Drafter picks the right subset of MCP tools, pulls evidence, and returns a specific answer. Every run writes to an audit table for the approval gate and flywheel learning. Drafter and the external MCP server share the same 65-tool catalog, so behavior is consistent across surfaces.
+    **Drafter** is the in-app AI agent layer, mounted globally across every authenticated PILLAR page as a floating chat widget. Ask any GTM question — "why does Houston ISD have its current renewal risk score?", "what's our biggest pipeline risk this quarter?", "simulate NRR going from 108% to 115%" — and Drafter picks the right subset of MCP tools, pulls evidence, and returns a specific answer. Every run writes to an audit table for the approval gate and flywheel learning. Drafter and the external MCP server share the same 70+ MCP tool catalog, so behavior is consistent across surfaces.
   </Accordion>
 
   <Accordion title="How is Drafter different from the MCP server?">
