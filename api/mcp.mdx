@@ -51,9 +51,11 @@ GET  https://app.pillargtm.com/api/mcp  (server discovery)
 
 Authentication: Bearer API key in the `Authorization` header.
 
-## Available Tools (75)
+## Available Tools (90+)
 
-PILLAR's MCP surface spans six tiers plus vertical-intelligence extensions, covering every layer of the revenue architecture. The list below is representative — the source of truth is the tool catalog at `src/lib/mcp/tool-catalog.ts`, and new tools ship continuously as vertical-intelligence surfaces (K-12 state-calendar procurement windows, federal Title program eligibility, cooperative-contract lookups, NCES district enrichment) come online.
+PILLAR's MCP surface spans **seven tiers** (Core + A–F + G), covering every layer of the revenue architecture. The Vertical Intelligence tier (Tier G, 24+ tools) is the largest single-tier addition since the original launch — it carries PILLAR's canonical district + federal-program datasets that horizontal Revenue AI platforms structurally cannot answer.
+
+The list below is representative — the source of truth is the tool catalog at `src/lib/mcp/tool-catalog.ts`, and new tools ship continuously as vertical-intelligence surfaces (K-12 state-calendar procurement windows, federal Title program eligibility, cooperative-contract lookups, NCES district enrichment, state DOE assessment + accountability + graduation) come online.
 
 ### Tier 0 — Core Surface
 
@@ -191,13 +193,33 @@ The foundational tool set that shipped with the original MCP server. Still the m
 | `set_renewal_disposition` | Set renewal disposition directly (RENEWED / CHURNED / EXPANDED / LOST / PENDING). *Write.* |
 | `opt_in_benchmarks` | Opt the org in or out of anonymized peer-cohort benchmarking. *Write.* |
 
-### Tier G — Vertical Intelligence (9 tools)
+### Tier G — Vertical Intelligence (24 tools)
 
 <Info>
-**The competitive moat.** Horizontal revenue platforms (Salesforce, HubSpot, Gong, Clari) cannot ship these tools because they don't maintain federal education datasets, accreditor calendars, or per-state procurement timing. PILLAR does — the Tier G surface answers questions the customer's own procurement office and CFO operate in.
+**The competitive moat.** Horizontal revenue platforms (Salesforce, HubSpot, Gong, Clari) cannot ship these tools because they don't maintain federal education datasets, accreditor calendars, per-state procurement timing, or canonicalized state DOE assessment data. PILLAR does — the Tier G surface answers questions the customer's own procurement office and CFO operate in.
 </Info>
 
-K-12 + HigherEd specific tools backed by maintained federal datasets (IPEDS, NCES CCD, EDFacts, F-33 district finance), accreditor cycles, state fiscal calendars, and Title program formulas.
+K-12 + HigherEd specific tools backed by maintained federal datasets (IPEDS, NCES CCD, EDFacts, F-33 district finance), accreditor cycles, state fiscal calendars, Title program formulas, and **27+ state DOEs canonicalized into a unified per-LEA assessment / accountability / graduation surface**.
+
+**K-12 — State DOE academic outcomes (NCES LEAID-keyed, 27+ states unified)**
+
+| Tool | Description |
+|------|-------------|
+| `get_district_assessment_proficiency` | Per-LEA proficiency cell (subject × grade × subgroup × year) from any of 27+ ingested state DOEs, normalized to a unified `pct_proficient_or_above` column with documented per-state policy footprint |
+| `get_district_assessment_trend` | Year-over-year proficiency trend with `continuity_break` flags across assessment-family transitions (PARCC→MCAP, FSA→FAST, AIR→Cambium) |
+| `get_district_assessment_benchmarks` | District proficiency vs state aggregates (P25 / median / P75) AND NAEP state + national, with mandatory `standards_comparability_note` whenever cross-family figures juxtapose |
+| `get_district_assessment_subgroup_gaps` | Ranked gap-from-all-students per subgroup; suppression envelope preserved (suppressed cells appear with `gap_pct: null`, never silently dropped) |
+| `get_district_accountability_status` | Canonical CSI / TSI / LRAP / REC / GS status with the `is_intervention_priority` boolean derived from a single source of truth |
+| `get_district_graduation_metrics` | Multi-year-window graduation rates (4yr / 5yr / 6yr / 7yr) with explicit `extension_coverage` documenting which extensions are available |
+| `get_district_engagement_metrics` | Chronic absenteeism, attendance, dropout per LEA × subgroup with worst-subgroup ranking |
+| `get_district_advanced_coursework_metrics` | AP/IB/dual-credit enrollment + pass rates with `ZERO_PASSING_NOTE` flag for the "access without success" pattern |
+| `get_district_ccmr_metrics` | College/Career/Military Readiness composites with explicit `CCMR_COMPOSITE_NOTE` warning that composites aren't comparable across states |
+| `get_district_growth_metrics` | YoY improvement scores with `GROWTH_VS_LEVEL_NOTE` to prevent conflating growth with absolute proficiency |
+| `get_district_early_childhood_metrics` | Pre-K + early literacy with `coverage_scope_note` (frequently public-school-enrolled only) |
+| `get_district_graduation_pathway_metrics` | TX-specific graduation pathway codes with state-attribution preservation (no silent cross-state collapse) |
+| `get_district_refusal_rates` | NY 3-8 assessment opt-out rates per LEA × subject × subgroup |
+| `get_state_naep_comparison` | State assessment trend vs NAEP trend for the 11 Tier-1 states; surfaces `naep_disagrees: true` when state cut-score recalibrations diverge from federal benchmark |
+| `get_ingestion_health` | Per-state ingest freshness + last-publish lag |
 
 **HigherEd — IPEDS institutional intelligence (UNITID-keyed)**
 
@@ -207,7 +229,7 @@ K-12 + HigherEd specific tools backed by maintained federal datasets (IPEDS, NCE
 | `score_institution_tuition_dependency` | Tuition-and-fees / total-revenue ratio over 5 years with dependency score. Higher = more exposed to enrollment-cliff → vendor ability-to-pay risk. |
 | `get_pell_grant_institutional_share` | % of undergrads receiving Pell, total Pell dollars, 5-year trend, and federal-budget-sensitivity score. Higher Pell reliance = more exposure to federal appropriation risk. |
 
-**K-12 — Federal Title dollars + district demographics (NCES LEAID-keyed)**
+**K-12 — Federal Title dollars (NCES LEAID-keyed)**
 
 | Tool | Description |
 |------|-------------|
@@ -223,7 +245,24 @@ K-12 + HigherEd specific tools backed by maintained federal datasets (IPEDS, NCE
 | `get_accreditation_review_cycle` | A higher-ed institution's next accreditation self-study, site visit, and decision dates across 8 regional + national accreditors (SACSCOC, HLC, MSCHE, NECHE, NWCCU, WSCUC, ACCJC, DEAC). |
 | `score_cooperative_contract_eligibility` | Whether a target district / institution can buy through a named cooperative (NASPO ValuePoint, TIPS, Sourcewell, CRC, OMNIA Partners, E&I, MHEC, PEPPM, etc.) — turns a 3-month procurement cycle into 30 days. |
 
-**Provenance + honest coverage limits.** Every Tier G response carries row-level `source` strings and a response-level `data_provenance` section documenting reporting lag and known gaps. For example, `get_district_title_allocations` discloses the three dead-end paths that prevent national per-LEA II-A / IV-A coverage (the Q1 2026 ed.gov site reorg deleted the per-state workbooks; Internet Archive has zero XLSX snapshots of the ed.gov Title paths; USAspending.gov records only state-level primary awards and double-counts carryover obligations). Consumers should never guess at data availability — the route tells them what it has and what it doesn't.
+#### The canonicalization claim
+
+> PILLAR canonicalizes 27+ states' DOE data with a documented policy footprint, a structural honesty layer, and **six independent layers of accuracy verification**:
+>
+> - **Macro-level reconciliation** against state-published statewide aggregates with **24-state coverage** (`G-X-25`)
+> - **Micro-level spot-checks** against **17 hand-validated district fixtures across 13 states** including the load-bearing LDOE R36→036 alias (`G-X-26`)
+> - **External NAEP trend-direction cross-validation** for the 11 Tier-1 states with a live MCP route at `/api/vertical/state-naep-comparison` (`G-X-27`)
+> - **Silent-corruption canary** on every ingested cell with queue-backed weekly review via the `value_unknown_alarms` table (`G-X-28`)
+> - **Federal Title pass-through reconciliation** between EDFacts allocations and SEA-published disbursements (`G-X-29`)
+> - **Per-district Title allocation spot-checks** closing the loop on "we know proficiency AND federal allocation are right for the same district" (`G-X-30`)
+
+Each verification layer is a build-time-enforced Guarantee with a cited spec entry — see [The Guarantee → Vertical Intelligence (X)](/the-guarantee#vertical-intelligence-x-the-canonicalization-layer) for the full structural enforcement chain.
+
+#### Why this differentiates PILLAR
+
+State DOEs each express proficiency on a different scale, suppression with different sentinels, accountability in 4-tier vs 5-tier vs A-F, with subgroup labels that vary across all 27 states. Each state DOE essentially publishes data that's only legible inside its own bureaucracy. Without the canonicalization layer, a query like *"show me districts with declining ELA proficiency under 50%, chronic absenteeism above 20%, and accountability rating in the bottom two tiers"* is structurally impossible across state lines — every comparison would require state-specific knowledge of cut-scores, sentinels, and subgroup mappings. PILLAR's vertical intelligence MCP layer makes that query a single tool call that runs in milliseconds and returns the unified answer with the comparability caveats baked in.
+
+**Provenance + honest coverage limits.** Every Tier G response carries row-level `source` strings and a response-level `data_provenance` section documenting reporting lag and known gaps. For example, `get_district_title_allocations` discloses the three dead-end paths that prevent national per-LEA II-A / IV-A coverage (the Q1 2026 ed.gov site reorg deleted the per-state workbooks; Internet Archive has zero XLSX snapshots of the ed.gov Title paths; USAspending.gov records only state-level primary awards and double-counts carryover obligations). Similarly, the per-state assessment ingestion documents per-state policy footprints (TN "Approached/Met/Exceeded" vs LA "Mastery and above" vs WI "Advanced+Meeting") and surfaces `continuity_break` flags whenever year-over-year comparison crosses an assessment-family transition. Consumers should never guess at data availability — the route tells them what it has and what it doesn't.
 
 ## Compatible AI Assistants
 

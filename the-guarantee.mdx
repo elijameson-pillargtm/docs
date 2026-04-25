@@ -1,6 +1,6 @@
 ---
 title: 'The Guarantee'
-description: "PILLAR's three-link chain of Spec → Guarantee → Test. Every behavior we commit to is a named, enforced, append-only invariant — 66 spec entries, 63 Guarantees across 17 categories, 2,500+ tests on every commit."
+description: "PILLAR's three-link chain of Spec → Guarantee → Test. Every behavior we commit to is a named, enforced, append-only invariant — 98 spec entries, 95 Guarantees across 18 categories, 2,700+ tests on every commit. Vertical Intelligence (X) is the largest category at 30 Guarantees, covering the canonicalization layer that translates 27+ state DOEs into a unified schema."
 icon: 'shield-check'
 ---
 
@@ -29,7 +29,7 @@ Examples of concrete commitments:
 
 Each entry has a `status`: `required` (must be enforced), `aspirational` (intent tracked for future enforcement), or `retired` (explicitly deprecated, with a pointer to what replaced it). IDs are append-only — spec numbers never get reused.
 
-**Current count: 66 entries** (61 required, 5 aspirational — an explicitly published roadmap of commitments PILLAR intends to enforce as the UI and integration-test harnesses expand).
+**Current count: 98 entries** spanning ten domains (scoring, vertical intelligence, configuration, ingestion, UI, tenancy, contract, signals, validation, ops). The Vertical Intelligence domain (`SPEC-VERTICAL-*`) is the fastest-growing surface at 27 entries, reflecting the multi-layer reconciliation work that closes the gap between "PILLAR canonicalizes 27+ states' DOE data" and "PILLAR's per-district numbers reconcile to the state DOE's own published values."
 
 ### 2. The Guarantee — how each commitment is enforced
 
@@ -54,8 +54,9 @@ Every required spec entry has at least one named Guarantee that enforces it in c
 | V | Validation | API-boundary input validation via Zod |
 | U | UI | User-facing journey correctness (Playwright) |
 | E | Endpoint | API input → output contract invariants |
+| **X** | **Vertical Intelligence** | **State DOE canonicalization, federal Title program flows, NAEP cross-validation, accreditation cycles, state procurement calendars — the external-knowledge surfaces that horizontal Revenue AI platforms structurally cannot answer** |
 
-**Current count: 63 Guarantees** across 17 categories.
+**Current count: 95 Guarantees** across 18 categories. **Vertical Intelligence (X) is the largest category at 30 Guarantees**, reflecting the depth of the canonicalization + accuracy-verification layer that translates 27+ state DOEs into a unified schema.
 
 ### 3. The Tests — evidence the invariants hold
 
@@ -66,7 +67,7 @@ Every Guarantee has at least one automated test whose description starts with th
 - **Endpoint-contract tests** — lock the shape of every API response plus invariants about the output data (e.g. decomposition sums to score within ±1).
 - **UI tests** — [Playwright](https://playwright.dev/) exercises user-facing pages end-to-end.
 
-**Current count: 2,500+ tests** running on every commit (unit + integration), plus Playwright UI tests against the public auth + unsubscribe surfaces.
+**Current count: 2,700+ tests** running on every commit (441 in the Guarantee suite directly, ~2,300 broader unit/integration), plus Playwright UI tests against the public auth + unsubscribe surfaces.
 
 ## What makes the claim falsifiable
 
@@ -112,6 +113,34 @@ Every API route that reads a JSON body or `searchParams` runs input through a Zo
 ### UI (U)
 
 Three Playwright-backed Guarantees (`G-U-01` through `G-U-03`) verify the public-surface integrity layer: the `/login` page responds non-5xx and renders an interactive email input, and `/api/architects/unsubscribe?t=<invalid>` returns a branded 200 HTML page rather than leaking a stack trace. Data-aware UI invariants (account detail scoring, triage ordering, signal feed tenancy) are tracked as aspirational SPEC entries and will land with the hermetic Playwright fixture seed.
+
+### Vertical Intelligence (X) — the canonicalization layer
+
+The largest category at **30 Guarantees** (G-X-01 through G-X-30), covering external-knowledge surfaces that horizontal Revenue AI platforms structurally cannot answer: state DOE assessment + accountability + graduation data, federal Title program allocations, NAEP cross-validation, accreditation review cycles, state procurement calendars, and cooperative-contract eligibility.
+
+**The headline claim**:
+
+> PILLAR canonicalizes 27+ states' DOE data with a documented policy footprint, a structural honesty layer, and **six independent layers of accuracy verification**:
+>
+> - **Macro-level reconciliation** against state-published statewide aggregates with **24-state coverage** (`G-X-25`)
+> - **Micro-level spot-checks** against **17 hand-validated district fixtures across 13 states** including the load-bearing LDOE R36→036 alias (`G-X-26`)
+> - **External NAEP trend-direction cross-validation** for the 11 Tier-1 states with a live MCP route at `/api/vertical/state-naep-comparison` (`G-X-27`)
+> - **Silent-corruption canary** on every ingested cell with queue-backed weekly review via the `value_unknown_alarms` table (`G-X-28`)
+> - **Federal Title pass-through reconciliation** between EDFacts allocations and SEA-published disbursements (`G-X-29`)
+> - **Per-district Title allocation spot-checks** closing the loop on "we know proficiency AND federal allocation are right for the same district" (`G-X-30`)
+
+**Why this matters for buyers**: state DOEs each express proficiency on a different scale, suppression with different sentinels, accountability in 4-tier vs 5-tier vs A-F, with subgroup labels that vary across all 27 states. Each state DOE essentially publishes data that's only legible inside its own bureaucracy. PILLAR's canonicalization is the cultural translation — taking Tennessee's "Approached/Met/Exceeded" and Louisiana's "Mastery and above" and Wisconsin's "Advanced+Meeting" and forcing them all into one comparable `pct_proficient_or_above` column with a documented policy footprint. The six verification layers above mean the resulting unified surface isn't just "structurally faithful" — it's been independently checked against state-published aggregates, hand-validated district fixtures, federal NAEP, federal EDFacts allocation tables, and SEA pass-through reports.
+
+**What this is NOT**: numerical perfection at the per-district per-cell level for every single one of the ~13,000 US LEAs. The Round 1 backfill seed includes 24 states with reconciliation aggregates and 17 districts with locked spot-check cells (out of ~91 districts × 27 states = ~2,500 possible spot-checks); coverage expands per the published backfill runbooks (`docs/RECONCILIATION_BACKFILL_RUNBOOK.md`, `docs/SPOT_CHECK_BACKFILL_RUNBOOK.md`). Build-time Guarantees enforce the lookup-table shape + helper behavior; runtime production crons (separate from the build-time gate) compare freshly-ingested cells against the locked fixtures and alert on drift.
+
+**Honesty contract** baked into the response shape:
+- `STANDARDS_CROSS_FAMILY_NOTE` (`G-X-15`) — every cross-family comparison carries a "cut-scores differ; not directly comparable" caveat
+- `continuity_break: true` (`G-X-14`) — flagged on year-over-year transitions where state assessment family changed (PARCC→MCAP, FSA→FAST, AIR→Cambium)
+- `CCMR_COMPOSITE_NOTE` (`G-X-19`) — warns against cross-state composite comparison
+- `GROWTH_VS_LEVEL_NOTE` (`G-X-20`) — prevents conflating growth with absolute proficiency
+- `naep_disagrees: true` (`G-X-27`) — surfaces when state cut-score recalibrations diverge from NAEP
+
+The category as a whole answers the question: "How do you know your federalized + state-canonicalized district intelligence is right?" with the same structural answer PILLAR gives for scoring math — show the spec, show the Guarantee, show the test.
 
 ## Related reading
 
