@@ -1,12 +1,22 @@
 ---
 title: 'The Guarantee'
-description: "PILLAR's three-link chain of Spec → Guarantee → Test. Every behavior we commit to is a named, enforced, append-only invariant — 98 spec entries, 95 Guarantees across 18 categories, 2,700+ tests on every commit. Vertical Intelligence (X) is the largest category at 30 Guarantees, covering the canonicalization layer that translates 27+ state DOEs into a unified schema."
+description: "PILLAR's correctness commitment: every behavior we promise is enforced by an automated test that runs on every release. 95 named invariants across 18 categories, 2,700+ tests on every commit, all green on every build. The largest category — Vertical Intelligence — covers PILLAR's translation of 27+ state Departments of Education into a unified schema."
 icon: 'shield-check'
 ---
 
 > **Every behavior PILLAR commits to is a named, enforced, append-only invariant, and we can show you the exact test that proves each one.**
 
 Most AI-native tools ask you to take the math on faith. PILLAR doesn't. We publish our correctness spec, enforce it in CI, and show you the tests. This article walks through the framework so you can verify what we claim — and what we don't.
+
+<Note>
+**TL;DR for non-technical readers.** PILLAR makes a structural promise: every behavior we commit to is enforced by an automated test that runs on every code change. If any test fails, the build fails — no exceptions, no warning-downgrades, no "we'll fix it later." As of today: **95 named correctness invariants across 18 categories, 2,700+ tests, all green on the latest commit.** What this means for you in plain English:
+
+- **Procurement sign-off in days, not quarters.** Hand this page to your CTO or CISO; they read enforced behaviors, not marketing copy. Every claim on this page has a citable test.
+- **Integration breakage caught automatically.** When PILLAR ships a new connector or refactors a scoring formula, the existing invariants either keep holding or the build turns red — no silent regressions slip into production.
+- **Falsifiable correctness claim.** Most "trust us, our AI works" claims aren't testable. Every "PILLAR is correct because..." statement on this page is backed by a specific named test that runs on every release. We name them, we cite them, and we publish what they enforce.
+
+Skim the framework below for the structural argument, jump to ["What this gets you, the customer"](#what-this-gets-you-the-customer) for the buyer-facing value, or hand the whole page to your security team for vendor due diligence.
+</Note>
 
 ## Why this exists
 
