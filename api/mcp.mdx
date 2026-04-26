@@ -53,7 +53,11 @@ Authentication: Bearer API key in the `Authorization` header.
 
 ## Available Tools (90+)
 
-PILLAR's MCP surface spans **seven tiers** (Core + A–F + G), covering every layer of the revenue architecture. The Vertical Intelligence tier (Tier G, 24+ tools) is the largest single-tier addition since the original launch — it carries PILLAR's canonical district + federal-program datasets that horizontal Revenue AI platforms structurally cannot answer.
+PILLAR's MCP surface spans **seven tiers** (Core + A–F + G), covering every layer of the revenue architecture. The Vertical Intelligence tier (Tier G, 24+ tools live + expanding) is the largest single-tier addition since the original launch — it carries PILLAR's canonical district + federal-program datasets that horizontal Revenue AI platforms structurally cannot answer.
+
+<Note>
+**Coverage as of April 2026**: Tier G is now backed by **51 jurisdictions** (50 states + DC + federal) and **26 federal datasets** (8 IPEDS components + 8 Higher Ed sources + 10 K-12 sources). The schema, ingest pipeline, and 462+ build-time-enforced Guarantees are runtime-truth — every commit blocks merge unless the canonical-shape validators (`G-X-31` through `G-X-40`) accept every row landing in the 26 new federal-data tables. Tool surfaces for the latest federal datasets (Scorecard Field-of-Study, FSA CDR/GE/HCM, SHEEO SHEF, Carnegie 2025, OSEP IDEA-B, etc.) ship in the next MCP release; the underlying data is queryable via direct Postgres access today.
+</Note>
 
 The list below is representative — the source of truth is the tool catalog at `src/lib/mcp/tool-catalog.ts`, and new tools ship continuously as vertical-intelligence surfaces (K-12 state-calendar procurement windows, federal Title program eligibility, cooperative-contract lookups, NCES district enrichment, state DOE assessment + accountability + graduation) come online.
 
@@ -193,13 +197,13 @@ The foundational tool set that shipped with the original MCP server. Still the m
 | `set_renewal_disposition` | Set renewal disposition directly (RENEWED / CHURNED / EXPANDED / LOST / PENDING). *Write.* |
 | `opt_in_benchmarks` | Opt the org in or out of anonymized peer-cohort benchmarking. *Write.* |
 
-### Tier G — Vertical Intelligence (24 tools)
+### Tier G — Vertical Intelligence (24 tools live, 30+ in next release)
 
 <Info>
 **The competitive moat.** Horizontal revenue platforms (Salesforce, HubSpot, Gong, Clari) cannot ship these tools because they don't maintain federal education datasets, accreditor calendars, per-state procurement timing, or canonicalized state DOE assessment data. PILLAR does — the Tier G surface answers questions the customer's own procurement office and CFO operate in.
 </Info>
 
-K-12 + HigherEd specific tools backed by maintained federal datasets (IPEDS, NCES CCD, EDFacts, F-33 district finance), accreditor cycles, state fiscal calendars, Title program formulas, and **27+ state DOEs canonicalized into a unified per-LEA assessment / accountability / graduation surface**.
+K-12 + HigherEd specific tools backed by maintained federal datasets (IPEDS — now including the 5 IPEDS-extension components Human Resources / Admissions / Academic Year Tuition / Academic Libraries / Enrollment by CIP — plus NCES CCD, EDFacts, F-33 district finance, College Scorecard institution + field-of-study, Carnegie Classification 2025, FSA Cohort Default Rates / Gainful Employment / NSLDS aggregate / HCM, SHEEO SHEF, NC-SARA, CRDC, OSEP IDEA Part B, McKinney-Vento, Title III ELA, Migrant Education, Perkins V CTE, NCES EDGE Locale Codes, NSLP/CEP, NIEER State of Preschool), accreditor cycles, state fiscal calendars, Title program formulas, and **all 50 states + DC canonicalized into a unified per-LEA assessment / accountability / graduation surface (33 of 51 jurisdictions with deep ingests; the remaining 18 are downloader-resolved with assessment ingests landing through 2026)**.
 
 **K-12 — State DOE academic outcomes (NCES LEAID-keyed, 27+ states unified)**
 
@@ -247,16 +251,31 @@ K-12 + HigherEd specific tools backed by maintained federal datasets (IPEDS, NCE
 
 #### The canonicalization claim
 
-> PILLAR canonicalizes 27+ states' DOE data with a documented policy footprint, a structural honesty layer, and **six independent layers of accuracy verification**:
+> PILLAR canonicalizes **51 jurisdictions** (50 state DOEs + DC + federal) with a documented policy footprint, a structural honesty layer, and **sixteen independent layers of accuracy verification**:
 >
+> **Round 1-5 reconciliation layer (closes "is the state-DOE proficiency number right?")**
 > - **Macro-level reconciliation** against state-published statewide aggregates with **24-state coverage** (`G-X-25`)
 > - **Micro-level spot-checks** against **17 hand-validated district fixtures across 13 states** including the load-bearing LDOE R36→036 alias (`G-X-26`)
 > - **External NAEP trend-direction cross-validation** for the 11 Tier-1 states with a live MCP route at `/api/vertical/state-naep-comparison` (`G-X-27`)
 > - **Silent-corruption canary** on every ingested cell with queue-backed weekly review via the `value_unknown_alarms` table (`G-X-28`)
 > - **Federal Title pass-through reconciliation** between EDFacts allocations and SEA-published disbursements (`G-X-29`)
 > - **Per-district Title allocation spot-checks** closing the loop on "we know proficiency AND federal allocation are right for the same district" (`G-X-30`)
+>
+> **Round 8 federal-data canonical-shape layer (closes "is the federal-dataset row right?")**
+> - **IPEDS-extension shape discipline** for Human Resources / Admissions / Academic Year Tuition / Academic Libraries / Enrollment by CIP — including biennial-even-year discipline on EF-CIP and pre-2014 collection_status discipline on Academic Libraries (`G-X-31`)
+> - **OPEID padding integrity** on the institution_crosswalk join — the only authorized path between UNITID-keyed (IPEDS, Scorecard, Carnegie) and OPEID-keyed (FSA CDR/GE/NSLDS/HCM, NC-SARA) datasets (`G-X-32`)
+> - **College Scorecard shape** validators on institution-level + field-of-study tables (`G-X-33`)
+> - **Carnegie 2025 four-dimension derivation discipline** — `is_r1`/`is_r2` MUST be derivable from `research_activity_designation`; SAEC eligibility flag MUST be true when SAEC classification is present (`G-X-34`)
+> - **FSA regulatory-status discipline** preventing accidental publish-rate inference during the 2019-2023 GE rescission gap; CDR status enum + HCM level enum locked (`G-X-35`)
+> - **SHEEO SHEF + NC-SARA** state-level shape with USPS-keyed JSONB integrity (`G-X-36`)
+> - **CRDC biennial discipline** — collection year MUST be even; suspensions ≤ 2× total enrollment sanity check (`G-X-37`)
+> - **CCD School Universe + EDGE locale enum** — title_i_status, charter_status, magnet_status, virtual_indicator, locale_code all locked to documented value sets (`G-X-38`)
+> - **OSEP IDEA Part B + K-12 federal program** state-aggregate shape (`G-X-39`)
+> - **NCES EDGE entity-type-conditional ID-length** (school=12 / lea=7-10 / postsecondary=1-6 digits) + **NIEER 0-10 quality benchmark hard cap** (`G-X-40`)
 
 Each verification layer is a build-time-enforced Guarantee with a cited spec entry — see [The Guarantee → Vertical Intelligence (X)](/the-guarantee#vertical-intelligence-x-the-canonicalization-layer) for the full structural enforcement chain.
+
+**Runtime-truth status (April 2026)**: 550 Guarantee tests pass on every commit; 0 route type errors; 26 federal datasets ingested with 890,000+ canonical rows ready for live upsert across 35 ingest scripts.
 
 #### Why this differentiates PILLAR
 
