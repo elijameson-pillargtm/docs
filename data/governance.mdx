@@ -74,4 +74,4 @@ Every governed write is addressable via the MCP server so AI agents (Claude Desk
 
 ### External MCP vs In-App Drafter
 
-External MCP clients invoke write tools directly with the caller's API-key permissions. The in-app **Drafter** agent does NOT call writes directly — it routes every mutation through the `propose_action` meta-tool, which surfaces the proposal in the drawer with approve / reject / edit controls. Every decision is written to `agent_actions` for audit and flywheel learning. Both surfaces share the same 70+ MCP tool catalog, so an AI acting via Claude Desktop and a user acting via Drafter land in the same governance trail.
+External MCP clients invoke write tools directly with the caller's API-key permissions. The in-app **Drafter** agent does NOT call writes directly — it routes every mutation through the `propose_action` meta-tool, which surfaces the proposal in the drawer with approve / reject / edit controls. Every decision is written to `agent_actions` for audit and flywheel learning. Both surfaces share the same 128 MCP tool catalog, so an AI acting via Claude Desktop and a user acting via Drafter land in the same governance trail.
